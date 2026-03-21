@@ -20,8 +20,10 @@
             
             <!-- Upload ảnh -->
             <div class="form-group">
-                <label>Chọn ảnh</label>
+                <label class="control-label">Hình ảnh sản phẩm</label>
                 <input type="file" name="ImageFile" class="form-control" />
+
+                <span class="text-danger">@Html.ValidationMessage("ImageFile")</span>
             </div>
 
             <!-- Description -->
