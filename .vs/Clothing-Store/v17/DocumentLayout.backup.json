@@ -36,8 +36,10 @@
               "RelativeDocumentMoniker": "MTKPM_Clothing_Store_web\\Program.cs",
               "ToolTip": "D:\\Github Repos\\Clothing-Store\\MTKPM_Clothing_Store_web\\Program.cs",
               "RelativeToolTip": "MTKPM_Clothing_Store_web\\Program.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAAB4AAAA3AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-20T17:41:34.124Z"
+              "WhenOpened": "2026-03-20T17:41:34.124Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -47,6 +49,7 @@
               "RelativeDocumentMoniker": "MTKPM_Clothing_Store_web\\Controllers\\ProductsController.cs",
               "ToolTip": "D:\\Github Repos\\Clothing-Store\\MTKPM_Clothing_Store_web\\Controllers\\ProductsController.cs",
               "RelativeToolTip": "MTKPM_Clothing_Store_web\\Controllers\\ProductsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-20T17:41:21.284Z"
             }
