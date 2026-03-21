@@ -7440,11 +7440,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Github Repos\\Clothing-Store\\MTKPM_Clothing_Store_web\\MTKPM_Clothing_Store_web.csproj",
+      "projectUniqueName": "D:\\Github Repos\\Clothing-Store\\MTKPM_Clothing_Store_web.csproj",
       "projectName": "MTKPM_Clothing_Store_web",
-      "projectPath": "D:\\Github Repos\\Clothing-Store\\MTKPM_Clothing_Store_web\\MTKPM_Clothing_Store_web.csproj",
+      "projectPath": "D:\\Github Repos\\Clothing-Store\\MTKPM_Clothing_Store_web.csproj",
       "packagesPath": "C:\\Users\\MSI TRUE  GAMING\\.nuget\\packages\\",
-      "outputPath": "D:\\Github Repos\\Clothing-Store\\MTKPM_Clothing_Store_web\\obj\\",
+      "outputPath": "D:\\Github Repos\\Clothing-Store\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

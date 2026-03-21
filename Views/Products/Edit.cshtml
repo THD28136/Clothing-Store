@@ -20,9 +20,11 @@
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
 
+            <input type="hidden" asp-for="ProductId" />
+            <input type="hidden" asp-for="Pic" /> <!--Giữ đường dẫn ảnh cũ-->
             <div class="form-group">
-                <label>Chọn ảnh</label>
-                <input type="file" name="ImageFile" class="form-control" />
+                <label>Thay đổi ảnh (để trống nếu giữ nguyên)</label>
+                <input type="file" name="ImageFile" class="form-control" accept=".png" />
             </div>
 
             <div class="form-group">

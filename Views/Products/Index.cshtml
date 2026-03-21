@@ -11,7 +11,9 @@
 </p>
 <table class="table">
     <thead>
+        <!--Tiêu đề bảng-->
         <tr>
+            <th>STT</th>
             <th>
                 @Html.DisplayNameFor(model => model.Name)
             </th>
@@ -31,8 +33,13 @@
         </tr>
     </thead>
     <tbody>
+        @{
+            int stt = 1;
+        }
 @foreach (var item in Model) {
+        <!--Nội dung bảng-->
         <tr>
+            <td>@stt</td>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
@@ -54,6 +61,7 @@
                 <a asp-action="Delete" asp-route-id="@item.ProductId">Delete</a>
             </td>
         </tr>
+        stt++;
 }
     </tbody>
 </table>
