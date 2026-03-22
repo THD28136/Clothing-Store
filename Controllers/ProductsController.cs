@@ -231,7 +231,6 @@ namespace MTKPM_Clothing_Store_web.Controllers
             {
                 return NotFound();
             }
-
             return View(product);
         }
 
@@ -240,13 +239,29 @@ namespace MTKPM_Clothing_Store_web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            // 1. Tìm sản phẩm cần xóa trong Database
             var product = await _context.Products.FindAsync(id);
             if (product != null)
             {
-                _context.Products.Remove(product);
-            }
+                // 2. Lấy đường dẫn vật lý của file ảnh
+                // product.Pic = "images/filename.png"
+                if (!string.IsNullOrEmpty(product.Pic) && !product.Pic.Contains("PlaceHolder.png"))
+                {
+                    //Directory.GetCurrentDirectory() trả về đường dẫn đến thư mục gốc của dự án (nơi chứa file .csproj)
+                    // Kết hợp với "wwwroot/" và đường dẫn ảnh trong product.Pic để có được đường dẫn đầy đủ đến file ảnh trên ổ cứng
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/", product.Pic);
 
-            await _context.SaveChangesAsync();
+                    // 3. Kiểm tra file có tồn tại trên ổ cứng không trước khi xóa
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+                }
+
+                // 4. Xóa bản ghi trong Database
+                _context.Products.Remove(product);
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 

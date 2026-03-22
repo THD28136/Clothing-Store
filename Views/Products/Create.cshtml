@@ -21,7 +21,7 @@
             <!-- Upload ảnh -->
             <div class="form-group">
                 <label class="control-label">Hình ảnh sản phẩm</label>
-                <input type="file" name="ImageFile" class="form-control" />
+                <input type="file" name="ImageFile" class="form-control" accept=".png" />
 
                 <span class="text-danger">@Html.ValidationMessage("ImageFile")</span>
             </div>
@@ -35,11 +35,12 @@
 
             <!-- Price -->
             <div class="form-group">
-                <label asp-for="Price" class="control-label"></label>
-                <input asp-for="Price" class="form-control" />
-                <span asp-validation-for="Price" class="text-danger"></span>
+                <label asp-for="Price" class="control-label, col-md-12"></label>
+                <input asp-for="Price" class="form-control, col-md-10" style="display: inline" />
+                <div class="col-md-1" style="display: inline">VNĐ</div>
+                <span asp-validation-for="Price" class="text-danger"></span> 
             </div>
-
+            
             <!-- Category -->
             <div class="form-group">
                 <label asp-for="CategoryId" class="control-label"></label>
