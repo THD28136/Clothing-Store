@@ -23,7 +23,7 @@
             <input type="hidden" asp-for="ProductId" />
             <input type="hidden" asp-for="Pic" /> <!--Giữ đường dẫn ảnh cũ-->
             <div class="form-group">
-                <label>Thay đổi ảnh (để trống nếu giữ nguyên)</label>
+                <label asp-for="Description" class="control-label">Image</label>
                 <input type="file" name="ImageFile" class="form-control" accept=".png" />
             </div>
 

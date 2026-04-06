@@ -1,0 +1,62 @@
+﻿/* Color Theme Swatches in Hex */
+.polka-dot-skirt-yellow-cardigan-1-hex {
+    background-color: #020B45;
+}
+
+.polka-dot-skirt-yellow-cardigan-2-hex {
+    color: #2C3879;
+}
+
+.polka-dot-skirt-yellow-cardigan-3-hex {
+    color: #F4FDFD;
+}
+
+.polka-dot-skirt-yellow-cardigan-4-hex {
+    color: #FDEE84;
+}
+
+.polka-dot-skirt-yellow-cardigan-5-hex {
+    color: #FEDA51;
+}
+
+/* Color Theme Swatches in RGBA */
+.polka-dot-skirt-yellow-cardigan-1-rgba {
+    color: rgba(2, 11, 68, 1);
+}
+
+.polka-dot-skirt-yellow-cardigan-2-rgba {
+    color: rgba(43, 56, 121, 1);
+}
+
+.polka-dot-skirt-yellow-cardigan-3-rgba {
+    color: rgba(244, 253, 253, 1);
+}
+
+.polka-dot-skirt-yellow-cardigan-4-rgba {
+    color: rgba(253, 237, 131, 1);
+}
+
+.polka-dot-skirt-yellow-cardigan-5-rgba {
+    color: rgba(253, 218, 80, 1);
+}
+
+/* Color Theme Swatches in HSLA */
+.polka-dot-skirt-yellow-cardigan-1-hsla {
+    color: hsla(231, 94, 13, 1);
+}
+
+.polka-dot-skirt-yellow-cardigan-2-hsla {
+    color: hsla(230, 46, 32, 1);
+}
+
+.polka-dot-skirt-yellow-cardigan-3-hsla {
+    color: hsla(180, 69, 97, 1);
+}
+
+.polka-dot-skirt-yellow-cardigan-4-hsla {
+    color: hsla(52, 96, 75, 1);
+}
+
+.polka-dot-skirt-yellow-cardigan-5-hsla {
+    color: hsla(47, 98, 65, 1);
+}
