@@ -1,6 +1,11 @@
 wwwroot\css\Color.css
 wwwroot\css\site.css
 wwwroot\favicon.ico
+wwwroot\images\7bfea919-d727-4c08-8714-6c67861d5103.png
+wwwroot\images\a42c137e-302c-46f5-8f51-03542251be99.png
+wwwroot\images\b07ee740-3dd1-4393-8ff8-278905061e7d.png
+wwwroot\images\b2f87f36-3755-4317-be86-23e7355253a0.png
+wwwroot\images\f9fc9b66-3893-43f1-9345-ccc35b7dc79c.png
 wwwroot\images\Filter017_Banner.jpg
 wwwroot\images\H_FASHION.jpg
 wwwroot\images\PlaceHolder.png

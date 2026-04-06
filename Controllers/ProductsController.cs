@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using MTKPM_Clothing_Store_web.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MTKPM_Clothing_Store_web.Controllers
 {
@@ -46,6 +47,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
         }
 
         // GET: Products/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             // SelectList( [Nguồn dữ liệu], [Giá trị], [Tên hiển thị trên màn hình] );
@@ -58,6 +60,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([Bind("ProductId,Name,Description,Price,CategoryId")] Product product, IFormFile? ImageFile)
         {
             // Loại bỏ kiểm tra bắt buộc cho trường Pic trong Model
@@ -119,6 +122,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
         }
 
         // GET: Products/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -140,6 +144,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, [Bind("ProductId,Name,Description,Price,CategoryId,Pic")] Product product, IFormFile? ImageFile)
         {
             if (id != product.ProductId)
@@ -217,6 +222,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
         }
 
         // GET: Products/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -237,6 +243,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
         // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             // 1. Tìm sản phẩm cần xóa trong Database
