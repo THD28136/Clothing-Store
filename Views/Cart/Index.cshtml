@@ -1,0 +1,71 @@
+﻿@model List<MTKPM_Clothing_Store_web.Models.CartItem>
+
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    var total = ViewData["Total"] as decimal? ?? Model.Sum(i => i.LineTotal);
+}
+
+<h2>Giỏ hàng</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Giỏ hàng trống. <a asp-controller="Products" asp-action="Index">Tiếp tục mua sắm</a></div>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Ảnh</th>
+                <th>Sản phẩm</th>
+                <th>Giá</th>
+                <th style="width:140px">Số lượng</th>
+                <th>Thành tiền</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <img src="@(string.IsNullOrEmpty(item.Pic) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + item.Pic))" style="height:60px;object-fit:cover;" />
+                    </td>
+                    <td>@item.Name</td>
+                    <td>@item.Price.ToString("C0")</td>
+                    <td>
+                        <form asp-controller="Cart" asp-action="Update" method="post" class="d-flex gap-2">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="productId" value="@item.ProductId" />
+                            <input type="number" name="quantity" value="@item.Quantity" min="1" class="form-control form-control-sm" />
+                            <button type="submit" class="btn btn-sm btn-primary">Cập nhật</button>
+                        </form>
+                    </td>
+                    <td>@item.LineTotal.ToString("C0")</td>
+                    <td>
+                        <form asp-controller="Cart" asp-action="Remove" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="productId" value="@item.ProductId" />
+                            <button class="btn btn-sm btn-danger">Xóa</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4" class="text-end"><strong>Tổng:</strong></td>
+                <td colspan="2"><strong>@total.ToString("C0")</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="d-flex gap-2">
+        <form asp-controller="Cart" asp-action="Clear" method="post">
+            @Html.AntiForgeryToken()
+            <button class="btn btn-outline-secondary">Xóa giỏ</button>
+        </form>
+        <a class="btn btn-primary" asp-controller="Orders" asp-action="Create">Thanh toán</a>
+    </div>
+}

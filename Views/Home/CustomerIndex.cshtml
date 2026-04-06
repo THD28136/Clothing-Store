@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<MTKPM_Clothing_Store_web.Models.Category>
 
 @{
-    ViewData["Title"] = "Trang khách hàng";
+    ViewData["Title"] = "Home";
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
 }
 
@@ -13,6 +13,8 @@
         -webkit-overflow-scrolling: touch;
         padding-bottom: 8px;
     }
+
+    /* Card: cố định kích thước, hiển thị inline để cuộn ngang */
     .product-card {
         display: inline-block;
         white-space: normal;
@@ -20,6 +22,66 @@
         margin-right: 12px;
         vertical-align: top;
     }
+
+    /* Đặt chiều cao cố định cho khung card để mọi card đồng đều */
+    .product-card .card {
+        width: 100%;
+        height: 260px; /* tổng chiều cao card (ảnh + body) */
+        display: flex;
+        flex-direction: column;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    /* Khung chứa ảnh: cố định chiều cao, overflow hidden */
+    .product-card .img-wrap {
+        height: 140px;
+        width: 100%;
+        overflow: hidden;
+        flex: 0 0 140px;
+        background-color: #f8f9fa;
+    }
+
+    /* Ảnh luôn phủ kín khung, được crop đều */
+    .product-card .img-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    /* Body có chiều cao cố định, bố trí nội dung theo cột, nút ở dưới */
+    .product-card .card-body {
+        padding: 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex: 1 1 auto;
+    }
+
+    .product-card .card-body .card-top {
+        /* phần chứa tiêu đề + giá */
+    }
+
+    .product-card .card-title {
+        font-size: 0.95rem;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .product-card .card-price {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .product-card .card-actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 6px;
+    }
+
     .banner {
         position: relative;
         background-size: cover;
@@ -29,7 +91,7 @@
         margin-bottom: 24px;
         color: white;
     }
-    
+
     .banner-overlay {
         position: absolute;
         inset: 0;
@@ -44,8 +106,7 @@
     }
 </style>
 
-<h1>Chào mừng tới Clothing Store</h1>
-<p>Trang khách hàng được tối ưu để duyệt sản phẩm và quản lý đơn hàng cá nhân.</p>
+<h1 class="mb-3">Chào mừng tới Clothing Store</h1>
 
 <!-- Banner dưới navbar -->
 <div class="banner" style="background-image: url('/images/H_FASHION.jpg'); background-size:auto">
@@ -69,18 +130,27 @@
         <div class="product-row">
             @foreach (var product in category.Products.Take(12))
             {
-                <div class="card product-card">
-                    <img src="@(string.IsNullOrEmpty(product.Pic) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + product.Pic))" class="card-img-top" style="height:140px;object-fit:cover;" alt="@product.Name" />
-                    <div class="card-body p-2">
-                        <h6 class="card-title mb-1">@product.Name</h6>
-                        <p class="text-muted small mb-1">@product.Price.ToString("C0")</p>
-                        <div class="d-flex gap-1">
-                            <a class="btn btn-sm btn-outline-primary flex-grow-1" asp-controller="Products" asp-action="Details" asp-route-id="@product.ProductId">Chi tiết</a>
-                            <form asp-controller="Orders" asp-action="Create" method="post" class="d-inline">
-                                @* Nếu chưa có chức năng giỏ hàng/Orders.Create, nút này chỉ mẫu *@
-                                <input type="hidden" name="productId" value="@product.ProductId" />
-                                <button type="submit" class="btn btn-sm btn-primary">Mua</button>
-                            </form>
+                <div class="product-card">
+                    <div class="card">
+                        <div class="img-wrap">
+                            <img src="@(string.IsNullOrEmpty(product.Pic) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + product.Pic))" alt="@product.Name" />
+                        </div>
+                        <div class="card-body">
+                            <div class="card-top">
+                                <h6 class="card-title">@product.Name</h6>
+                                <p class="card-price mb-1">@product.Price.ToString("C0")</p>
+                            </div>
+
+                            <div class="card-actions">
+                                <a class="btn btn-sm btn-outline-primary flex-grow-1" asp-controller="Products" asp-action="Details" asp-route-id="@product.ProductId">Chi tiết</a>
+
+                                <form asp-controller="Cart" asp-action="Add" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@product.ProductId" />
+                                    <input type="hidden" name="quantity" value="1" />
+                                    <button type="submit" class="btn btn-sm btn-primary">Thêm vào giỏ</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
