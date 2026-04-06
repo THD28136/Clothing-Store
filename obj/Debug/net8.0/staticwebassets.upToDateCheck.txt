@@ -1,6 +1,8 @@
+wwwroot\css\Color.css
 wwwroot\css\site.css
 wwwroot\favicon.ico
-wwwroot\images\933a1466-7700-40de-9d37-6f83f30a0220.png
+wwwroot\images\Filter017_Banner.jpg
+wwwroot\images\H_FASHION.jpg
 wwwroot\images\PlaceHolder.png
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css

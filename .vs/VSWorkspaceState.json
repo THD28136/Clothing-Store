@@ -2,8 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\Views",
-    "\\Views\\Products"
+    "\\Views\\Products",
+    "\\Views\\Users"
   ],
-  "SelectedNode": "\\Views\\Products\\Edit.cshtml",
+  "SelectedNode": "\\Views\\Users\\Register.cshtml",
   "PreviewInSolutionExplorer": false
 }
