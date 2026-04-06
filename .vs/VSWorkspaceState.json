@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\MTKPM_Clothing_Store_web"
+    "\\Views",
+    "\\Views\\Products"
   ],
-  "SelectedNode": "\\MTKPM_Clothing_Store_web",
+  "SelectedNode": "\\Views\\Products\\Edit.cshtml",
   "PreviewInSolutionExplorer": false
 }
