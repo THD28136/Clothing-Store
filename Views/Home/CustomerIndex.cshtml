@@ -1,0 +1,93 @@
+﻿@model IEnumerable<MTKPM_Clothing_Store_web.Models.Category>
+
+@{
+    ViewData["Title"] = "Trang khách hàng";
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+}
+
+<style>
+    /* Scroll container for horizontal product rows */
+    .product-row {
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+    }
+    .product-card {
+        display: inline-block;
+        white-space: normal;
+        width: 200px;
+        margin-right: 12px;
+        vertical-align: top;
+    }
+    .banner {
+        position: relative;
+        background-size: cover;
+        background-position: center;
+        height: 300px;
+        border-radius: 6px;
+        margin-bottom: 24px;
+        color: white;
+    }
+    
+    .banner-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.35));
+        border-radius: 6px;
+    }
+    .banner-content {
+        position: absolute;
+        left: 40px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+</style>
+
+<h1>Chào mừng tới Clothing Store</h1>
+<p>Trang khách hàng được tối ưu để duyệt sản phẩm và quản lý đơn hàng cá nhân.</p>
+
+<!-- Banner dưới navbar -->
+<div class="banner" style="background-image: url('/images/H_FASHION.jpg'); background-size:auto">
+    <div class="banner-overlay"></div>
+    <div class="banner-content">
+        <h1 class="display-5">Mùa mới đã có mặt</h1>
+        <p class="lead">Khám phá bộ sưu tập mới — giảm giá đến 30% cho các sản phẩm chọn lọc.</p>
+        <a class="btn btn-primary btn-lg" asp-controller="Products" asp-action="Index">Mua ngay</a>
+    </div>
+</div>
+
+<!-- Danh mục + hàng sản phẩm ngang có thể scroll -->
+@foreach (var category in Model)
+{
+    <section class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h4 class="mb-0">@category.Name</h4>
+            <a class="small text-decoration-none" asp-controller="Products" asp-action="Index" asp-route-categoryId="@category.CategoryId">Xem tất cả</a>
+        </div>
+
+        <div class="product-row">
+            @foreach (var product in category.Products.Take(12))
+            {
+                <div class="card product-card">
+                    <img src="@(string.IsNullOrEmpty(product.Pic) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + product.Pic))" class="card-img-top" style="height:140px;object-fit:cover;" alt="@product.Name" />
+                    <div class="card-body p-2">
+                        <h6 class="card-title mb-1">@product.Name</h6>
+                        <p class="text-muted small mb-1">@product.Price.ToString("C0")</p>
+                        <div class="d-flex gap-1">
+                            <a class="btn btn-sm btn-outline-primary flex-grow-1" 
+                               asp-controller="Products" 
+                               asp-action="Details" 
+                               asp-route-id="@product.ProductId">Chi tiết</a>
+                                <form asp-controller="Cart" asp-action="AddToCart" method="post" class="d-inline">
+            <input type="hidden" name="productId" value="@product.ProductId" />
+            <button type="submit" class="btn btn-sm btn-primary">Mua</button>
+        </form>                         
+    
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}

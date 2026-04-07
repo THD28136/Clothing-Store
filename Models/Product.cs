@@ -16,6 +16,7 @@ public partial class Product
     public decimal Price { get; set; }
 
     public int? CategoryId { get; set; }
+    public int Stock { get; set; } = 0;
 
     public virtual Category? Category { get; set; }
 
