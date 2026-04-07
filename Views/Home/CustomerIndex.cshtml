@@ -3,6 +3,8 @@
 @{
     ViewData["Title"] = "Home";
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    // Tập hợp sản phẩm nổi bật từ các category đã nạp
+    var featured = Model.SelectMany(c => c.Products).Where(p => p.IsFeatured).OrderByDescending(p => p.Price).Take(12).ToList();
 }
 
 <style>
@@ -12,6 +14,15 @@
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
         padding-bottom: 8px;
+
+        /* hide scrollbar while keeping scrolling usable */
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;     /* Firefox */
+    }
+    /* Chrome, Safari, Opera */
+    .product-row::-webkit-scrollbar {
+        height: 0;
+        display: none;
     }
 
     /* Card: cố định kích thước, hiển thị inline để cuộn ngang */
@@ -119,6 +130,45 @@
 </div>
 
 <!-- Danh mục + hàng sản phẩm ngang có thể scroll -->
+@if (featured.Any())
+{
+    <section class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h4 class="mb-0">Sản phẩm nổi bật</h4>
+            <a class="small text-decoration-none" asp-controller="Products" asp-action="Index">Xem tất cả</a>
+        </div>
+
+        <div class="product-row">
+            @foreach (var p in featured)
+            {
+                <div class="product-card">
+                    <div class="card">
+                        <div class="img-wrap">
+                            <img src="@(string.IsNullOrEmpty(p.Pic) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + p.Pic))" alt="@p.Name" />
+                        </div>
+                        <div class="card-body">
+                            <div>
+                                <h6 class="card-title">@p.Name</h6>
+                                <p class="card-price mb-1">@p.Price.ToString("C0")</p>
+                            </div>
+                            <div class="card-actions">
+                                <a class="btn btn-sm btn-outline-primary flex-grow-1" asp-controller="Products" asp-action="Details" asp-route-id="@p.ProductId">Chi tiết</a>
+                                <form asp-controller="Cart" asp-action="Add" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@p.ProductId" />
+                                    <input type="hidden" name="quantity" value="1" />
+                                    <button type="submit" class="btn btn-sm btn-primary">Thêm vào giỏ</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<!-- Các danh mục như cũ -->
 @foreach (var category in Model)
 {
     <section class="mb-4">
