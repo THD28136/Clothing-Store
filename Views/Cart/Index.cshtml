@@ -1,0 +1,54 @@
+﻿@model dynamic
+
+<h2>🛒 Giỏ hàng</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Hình</th>
+            <th>Tên</th>
+            <th>Giá</th>
+            <th>Số lượng</th>
+            <th>Thành tiền</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @{
+            decimal total = 0;
+        }
+
+        @foreach (var item in Model)
+        {
+            var price = item.Product.Price;
+            var qty = item.Quantity;
+            var subtotal = price * qty;
+            total += subtotal;
+
+            <tr>
+                <td>
+                    <img src="~/@item.Product.Pic" width="80" />
+                </td>
+                <td>@item.Product.Name</td>
+                <td>@price.ToString("N0")</td>
+                <td>
+                    <a asp-action="Decrease" asp-route-productId="@item.Product.ProductId">-</a>
+                    @qty
+                    <a asp-action="Increase" asp-route-productId="@item.Product.ProductId">+</a>
+                </td>
+                <td>@subtotal.ToString("N0")</td>
+                <td>
+                    <a asp-action="Remove" asp-route-productId="@item.Product.ProductId"
+                       class="btn btn-danger btn-sm">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h4 class="text-danger">Tổng tiền: @total.ToString("N0") VNĐ</h4>
+
+<a asp-controller="Order" asp-action="Checkout" class="btn btn-success">
+    Thanh toán
+</a>
