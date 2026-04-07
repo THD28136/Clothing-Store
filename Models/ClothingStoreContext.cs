@@ -100,6 +100,11 @@ public partial class ClothingStoreContext : DbContext
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("price");
 
+            // Map IsFeatured to snake_case column with default false
+            entity.Property(e => e.IsFeatured)
+                .HasColumnName("is_featured")
+                .HasDefaultValue(false);
+
             entity.HasOne(d => d.Category).WithMany(p => p.Products)
                 .HasForeignKey(d => d.CategoryId)
                 .HasConstraintName("FK_Products_Categories");

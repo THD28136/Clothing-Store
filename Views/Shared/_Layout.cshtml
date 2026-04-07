@@ -25,7 +25,7 @@
                     <span class="navbar-text text-light me-3">Xin chào, @userName</span>
                     <form asp-controller="Users" asp-action="Logout" method="post" class="d-inline">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-outline-light">Logout</button>
+                        <button type="submit" class="btn btn-outline-light">Đăng xuất</button>
                     </form>
                 </div>
             </div>
@@ -39,16 +39,16 @@
                             <a class="nav-link" asp-controller="Home" asp-action="Index">Dashboard</a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a class="nav-link" asp-controller="Users" asp-action="Index">Users</a>
+                            <a class="nav-link" asp-controller="Users" asp-action="Index">Người dùng</a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a class="nav-link" asp-controller="Products" asp-action="Index">Products</a>
+                            <a class="nav-link" asp-controller="Products" asp-action="AdminIndex">Sản phẩm</a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a class="nav-link" asp-controller="Categories" asp-action="Index">Categories</a>
+                            <a class="nav-link" asp-controller="Categories" asp-action="Index">Danh mục</a>
                         </li>
                         <li class="nav-item mb-1">
-                            <a class="nav-link" asp-controller="Orders" asp-action="Index">Orders</a>
+                            <a class="nav-link" asp-controller="Orders" asp-action="Index">Đơn hàng</a>
                         </li>
                     </ul>
                 </aside>
@@ -76,35 +76,35 @@
                     <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                         <ul class="navbar-nav flex-grow-1">
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="CustomerIndex">Home</a>
+                                <a class="nav-link text-light" asp-controller="Home" asp-action="CustomerIndex">Trang chủ</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Products" asp-action="Index">Products</a>
+                                <a class="nav-link text-light" asp-controller="Products" asp-action="Index">Sản phẩm</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Categories" asp-action="Index">Categories</a>
+                                <a class="nav-link text-light" asp-controller="Categories" asp-action="Index">Danh mục</a>
                             </li>
                         </ul>
                         <ul class="navbar-nav">
                             @if (isAuthenticated)
                             {
                                 <li class="nav-item">
-                                    <span class="nav-link text-dark">Xin chào @userName</span>
+                                    <span class="nav-link text-light">Xin chào @userName</span>
                                 </li>
                                 <li class="nav-item">
                                     <form asp-controller="Users" asp-action="Logout" method="post" class="d-inline">
                                         @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-link nav-link">Logout</button>
+                                        <button type="submit" class="btn btn-link nav-link text-light">Đăng xuất</button>
                                     </form>
                                 </li>
                             }
                             else
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Users" asp-action="Login">Login</a>
+                                    <a class="nav-link text-light" asp-controller="Users" asp-action="Login">Đăng nhập</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Users" asp-action="Register">Register</a>
+                                    <a class="nav-link text-light" asp-controller="Users" asp-action="Register">Đăng ký</a>
                                 </li>
                             }
                         </ul>
@@ -122,7 +122,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; @DateTime.Now.Year - Clothing_Store - <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; @DateTime.Now.Year - LOVSTORE - <a asp-controller="Home" asp-action="Privacy">Chính sách bảo mật</a>
         </div>
     </footer>
 
