@@ -1,7 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc;
 using MTKPM_Clothing_Store_web.Models;
 using MTKPM_Clothing_Store_web.Helpers;
 using Microsoft.EntityFrameworkCore;
+using MTKPM_Clothing_Store_web.Adapters;
 
 namespace MTKPM_Clothing_Store_web.Controllers
 {
@@ -40,14 +41,9 @@ namespace MTKPM_Clothing_Store_web.Controllers
             }
             else
             {
-                cart.Add(new CartItem
-                {
-                    ProductId = product.ProductId,
-                    Name = product.Name,
-                    Price = product.Price,
-                    Quantity = Math.Max(1, quantity),
-                    Pic = product.Pic
-                });
+                // Use adapter to convert Product -> CartItem
+                var adapter = new ProductToCartItemAdapter(product, quantity);
+                cart.Add(adapter.Adapt());
             }
 
             HttpContext.Session.SetObject(CartSessionKey, cart);

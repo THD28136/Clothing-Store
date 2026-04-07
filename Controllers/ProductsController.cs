@@ -8,6 +8,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using MTKPM_Clothing_Store_web.Models;
 using Microsoft.AspNetCore.Authorization;
+using MTKPM_Clothing_Store_web.Services;
 
 namespace MTKPM_Clothing_Store_web.Controllers
 {
@@ -21,96 +22,40 @@ namespace MTKPM_Clothing_Store_web.Controllers
         }
 
         // GET: Products (customer)
-        // Supports filtering/sorting/searching
         public async Task<IActionResult> Index(int? categoryId, decimal? minPrice, decimal? maxPrice, string? sort, string? q)
         {
             var categories = await _context.Categories.OrderBy(c => c.Name).ToListAsync();
             ViewBag.Categories = new SelectList(categories, "CategoryId", "Name");
 
-            var productsQuery = _context.Products.Include(p => p.Category).AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(q))
-            {
-                var keyword = q.Trim();
-                productsQuery = productsQuery.Where(p => p.Name.Contains(keyword));
-                ViewData["q"] = keyword;
-            }
-
-            if (categoryId.HasValue)
-            {
-                productsQuery = productsQuery.Where(p => p.CategoryId == categoryId.Value);
-                ViewData["categoryId"] = categoryId.Value;
-            }
-
-            if (minPrice.HasValue)
-            {
-                productsQuery = productsQuery.Where(p => p.Price >= minPrice.Value);
-                ViewData["minPrice"] = minPrice.Value;
-            }
-            if (maxPrice.HasValue)
-            {
-                productsQuery = productsQuery.Where(p => p.Price <= maxPrice.Value);
-                ViewData["maxPrice"] = maxPrice.Value;
-            }
+            // Use facade service + strategy internally
+            var service = new ProductService(_context);
+            var products = await service.GetProductsAsync(categoryId, minPrice, maxPrice, sort, q);
 
             ViewData["sort"] = sort ?? "";
-            productsQuery = sort switch
-            {
-                "price_asc" => productsQuery.OrderBy(p => p.Price),
-                "price_desc" => productsQuery.OrderByDescending(p => p.Price),
-                "name_asc" => productsQuery.OrderBy(p => p.Name),
-                "name_desc" => productsQuery.OrderByDescending(p => p.Name),
-                _ => productsQuery.OrderBy(p => p.Name)
-            };
+            if (!string.IsNullOrWhiteSpace(q)) ViewData["q"] = q;
+            if (categoryId.HasValue) ViewData["categoryId"] = categoryId.Value;
+            if (minPrice.HasValue) ViewData["minPrice"] = minPrice.Value;
+            if (maxPrice.HasValue) ViewData["maxPrice"] = maxPrice.Value;
 
-            var products = await productsQuery.ToListAsync();
             return View(products);
         }
 
-        // GET: Products/AdminIndex (Admin layout) - optional admin list
+        // GET: Products/AdminIndex (Admin layout)
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AdminIndex(int? categoryId, decimal? minPrice, decimal? maxPrice, string? sort, string? q)
         {
             var categories = await _context.Categories.OrderBy(c => c.Name).ToListAsync();
             ViewBag.Categories = new SelectList(categories, "CategoryId", "Name");
 
-            var productsQuery = _context.Products.Include(p => p.Category).AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(q))
-            {
-                var keyword = q.Trim();
-                productsQuery = productsQuery.Where(p => p.Name.Contains(keyword));
-                ViewData["q"] = keyword;
-            }
-
-            if (categoryId.HasValue)
-            {
-                productsQuery = productsQuery.Where(p => p.CategoryId == categoryId.Value);
-                ViewData["categoryId"] = categoryId.Value;
-            }
-
-            if (minPrice.HasValue)
-            {
-                productsQuery = productsQuery.Where(p => p.Price >= minPrice.Value);
-                ViewData["minPrice"] = minPrice.Value;
-            }
-            if (maxPrice.HasValue)
-            {
-                productsQuery = productsQuery.Where(p => p.Price <= maxPrice.Value);
-                ViewData["maxPrice"] = maxPrice.Value;
-            }
+            var service = new ProductService(_context);
+            var products = await service.GetProductsAsync(categoryId, minPrice, maxPrice, sort, q);
 
             ViewData["sort"] = sort ?? "";
-            productsQuery = sort switch
-            {
-                "price_asc" => productsQuery.OrderBy(p => p.Price),
-                "price_desc" => productsQuery.OrderByDescending(p => p.Price),
-                "name_asc" => productsQuery.OrderBy(p => p.Name),
-                "name_desc" => productsQuery.OrderByDescending(p => p.Name),
-                _ => productsQuery.OrderBy(p => p.Name)
-            };
+            if (!string.IsNullOrWhiteSpace(q)) ViewData["q"] = q;
+            if (categoryId.HasValue) ViewData["categoryId"] = categoryId.Value;
+            if (minPrice.HasValue) ViewData["minPrice"] = minPrice.Value;
+            if (maxPrice.HasValue) ViewData["maxPrice"] = maxPrice.Value;
 
-            var products = await productsQuery.ToListAsync();
             return View("AdminIndex", products);
         }
 
@@ -163,39 +108,38 @@ namespace MTKPM_Clothing_Store_web.Controllers
         {
             ModelState.Remove("Pic");
 
-            if (ModelState.IsValid)
+            // image handling remains identical (keeps existing behavior)
+            if (ImageFile != null && ImageFile.Length > 0)
             {
-                if (ImageFile != null && ImageFile.Length > 0)
+                var ext = Path.GetExtension(ImageFile.FileName).ToLower();
+                if (ext != ".png")
                 {
-                    var ext = Path.GetExtension(ImageFile.FileName).ToLower();
-                    if (ext != ".png")
-                    {
-                        ModelState.AddModelError("ImageFile", "Chỉ nhận file .png");
-                    }
-                    else
-                    {
-                        var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
-                        if (!Directory.Exists(uploadPath)) Directory.CreateDirectory(uploadPath);
-                        var fileName = Guid.NewGuid().ToString() + ext;
-                        var path = Path.Combine(uploadPath, fileName);
-                        using (var stream = new FileStream(path, FileMode.Create))
-                        {
-                            await ImageFile.CopyToAsync(stream);
-                        }
-                        product.Pic = "images/" + fileName;
-                    }
+                    ModelState.AddModelError("ImageFile", "Chỉ nhận file .png");
                 }
                 else
                 {
-                    product.Pic = "images/PlaceHolder.png";
+                    var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
+                    if (!Directory.Exists(uploadPath)) Directory.CreateDirectory(uploadPath);
+                    var fileName = Guid.NewGuid().ToString() + ext;
+                    var path = Path.Combine(uploadPath, fileName);
+                    using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        await ImageFile.CopyToAsync(stream);
+                    }
+                    product.Pic = "images/" + fileName;
                 }
+            }
+            else
+            {
+                // factory apply default
+                ProductFactory.ApplyDefaults(product);
+            }
 
-                if (ModelState.IsValid)
-                {
-                    _context.Add(product);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(AdminIndex));
-                }
+            if (ModelState.IsValid)
+            {
+                _context.Add(product);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(AdminIndex));
             }
 
             ViewBag.CategoryId = new SelectList(_context.Categories, "CategoryId", "Name", product.CategoryId);
@@ -229,6 +173,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
             {
                 try
                 {
+                    // image handling kept
                     if (ImageFile != null && ImageFile.Length > 0)
                     {
                         var ext = Path.GetExtension(ImageFile.FileName).ToLower();
