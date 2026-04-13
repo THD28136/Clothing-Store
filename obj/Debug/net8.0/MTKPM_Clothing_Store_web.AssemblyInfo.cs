@@ -15,11 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MTKPM_Clothing_Store_web")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-<<<<<<< Updated upstream
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+07a78bac389bb6b3ef0b00320cf5115b58c9f655")]
-=======
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+891acfe56e0bdde33289cb28d0411ec7e3c81e12")]
->>>>>>> Stashed changes
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+908ca6f5d89f8ac18ab33f198dcd6a71c74865ed")]
 [assembly: System.Reflection.AssemblyProductAttribute("MTKPM_Clothing_Store_web")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MTKPM_Clothing_Store_web")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
