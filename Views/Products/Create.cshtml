@@ -31,6 +31,12 @@
     </div>
 
     <div class="mb-3">
+        <label asp-for="Stock" class="form-label"></label>
+        <input asp-for="Stock" class="form-control" type="number" min="0" />
+        <span asp-validation-for="Stock" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
         <label class="form-label">Danh mục</label>
         <select asp-for="CategoryId" class="form-select" asp-items="categories">
             <option value="">-- Chọn danh mục --</option>

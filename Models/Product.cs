@@ -17,7 +17,8 @@ public partial class Product
 
     public int? CategoryId { get; set; }
 
-    // Đánh dấu sản phẩm nổi bật
+    public int Stock { get; set; }
+
     public bool IsFeatured { get; set; }
 
     public virtual Category? Category { get; set; }

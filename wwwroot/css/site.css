@@ -20,3 +20,55 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/* Global site styles to unify views (keeps Bootstrap utilities but improves spacing/typography) */
+:root{
+  --brand-color: #0d6efd;
+  --muted: #6c757d;
+  --card-radius: .5rem;
+  --container-max: 1100px; /* matches visual width of product list */
+}
+
+body{
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: #f8f9fa;
+  color: #212529;
+  line-height: 1.45;
+}
+
+/* Constrain main content (keeps admin sidebar full height) */
+.container, .container-fluid > .row > main .container-fluid {
+  max-width: var(--container-max);
+}
+
+/* Card defaults */
+.card {
+  border-radius: var(--card-radius);
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  background: #ffffff;
+}
+
+/* Product card tweaks */
+.product-card .card {
+  border: 1px solid rgba(0,0,0,.03);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.product-card .card:hover { transform: translateY(-4px); box-shadow: 0 6px 18px rgba(0,0,0,.06); }
+.product-card .card-title { font-weight: 600; font-size: .95rem; }
+
+/* Store summary specific */
+.store-summary { width: 100%; }
+.store-summary .card-body { padding: 1rem; }
+.store-summary .card-title { font-size: 1rem; font-weight: 700; margin-bottom: .75rem; }
+.store-summary .small.text-muted { color: var(--muted); }
+.store-summary .h5 { font-size: 1.25rem; font-weight: 700; }
+
+/* Make top-selling names wrap nicely */
+.store-summary .text-wrap { white-space: normal; word-break: break-word; }
+
+/* Small screens: compact layout */
+@media (max-width: 576px) {
+  .product-row { padding-bottom: 6px; }
+  .product-card { width: 46%; margin-right: 8px; }
+  .store-summary .h5 { font-size: 1.05rem; }
+}

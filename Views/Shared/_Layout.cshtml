@@ -4,6 +4,7 @@
     var isAuthenticated = User?.Identity?.IsAuthenticated == true;
     var isAdmin = isAuthenticated && User.IsInRole("Admin");
     var userName = User?.Identity?.Name ?? HttpContextAccessor.HttpContext?.Session.GetString("Name");
+    var userId = HttpContextAccessor.HttpContext?.Session.GetString("UserId");
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -22,11 +23,27 @@
             <div class="container-fluid" >
                 <a class="navbar-brand" asp-controller="Home" asp-action="Index">LOVSTORE - ADMIN</a>
                 <div class="d-flex">
-                    <span class="navbar-text text-light me-3">Xin chào, @userName</span>
-                    <form asp-controller="Users" asp-action="Logout" method="post" class="d-inline">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-outline-light">Đăng xuất</button>
-                    </form>
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-light" href="#" id="adminUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span>@userName</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminUserDropdown">
+                            <li>
+                                <a class="dropdown-item" asp-controller="Users" asp-action="Details" asp-route-id="@userId">
+                                    <i class="bi bi-person"></i> Thông tin cá nhân
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form asp-controller="Users" asp-action="Logout" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -88,14 +105,31 @@
                         <ul class="navbar-nav">
                             @if (isAuthenticated)
                             {
-                                <li class="nav-item">
-                                    <span class="nav-link text-light">Xin chào @userName</span>
-                                </li>
-                                <li class="nav-item">
-                                    <form asp-controller="Users" asp-action="Logout" method="post" class="d-inline">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-link nav-link text-light">Đăng xuất</button>
-                                    </form>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-light" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Xin chào, @userName
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Users" asp-action="Details" asp-route-id="@userId">
+                                                <i class="bi bi-person"></i> Thông tin người dùng
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Orders" asp-action="UserOrders">
+                                                <i class="bi bi-receipt"></i> Lịch sử đặt hàng
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form asp-controller="Users" asp-action="Logout" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="dropdown-item">
+                                                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
                                 </li>
                             }
                             else

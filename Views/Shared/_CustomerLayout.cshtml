@@ -4,6 +4,11 @@
 @inject IHttpContextAccessor HttpContextAccessor
 @{
     var userName = HttpContextAccessor.HttpContext?.Session.GetString("Name") ?? User.Identity?.Name;
+    var userId = HttpContextAccessor.HttpContext?.Session.GetString("UserId")
+                 ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var userRole = HttpContextAccessor.HttpContext?.Session.GetString("Role")
+                   ?? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
+                   ?? (User?.IsInRole("Admin") == true ? "Admin" : "customer");
     var cart = HttpContextAccessor.HttpContext?.Session.GetObject<List<CartItem>>("Cart") ?? new List<CartItem>();
     var cartCount = cart.Sum(i => i.Quantity);
     Layout = null;
@@ -39,14 +44,25 @@
                         </li>
                         @if (!string.IsNullOrEmpty(userName))
                         {
-                            <li class="nav-item">
-                                <span class="nav-link">Xin chào @userName</span>
-                            </li>
-                            <li class="nav-item">
-                                <form asp-controller="Users" asp-action="Logout" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-link nav-link">Logout</button>
-                                </form>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-light" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    @userName
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Users" asp-action="Details" asp-route-id="@userId">Thông tin người dùng</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Orders" asp-action="UserOrders">Lịch sử đặt hàng</a>
+                                    </li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li>
+                                        <form asp-controller="Users" asp-action="Logout" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item">Đăng xuất</button>
+                                        </form>
+                                    </li>
+                                </ul>
                             </li>
                         }
                         else

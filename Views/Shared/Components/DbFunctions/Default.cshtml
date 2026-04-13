@@ -1,0 +1,60 @@
+@model MTKPM_Clothing_Store_web.ViewModels.DbFunctionsViewModel
+@{
+    Layout = null;
+}
+
+<div class="card mb-3 store-summary">
+    <div class="card-body">
+        <h6 class="card-title mb-2">Store summary</h6>
+
+        @if (Model?.Error != null)
+        {
+            <div class="text-danger">@Model.Error</div>
+        }
+        else if (Model != null)
+        {
+            <div class="row gx-2 gy-2">
+                <div class="col-6 col-md-3">
+                    <div class="small text-muted">Total orders</div>
+                    <div class="h5">@((Model.TotalOrders ?? 0))</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="small text-muted">Total products</div>
+                    <div class="h5">@((Model.TotalProducts ?? Model.ProductCount))</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="small text-muted">In stock</div>
+                    <div class="h5">@((Model.InStockCount))</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="small text-muted">Recent orders (7d)</div>
+                    <div class="h5">@((Model.RecentOrdersCount))</div>
+                </div>
+
+                <div class="col-12 mt-2">
+                    <div class="small text-muted">Total revenue</div>
+                    <div class="h5">@( (Model.TotalRevenue ?? 0m).ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) )</div>
+                </div>
+
+                <div class="col-12 mt-3">
+                    <div class="small text-muted">Top selling</div>
+                    <ul class="list-unstyled mb-0">
+                        @foreach (var p in Model.TopSelling ?? new List<MTKPM_Clothing_Store_web.ViewModels.TopProduct>())
+                        {
+                            <li class="text-wrap">@p.Name <span class="text-muted">(@p.TotalSold)</span></li>
+                        }
+                        @if ((Model.TopSelling?.Any() ?? false) == false)
+                        {
+                            <li class="text-muted">No data</li>
+                        }
+                    </ul>
+                </div>
+
+                <div class="col-12 mt-3">
+                    <small class="text-muted">Server time: </small>
+                    <small>@(Model.ServerNow?.ToString("g") ?? "-")</small>
+                </div>
+            </div>
+        }
+    </div>
+</div>

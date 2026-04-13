@@ -1,36 +1,26 @@
 ﻿@model MTKPM_Clothing_Store_web.Models.User
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Thông tin người dùng";
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
 }
 
-<h1>Details</h1>
+<h2>Thông tin người dùng</h2>
 
-<div>
-    <h4>User</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Role)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Role)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.UserId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<div class="card mb-3">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Tên</dt>
+            <dd class="col-sm-9">@Model.Name</dd>
+
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+
+            <dt class="col-sm-3">Vai trò</dt>
+            <dd class="col-sm-9">@Model.Role</dd>
+        </dl>
+
+        <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="CustomerIndex">Quay lại</a>
+        <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.UserId">Chỉnh sửa</a>
+    </div>
 </div>

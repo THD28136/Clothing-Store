@@ -104,7 +104,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create([Bind("ProductId,Name,Description,Price,CategoryId,IsFeatured")] Product product, IFormFile? ImageFile)
+        public async Task<IActionResult> Create([Bind("ProductId,Name,Description,Price,CategoryId,IsFeatured,Stock")] Product product, IFormFile? ImageFile)
         {
             ModelState.Remove("Pic");
 
@@ -163,17 +163,21 @@ namespace MTKPM_Clothing_Store_web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductId,Name,Description,Price,CategoryId,Pic,IsFeatured")] Product product, IFormFile? ImageFile)
+        public async Task<IActionResult> Edit(int id, [Bind("ProductId,Name,Description,Price,CategoryId,Pic,IsFeatured,Stock")] Product product, IFormFile? ImageFile)
         {
             if (id != product.ProductId) return NotFound();
 
             ModelState.Remove("ImageFile");
 
+            // load existing entity so we don't overwrite Pic when no new file is uploaded
+            var existing = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == id);
+            if (existing == null) return NotFound();
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // image handling kept
+                    // handle new image upload (replace existing image)
                     if (ImageFile != null && ImageFile.Length > 0)
                     {
                         var ext = Path.GetExtension(ImageFile.FileName).ToLower();
@@ -187,9 +191,9 @@ namespace MTKPM_Clothing_Store_web.Controllers
                         var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
                         if (!Directory.Exists(uploadPath)) Directory.CreateDirectory(uploadPath);
 
-                        if (!string.IsNullOrEmpty(product.Pic) && !product.Pic.Contains("PlaceHolder.png"))
+                        if (!string.IsNullOrEmpty(existing.Pic) && !existing.Pic.Contains("PlaceHolder.png"))
                         {
-                            var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), product.Pic);
+                            var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), existing.Pic);
                             if (System.IO.File.Exists(oldFilePath)) System.IO.File.Delete(oldFilePath);
                         }
 
@@ -199,10 +203,18 @@ namespace MTKPM_Clothing_Store_web.Controllers
                         {
                             await ImageFile.CopyToAsync(stream);
                         }
-                        product.Pic = "images/" + fileName;
+                        existing.Pic = "images/" + fileName;
                     }
 
-                    _context.Update(product);
+                    // copy editable fields from incoming model to existing entity (keep existing.Pic if no upload)
+                    existing.Name = product.Name;
+                    existing.Description = product.Description;
+                    existing.Price = product.Price;
+                    existing.CategoryId = product.CategoryId;
+                    existing.IsFeatured = product.IsFeatured;
+                    existing.Stock = product.Stock;
+
+                    _context.Update(existing);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
