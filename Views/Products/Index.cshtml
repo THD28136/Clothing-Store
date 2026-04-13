@@ -1,137 +1,119 @@
-﻿@model IEnumerable<MTKPM_Clothing_Store_web.Models.Product>
+﻿@using Microsoft.AspNetCore.Mvc.Rendering
+@using System.Globalization
+@model IEnumerable<MTKPM_Clothing_Store_web.Models.Product>
 
 @{
     ViewData["Title"] = "Sản phẩm";
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
-    var categoriesSelect = ViewBag.Categories as Microsoft.AspNetCore.Mvc.Rendering.SelectList;
-    string sort = ViewData["sort"] as string ?? "";
-    string q = ViewData["q"] as string ?? "";
-    int? selectedCategory = ViewData["categoryId"] as int?;
-    decimal? minPrice = ViewData["minPrice"] as decimal?;
-    decimal? maxPrice = ViewData["maxPrice"] as decimal?;
 }
 
-<div class="row mb-3">
-    <div class="col-md-12">
-        <form method="get" class="row g-2 align-items-end">
-            <div class="col-sm-3">
-                <label class="form-label">Danh mục</label>
-                <select name="categoryId" class="form-select">
-                    <option value="">Tất cả</option>
-                    @if (categoriesSelect != null)
+<h1>Danh sách sản phẩm</h1>
+
+<form asp-action="Index" method="get" class="row g-2 mb-3 align-items-end">
+    <div class="col-auto">
+        <input type="search" name="q" class="form-control" placeholder="Tìm kiếm..." value="@(ViewData["q"] ?? "")" />
+    </div>
+
+    <div class="col-auto">
+        <select name="categoryId" class="form-select">
+            <option value="">Tất cả danh mục</option>
+            @if (ViewBag.Categories is IEnumerable<SelectListItem> list)
+            {
+                foreach (var c in list)
+                {
+                    var isSelected = (ViewData["categoryId"]?.ToString() == c.Value);
+                    if (isSelected)
                     {
-                        foreach (var c in categoriesSelect)
-                        {
-                            if (selectedCategory.HasValue && selectedCategory.Value.ToString() == c.Value)
+                        <option value="@c.Value" selected>@c.Text</option>
+                    }
+                    else
+                    {
+                        <option value="@c.Value">@c.Text</option>
+                    }
+                }
+            }
+        </select>
+    </div>
+
+    <div class="col-auto">
+        <input type="number" name="minPrice" class="form-control" placeholder="Giá từ" step="0.01" value="@(ViewData["minPrice"] ?? "")" />
+    </div>
+
+    <div class="col-auto">
+        <input type="number" name="maxPrice" class="form-control" placeholder="Đến" step="0.01" value="@(ViewData["maxPrice"] ?? "")" />
+    </div>
+
+    <div class="col-auto">
+        <select name="sort" class="form-select">
+            <option value="">Sắp xếp</option>
+            @{
+                var sort = ViewData["sort"]?.ToString();
+            }
+            <option value="price_asc" selected="@(sort == "price_asc" ? "selected" : null)">Giá: thấp → cao</option>
+            <option value="price_desc" selected="@(sort == "price_desc" ? "selected" : null)">Giá: cao → thấp</option>
+            <option value="newest" selected="@(sort == "newest" ? "selected" : null)">Mới nhất</option>
+        </select>
+    </div>
+
+    <div class="col-auto">
+        <button class="btn btn-primary">Tìm</button>
+    </div>
+</form>
+
+<div class="row">
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var product in Model)
+        {
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <img src="@(string.IsNullOrEmpty(product.Pic) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + product.Pic))" class="card-img-top" style="height: 250px; object-fit: cover;" alt="@product.Name" />
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@product.Name</h5>
+                        <p class="text-muted small">@product.Category?.Name</p>
+
+                        <div class="mb-2">
+                            <strong>Giá:</strong> @product.Price.ToString("C0", new CultureInfo("vi-VN"))
+                        </div>
+
+                        <div class="mb-2">
+                            @if (product.Stock > 10)
                             {
-                                <option value="@c.Value" selected>@c.Text</option>
+                                <span class="badge bg-success">Còn hàng (@product.Stock)</span>
+                            }
+                            else if (product.Stock > 0)
+                            {
+                                <span class="badge bg-warning">Còn lại @product.Stock</span>
                             }
                             else
                             {
-                                <option value="@c.Value">@c.Text</option>
+                                <span class="badge bg-danger">Hết hàng</span>
                             }
-                        }
-                    }
-                </select>
-            </div>
+                        </div>
 
-            <div class="col-sm-2">
-                <label class="form-label">Giá từ</label>
-                <input name="minPrice" class="form-control" type="number" step="0.01" value="@(minPrice?.ToString() ?? "")" />
-            </div>
-            <div class="col-sm-2">
-                <label class="form-label">Giá đến</label>
-                <input name="maxPrice" class="form-control" type="number" step="0.01" value="@(maxPrice?.ToString() ?? "")" />
-            </div>
-
-            <div class="col-sm-3">
-                <label class="form-label">Sắp xếp</label>
-                <select name="sort" class="form-select">
-                    @if (string.IsNullOrEmpty(sort))
-                    {
-                        <option value="" selected>Mặc định (Tên)</option>
-                    }
-                    else
-                    {
-                        <option value="">Mặc định (Tên)</option>
-                    }
-
-                    @if (sort == "price_asc")
-                    {
-                        <option value="price_asc" selected>Giá: thấp → cao</option>
-                    }
-                    else
-                    {
-                        <option value="price_asc">Giá: thấp → cao</option>
-                    }
-
-                    @if (sort == "price_desc")
-                    {
-                        <option value="price_desc" selected>Giá: cao → thấp</option>
-                    }
-                    else
-                    {
-                        <option value="price_desc">Giá: cao → thấp</option>
-                    }
-
-                    @if (sort == "name_asc")
-                    {
-                        <option value="name_asc" selected>Tên: A → Z</option>
-                    }
-                    else
-                    {
-                        <option value="name_asc">Tên: A → Z</option>
-                    }
-
-                    @if (sort == "name_desc")
-                    {
-                        <option value="name_desc" selected>Tên: Z → A</option>
-                    }
-                    else
-                    {
-                        <option value="name_desc">Tên: Z → A</option>
-                    }
-                </select>
-            </div>
-
-            <div class="col-sm-2">
-                <label class="form-label">Tìm</label>
-                <div class="input-group">
-                    <input name="q" class="form-control" placeholder="Từ khóa" value="@q" />
-                    <button class="btn btn-primary" type="submit">Lọc</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-@if (!Model.Any())
-{
-    <div class="alert alert-info">Không có sản phẩm phù hợp.</div>
-}
-else
-{
-    <div class="row">
-        @foreach (var product in Model)
-        {
-            <div class="col-6 col-md-3 mb-4">
-                <div class="card h-100">
-                    <img src="@(string.IsNullOrEmpty(product.Pic) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + product.Pic))" class="card-img-top" style="height:160px;object-fit:cover;" alt="@product.Name" />
-                    <div class="card-body d-flex flex-column">
-                        <h6 class="card-title text-truncate">@product.Name</h6>
-                        <p class="text-muted mb-2">@product.Price.ToString("C0")</p>
-                        <div class="mt-auto d-flex gap-2">
+                        <div class="d-flex gap-2 mt-auto">
                             <a class="btn btn-sm btn-outline-primary flex-grow-1" asp-action="Details" asp-route-id="@product.ProductId">Chi tiết</a>
-                            <form asp-controller="Cart" asp-action="Add" method="post" class="m-0">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="productId" value="@product.ProductId" />
-                                <input type="hidden" name="quantity" value="1" />
-                                <button type="submit" class="btn btn-sm btn-primary">Thêm vào giỏ</button>
-                            </form>
+                            @if (product.Stock > 0)
+                            {
+                                <form asp-controller="Cart" asp-action="Add" method="post" class="d-inline flex-grow-1">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@product.ProductId" />
+                                    <input type="hidden" name="quantity" value="1" />
+                                    <button type="submit" class="btn btn-sm btn-primary w-100">Thêm vào giỏ</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <button class="btn btn-sm btn-secondary flex-grow-1" disabled>Hết hàng</button>
+                            }
                         </div>
                     </div>
                 </div>
             </div>
         }
-    </div>
-}
+    }
+    else
+    {
+        <div class="alert alert-info">Không có sản phẩm nào.</div>
+    }
+</div>

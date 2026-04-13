@@ -1,0 +1,47 @@
+﻿@model IEnumerable<MTKPM_Clothing_Store_web.Models.Order>
+
+@{
+    ViewData["Title"] = "Lịch sử đặt hàng";
+    // Dùng layout khách để tránh hiển thị sidebar admin trên trang lịch sử đặt hàng
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+}
+
+<h1>Lịch sử đặt hàng của tôi</h1>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Mã đơn hàng</th>
+                <th>Ngày đặt hàng</th>
+                <th>Số lượng sản phẩm</th>
+                <th>Tổng tiền</th>
+                <th>Chi tiết</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                @foreach (var order in Model)
+                {
+                    var totalAmount = order.OrderDetails?.Sum(od => od.Quantity * od.Product?.Price ?? 0) ?? 0;
+                    <tr>
+                        <td>#@order.OrderId</td>
+                        <td>@order.OrderDate?.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@order.OrderDetails?.Count()</td>
+                        <td>@totalAmount.ToString("C0")</td>
+                        <td>
+                            <a class="btn btn-sm btn-primary" asp-action="Details" asp-route-id="@order.OrderId">Xem chi tiết</a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Bạn chưa có đơn hàng nào</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

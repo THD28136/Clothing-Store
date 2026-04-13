@@ -9,9 +9,9 @@
     <div class="col-md-3">
         <div class="card text-white mb-3" style="background-color: #FDEE84;">
             <div class="card-body">
-                <h5 class="card-title" style="color: #020B45">Users</h5>
+                <h5 class="card-title" style="color: #020B45">Người dùng</h5>
                 <p class="card-text" style="color: #2C3879">Quản lý tài khoản người dùng</p>
-                <a class="btn btn-light" asp-controller="Users" asp-action="Index">Quản lý Users</a>
+                <a class="btn btn-light" asp-controller="Users" asp-action="Index">Quản lý người dùng</a>
             </div>
         </div>
     </div>
@@ -19,9 +19,9 @@
     <div class="col-md-3">
         <div class="card text-white mb-3" style="background-color: #FEDA51;">
             <div class="card-body">
-                <h5 class="card-title" style="color: #020B45">Products</h5>
+                <h5 class="card-title" style="color: #020B45">Sản phẩm</h5>
                 <p class="card-text" style="color: #2C3879">Thêm / sửa / xóa sản phẩm</p>
-                <a class="btn btn-light" asp-controller="Products" asp-action="Index">Quản lý Products</a>
+                <a class="btn btn-light" asp-controller="Products" asp-action="Index">Quản lý sản phẩm</a>
             </div>
         </div>
     </div>
@@ -29,9 +29,9 @@
     <div class="col-md-3">
         <div class="card text-white mb-3" style="background-color: #FDEE84;">
             <div class="card-body">
-                <h5 class="card-title" style="color: #020B45">Categories</h5>
+                <h5 class="card-title" style="color: #020B45">Danh mục</h5>
                 <p class="card-text" style="color: #2C3879">Quản lý danh mục</p>
-                <a class="btn btn-light" asp-controller="Categories" asp-action="Index">Quản lý Categories</a>
+                <a class="btn btn-light" asp-controller="Categories" asp-action="Index">Quản lý danh mục</a>
             </div>
         </div>
     </div>
@@ -39,19 +39,30 @@
     <div class="col-md-3">
         <div class="card text-white mb-3" style="background-color: #FEDA51;">
             <div class="card-body">
-                <h5 class="card-title" style="color: #020B45">Orders</h5>
+                <h5 class="card-title" style="color: #020B45">Đơn hàng</h5>
                 <p class="card-text" style="color: #2C3879">Xem và xử lý đơn hàng</p>
-                <a class="btn btn-light" asp-controller="Orders" asp-action="Index">Quản lý Orders</a>
+                <a class="btn btn-light" asp-controller="Orders" asp-action="Index">Quản lý đơn hàng</a>
             </div>
         </div>
     </div>
 </div>
 
 <section class="mt-4">
-    <h4>Thao tác nhanh</h4>
-    <div class="d-flex gap-2">
-        <a class="btn btn-outline-primary" asp-controller="Products" asp-action="Create">Tạo sản phẩm</a>
-        <a class="btn btn-outline-secondary" asp-controller="Categories" asp-action="Create">Tạo danh mục</a>
-        <a class="btn btn-outline-success" asp-controller="Users" asp-action="Create">Tạo user</a>
+    <!-- Make store summary full-width (same visual width as product list) -->
+    <div class="row mb-3">
+        <div class="col-12">
+            @await Component.InvokeAsync("DbFunctions")
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <h4>Thao tác nhanh</h4>
+            <div class="d-flex gap-2">
+                <a class="btn btn-outline-primary" asp-controller="Products" asp-action="Create">Tạo sản phẩm</a>
+                <a class="btn btn-outline-secondary" asp-controller="Categories" asp-action="Create">Tạo danh mục</a>
+                <a class="btn btn-outline-success" asp-controller="Users" asp-action="Create">Tạo user</a>
+            </div>
+        </div>
     </div>
 </section>

@@ -1,0 +1,18 @@
+﻿@model dynamic
+@{
+    ViewData["Title"] = "Thanh toán thành công";
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    var orderId = ViewData["OrderId"];
+}
+
+<h2>Đơn hàng #@ViewData["OrderId"]</h2>
+
+<div class="alert alert-success">
+    <h4 class="alert-heading">Thanh toán thành công!</h4>
+    <p>Đơn hàng của bạn đã được tạo. Mã đơn hàng: <strong>#@orderId</strong></p>
+    <hr />
+    <p class="mb-0">
+        <a class="btn btn-primary" asp-controller="Orders" asp-action="UserOrders">Xem lịch sử đặt hàng</a>
+        <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="CustomerIndex">Tiếp tục mua sắm</a>
+    </p>
+</div>

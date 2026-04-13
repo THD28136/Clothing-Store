@@ -1,4 +1,5 @@
-﻿@model IEnumerable<MTKPM_Clothing_Store_web.Models.Category>
+﻿@using System.Globalization
+@model IEnumerable<MTKPM_Clothing_Store_web.Models.Category>
 
 @{
     ViewData["Title"] = "Home";
@@ -117,7 +118,7 @@
     }
 </style>
 
-<h1 class="mb-3">Chào mừng tới Clothing Store</h1>
+<h1 class="mb-3">Chào mừng tới  LOVSTORE</h1>
 
 <!-- Banner dưới navbar -->
 <div class="banner" style="background-image: url('/images/H_FASHION.jpg'); background-size:auto">
@@ -149,7 +150,7 @@
                         <div class="card-body">
                             <div>
                                 <h6 class="card-title">@p.Name</h6>
-                                <p class="card-price mb-1">@p.Price.ToString("C0")</p>
+                                <p class="card-price mb-1">@p.Price.ToString("C0", new CultureInfo("vi-VN"))</p>
                             </div>
                             <div class="card-actions">
                                 <a class="btn btn-sm btn-outline-primary flex-grow-1" asp-controller="Products" asp-action="Details" asp-route-id="@p.ProductId">Chi tiết</a>
@@ -188,18 +189,33 @@
                         <div class="card-body">
                             <div class="card-top">
                                 <h6 class="card-title">@product.Name</h6>
-                                <p class="card-price mb-1">@product.Price.ToString("C0")</p>
+                                <p class="card-price mb-1">@product.Price.ToString("C0", new CultureInfo("vi-VN"))</p>
+                                @if (product.Stock > 0)
+                                {
+                                    <small class="text-success">Còn @product.Stock</small>
+                                }
+                                else
+                                {
+                                    <small class="text-danger">Hết hàng</small>
+                                }
                             </div>
 
                             <div class="card-actions">
                                 <a class="btn btn-sm btn-outline-primary flex-grow-1" asp-controller="Products" asp-action="Details" asp-route-id="@product.ProductId">Chi tiết</a>
 
-                                <form asp-controller="Cart" asp-action="Add" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="productId" value="@product.ProductId" />
-                                    <input type="hidden" name="quantity" value="1" />
-                                    <button type="submit" class="btn btn-sm btn-primary">Thêm vào giỏ</button>
-                                </form>
+                                @if (product.Stock > 0)
+                                {
+                                    <form asp-controller="Cart" asp-action="Add" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="productId" value="@product.ProductId" />
+                                        <input type="hidden" name="quantity" value="1" />
+                                        <button type="submit" class="btn btn-sm btn-primary">Thêm vào giỏ</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-sm btn-secondary" disabled>Hết hàng</button>
+                                }
                             </div>
                         </div>
                     </div>
