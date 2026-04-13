@@ -95,7 +95,7 @@
                             <a class="btn btn-sm btn-outline-primary flex-grow-1" asp-action="Details" asp-route-id="@product.ProductId">Chi tiết</a>
                             @if (product.Stock > 0)
                             {
-                                <form asp-controller="Cart" asp-action="Add" method="post" class="d-inline flex-grow-1">
+                                <form asp-controller="Cart" asp-action="Add" method="post" class="d-inline flex-grow-1 ajax-add-to-cart">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="productId" value="@product.ProductId" />
                                     <input type="hidden" name="quantity" value="1" />
@@ -117,3 +117,56 @@
         <div class="alert alert-info">Không có sản phẩm nào.</div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        (function () {
+            // Intercept Add-to-cart forms and send AJAX so we stay on page and show notification
+            const forms = document.querySelectorAll('form.ajax-add-to-cart');
+            forms.forEach(f => {
+                f.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    const form = e.currentTarget;
+                    const data = new FormData(form);
+                    try {
+                        const resp = await fetch(form.action, {
+                            method: 'POST',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                            body: data
+                        });
+                        if (!resp.ok) throw new Error('Network error');
+                        const json = await resp.json();
+                        if (json?.success) {
+                            showToast(json.message || 'Added to cart');
+                            // update cart count badge if present
+                            const badge = document.querySelector('.cart-count-badge');
+                            if (badge && typeof json.cartCount !== 'undefined') badge.innerText = json.cartCount;
+                        } else {
+                            showToast('Không thể thêm vào giỏ: ' + (json?.message || 'Lỗi'), true);
+                        }
+                    } catch (err) {
+                        showToast('Lỗi khi thêm vào giỏ.', true);
+                        console.error(err);
+                    }
+                });
+            });
+
+            // Simple toast helper (injects a Bootstrap toast)
+            function showToast(message, isError) {
+                const id = 'toast-' + Math.random().toString(36).substr(2, 9);
+                const toastHtml = `
+<div id="${id}" class="toast align-items-center text-white ${isError ? 'bg-danger' : 'bg-success'} border-0" role="alert" aria-live="assertive" aria-atomic="true" style="position: fixed; top: 1rem; right: 1rem; z-index: 1200;">
+  <div class="d-flex">
+    <div class="toast-body">${message}</div>
+    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+  </div>
+</div>`;
+                document.body.insertAdjacentHTML('beforeend', toastHtml);
+                const el = document.getElementById(id);
+                const bs = new bootstrap.Toast(el, { delay: 2500 });
+                bs.show();
+                el.addEventListener('hidden.bs.toast', () => el.remove());
+            }
+        })();
+    </script>
+}

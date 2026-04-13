@@ -48,7 +48,7 @@
                             <button type="submit" class="btn btn-danger">Xóa</button>
                         </form>
                     }
-                    <a class="btn btn-outline-secondary" asp-action="Index">Quay lại</a>
+                    <a class="btn btn-outline-secondary" onclick="history.back(); return false;" href="#">Quay lại</a>
                     @if (Model.Stock > 0)
                     {
                         <form asp-controller="Cart" asp-action="Add" method="post" class="m-0">

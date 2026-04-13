@@ -16,6 +16,7 @@
                 <th>Ngày đặt hàng</th>
                 <th>Số lượng sản phẩm</th>
                 <th>Tổng tiền</th>
+                <th>Trạng thái</th>
                 <th>Chi tiết</th>
             </tr>
         </thead>
@@ -25,11 +26,21 @@
                 @foreach (var order in Model)
                 {
                     var totalAmount = order.OrderDetails?.Sum(od => od.Quantity * od.Product?.Price ?? 0) ?? 0;
+                    var status = string.IsNullOrWhiteSpace(order.Status) ? "Pending" : order.Status;
+                    string badgeClass = status switch
+                    {
+                        "Processing" => "bg-warning text-dark",
+                        "Shipped" => "bg-info text-dark",
+                        "Delivered" => "bg-success",
+                        "Cancelled" => "bg-danger",
+                        _ => "bg-secondary"
+                    };
                     <tr>
                         <td>#@order.OrderId</td>
                         <td>@order.OrderDate?.ToString("dd/MM/yyyy HH:mm")</td>
                         <td>@order.OrderDetails?.Count()</td>
                         <td>@totalAmount.ToString("C0")</td>
+                        <td><span class="badge @badgeClass">@status</span></td>
                         <td>
                             <a class="btn btn-sm btn-primary" asp-action="Details" asp-route-id="@order.OrderId">Xem chi tiết</a>
                         </td>
@@ -39,7 +50,7 @@
             else
             {
                 <tr>
-                    <td colspan="5" class="text-center text-muted">Bạn chưa có đơn hàng nào</td>
+                    <td colspan="6" class="text-center text-muted">Bạn chưa có đơn hàng nào</td>
                 </tr>
             }
         </tbody>

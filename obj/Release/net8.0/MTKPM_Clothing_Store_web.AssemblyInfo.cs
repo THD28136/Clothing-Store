@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MTKPM_Clothing_Store_web")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a37b5281ce30114c14f34a29bc3a90ebc3008238")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1a8c7a8494eabccf29a95f6191fb6b1f8db0c38a")]
 [assembly: System.Reflection.AssemblyProductAttribute("MTKPM_Clothing_Store_web")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MTKPM_Clothing_Store_web")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

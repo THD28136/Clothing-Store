@@ -1,39 +1,58 @@
 ﻿@using System.Globalization
-    @model MTKPM_Clothing_Store_web.Models.CheckoutViewModel
+@using System.Linq
+@model IEnumerable<MTKPM_Clothing_Store_web.Models.CartItem>
 
 @{
-    ViewData["Title"] = "Thanh toán";
+    ViewData["Title"] = "Giỏ hàng";
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
     var vn = CultureInfo.GetCultureInfo("vi-VN");
+    var items = Model ?? Enumerable.Empty<MTKPM_Clothing_Store_web.Models.CartItem>();
+    var total = items.Sum(i => i.LineTotal);
 }
 
-<h2>Thanh toán</h2>
+<h2>Giỏ hàng</h2>
 
-@if (!Model.Items.Any())
+@if (!items.Any())
 {
     <div class="alert alert-info">Giỏ hàng trống.</div>
 }
 else
 {
     <div class="table-responsive mb-3">
-        <table class="table">
+        <table class="table table-striped">
             <thead>
                 <tr>
                     <th>Sản phẩm</th>
                     <th>Đơn giá</th>
-                    <th>Số lượng</th>
+                    <th style="width:140px">Số lượng</th>
                     <th>Thành tiền</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var it in Model.Items)
+                @foreach (var it in items)
                 {
-                    var subtotal = it.Product.Price * it.Quantity;
-                    <tr>
-                        <td>@it.Product.Name</td>
-                        <td>@it.Product.Price.ToString("C0", vn)</td>
-                        <td>@it.Quantity</td>
-                        <td>@subtotal.ToString("C0", vn)</td>
+                    <tr data-product-id="@it.ProductId">
+                        <td>@it.Name</td>
+                        <td>@it.Price.ToString("C0", vn)</td>
+                        <td>
+                            <form asp-controller="Cart" asp-action="Update" method="post" class="d-inline cart-update-form">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="productId" value="@it.ProductId" />
+                                <div class="input-group input-group-sm">
+                                    <input type="number" name="quantity" value="@it.Quantity" min="0" class="form-control form-control-sm quantity-input" style="max-width:90px" />
+                                    <button class="btn btn-outline-secondary" type="submit">Cập nhật</button>
+                                </div>
+                            </form>
+                        </td>
+                        <td class="item-total">@it.LineTotal.ToString("C0", vn)</td>
+                        <td>
+                            <form asp-controller="Cart" asp-action="Remove" method="post" class="d-inline cart-remove-form">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="productId" value="@it.ProductId" />
+                                <button class="btn btn-sm btn-outline-danger" type="submit">Xóa</button>
+                            </form>
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -41,22 +60,76 @@ else
     </div>
 
     <div class="mb-3">
-        <h5>Tổng: @Model.Total.ToString("C0", vn)</h5>
+        <h5>Tổng: <span id="cart-total">@total.ToString("C0", vn)</span></h5>
     </div>
 
-    <form asp-controller="Payments" asp-action="CheckoutPost" method="post">
-        @Html.AntiForgeryToken()
-        <div class="mb-3">
-            <label class="form-label">Tên trên thẻ</label>
-            <input class="form-control" name="cardName" required />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Số thẻ</label>
-            <input class="form-control" name="cardNumber" required />
-        </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-primary" type="submit">Thanh toán</button>
-            <a class="btn btn-outline-secondary" asp-controller="Cart" asp-action="Index">Quay lại giỏ hàng</a>
-        </div>
-    </form>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary" asp-controller="Products" asp-action="Index">Tiếp tục mua</a>
+        <a class="btn btn-primary" asp-controller="Payments" asp-action="Checkout">Thanh toán</a>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            // Helper to read antiforgery token from a form
+            function formFetch(form) {
+                const fd = new FormData(form);
+                return fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: fd
+                }).then(r => r.json());
+            }
+
+            // Handle update quantity via AJAX
+            document.querySelectorAll('form.cart-update-form').forEach(form => {
+                form.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    const tr = form.closest('tr');
+                    const productId = tr.getAttribute('data-product-id');
+                    try {
+                        const json = await formFetch(form);
+                        if (json?.success) {
+                            // update item total and cart total and badge
+                            const itemTotalCell = tr.querySelector('.item-total');
+                            if (itemTotalCell) itemTotalCell.innerText = (json.itemTotal || 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 });
+                            if (document.getElementById('cart-total')) document.getElementById('cart-total').innerText = (json.cartTotal || 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 });
+                            const badge = document.querySelector('.cart-count-badge');
+                            if (badge && typeof json.cartCount !== 'undefined') badge.innerText = json.cartCount;
+                        } else {
+                            alert('Lỗi khi cập nhật giỏ hàng.');
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert('Lỗi khi cập nhật giỏ hàng.');
+                    }
+                });
+            });
+
+            // Handle remove via AJAX
+            document.querySelectorAll('form.cart-remove-form').forEach(form => {
+                form.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    const tr = form.closest('tr');
+                    try {
+                        const json = await formFetch(form);
+                        if (json?.success) {
+                            tr.remove();
+                            if (document.getElementById('cart-total')) document.getElementById('cart-total').innerText = (json.total || 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 });
+                            const badge = document.querySelector('.cart-count-badge');
+                            if (badge && typeof json.cartCount !== 'undefined') badge.innerText = json.cartCount;
+                            // If no rows left show empty message (simple reload is also fine)
+                            if (!document.querySelectorAll('tbody tr').length) location.reload();
+                        } else {
+                            alert('Lỗi khi xóa mục khỏi giỏ hàng.');
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert('Lỗi khi xóa mục khỏi giỏ hàng.');
+                    }
+                });
+            });
+        })();
+    </script>
 }

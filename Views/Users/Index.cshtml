@@ -1,47 +1,50 @@
 ﻿@model IEnumerable<MTKPM_Clothing_Store_web.Models.User>
 
 @{
-    ViewData["Title"] = "Users";
+    ViewData["Title"] = "Quản lý người dùng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Users</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Danh sách người dùng</h1>
+    <a class="btn btn-outline-primary" asp-action="Create">Tạo user mới</a>
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Role)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Role)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.UserId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.UserId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.UserId">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Mã người dùng</th>
+                <th>Tên</th>
+                <th>Email</th>
+                <th>Vai trò</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>#@user.UserId</td>
+                        <td>@user.Name</td>
+                        <td>@user.Email</td>
+                        <td>@user.Role</td>
+                        <td>
+                            <a class="btn btn-sm btn-warning" asp-action="Edit" asp-route-id="@user.UserId">Sửa</a>
+                            <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@user.UserId">Chi tiết</a>
+                            <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@user.UserId">Xóa</a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Không có người dùng nào</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
