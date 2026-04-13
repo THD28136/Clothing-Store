@@ -69,7 +69,7 @@
 
                 <div class="d-flex gap-2 mt-3">
                     <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
-                    <a asp-action="AdminIndex" class="btn btn-secondary">Hủy</a>
+                    <button type="button" onclick="history.back()" class="btn btn-secondary">Hủy</button>
 
                     @if (User.IsInRole("Admin"))
                     {

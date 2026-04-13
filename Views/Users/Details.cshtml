@@ -20,7 +20,7 @@
             <dd class="col-sm-9">@Model.Role</dd>
         </dl>
 
-        <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="CustomerIndex">Quay lại</a>
+        <button type="button" onclick="history.back()" class="btn btn-outline-secondary">Quay lại</button>
         <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.UserId">Chỉnh sửa</a>
     </div>
 </div>

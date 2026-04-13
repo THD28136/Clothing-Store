@@ -11,6 +11,9 @@ namespace MTKPM_Clothing_Store_web.Controllers
         private readonly ClothingStoreContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
+        // Allowed statuses
+        private static readonly string[] AllowedStatuses = new[] { "Pending", "Processing", "Shipped", "Delivered", "Cancelled" };
+
         public OrdersController(ClothingStoreContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
@@ -101,7 +104,32 @@ namespace MTKPM_Clothing_Store_web.Controllers
                 }
             }
 
+            // Pass allowed statuses to ViewBag for admin status change UI
+            ViewBag.AllowedStatuses = AllowedStatuses;
+
             return View(order);
+        }
+
+        // Admin-only: update order status
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateStatus(int id, string status)
+        {
+            if (!AllowedStatuses.Contains(status))
+            {
+                ModelState.AddModelError(string.Empty, "Invalid status.");
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null) return NotFound();
+
+            order.Status = status;
+            _context.Update(order);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Details), new { id });
         }
     }
 }

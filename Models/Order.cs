@@ -11,6 +11,8 @@ public partial class Order
 
     public DateTime? OrderDate { get; set; }
 
+    public string? Status { get; set; }
+
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
     public virtual User? User { get; set; }

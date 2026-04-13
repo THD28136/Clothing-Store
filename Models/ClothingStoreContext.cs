@@ -76,6 +76,9 @@ public partial class ClothingStoreContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("order_date");
+            entity.Property(e => e.Status)
+                .HasMaxLength(255)
+                .IsUnicode(false);
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.User).WithMany(p => p.Orders)
