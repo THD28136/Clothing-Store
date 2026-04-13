@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Thành công";
+}
+
+<div class="text-center mt-5">
+    <h2 class="text-success">🎉 Đặt hàng thành công!</h2>
+    <p>Mã đơn hàng của bạn là: <strong>#@ViewBag.OrderId</strong></p>
+
+    <a asp-action="Index" class="btn btn-primary mt-3">
+        Xem đơn hàng
+    </a>
+</div>
