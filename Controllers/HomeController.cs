@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.SqlServer;
 using MTKPM_Clothing_Store_web.Models;
 
 namespace MTKPM_Clothing_Store_web.Controllers
@@ -17,35 +16,38 @@ namespace MTKPM_Clothing_Store_web.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Main entry point: routes based on authentication and role.
+        /// - Admin -> AdminIndex view
+        /// - Customer/Guest -> CustomerIndex action
+        /// </summary>
         public IActionResult Index()
         {
-            // Nếu đã đăng nhập, chuyển theo vai trò
-            if (User?.Identity?.IsAuthenticated == true)
+            // If authenticated and Admin, show admin dashboard
+            if (User?.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
             {
-                if (User.IsInRole("Admin"))
-                {
-                    // Hiển thị dashboard admin (Views/Home/Index.cshtml)
-                    return View();
-                }
-
-                // Người dùng không phải Admin -> chuyển tới trang khách
-                return RedirectToAction("CustomerIndex");
+                // Return the AdminIndex view directly (no redirect)
+                return View("AdminIndex");
             }
 
-            // Khách -> trang khách
-            return RedirectToAction("CustomerIndex");
+            // Otherwise redirect to CustomerIndex for all other users/guests
+            return RedirectToAction(nameof(CustomerIndex));
         }
 
-        // Trang khách hàng: tải danh mục + sản phẩm
+        /// <summary>
+        /// Customer-facing home page: load categories with products
+        /// Returns View("Index") which displays featured products and category carousels
+        /// </summary>
         public async Task<IActionResult> CustomerIndex()
         {
-            // Nạp toàn bộ categories cùng products. Ở view chỉ hiển thị một số sản phẩm (Take).
+            // Load all categories with their products
             var categories = await _context.Categories
                 .Include(c => c.Products)
                 .OrderBy(c => c.Name)
                 .ToListAsync();
 
-            return View(categories);
+            // Return the Index view with categories model
+            return View("Index", categories);
         }
 
         public IActionResult Privacy()

@@ -150,7 +150,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
             if (string.Equals(user.Role, "Admin", StringComparison.OrdinalIgnoreCase))
                 return RedirectToAction("Index", "Home");
 
-            return RedirectToAction("CustomerIndex", "Home");
+            return RedirectToAction("Index", "Home");
         }
 
         // POST: Users/Logout
