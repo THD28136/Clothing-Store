@@ -2,8 +2,8 @@ namespace MTKPM_Clothing_Store_web.Adapters;
 using MTKPM_Clothing_Store_web.Models;
 
 /// <summary>
-/// Adapter: convert Product -> CartItem for session cart usage.
-/// Keeps conversion logic in one place.
+/// Adapter: convert Product -> SessionCartItem for session cart usage.
+/// Keeps conversion logic in one place and avoids colliding with the EF CartItem entity.
 /// </summary>
 public class ProductToCartItemAdapter
 {
@@ -16,15 +16,15 @@ public class ProductToCartItemAdapter
         _quantity = quantity < 1 ? 1 : quantity;
     }
 
-    public CartItem Adapt()
+    public SessionCartItem Adapt()
     {
-        return new CartItem
+        return new SessionCartItem
         {
             ProductId = _product.ProductId,
             Name = _product.Name,
             Price = _product.Price,
             Quantity = _quantity,
-            Pic = _product.Pic
+            Pic = _product.Image
         };
     }
 }

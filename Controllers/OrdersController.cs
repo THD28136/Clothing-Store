@@ -8,13 +8,13 @@ namespace MTKPM_Clothing_Store_web.Controllers
     [Authorize]  // Bắt buộc đăng nhập cho tất cả action
     public class OrdersController : Controller
     {
-        private readonly ClothingStoreContext _context;
+        private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         // Allowed statuses
         private static readonly string[] AllowedStatuses = new[] { "Pending", "Processing", "Shipped", "Delivered", "Cancelled" };
 
-        public OrdersController(ClothingStoreContext context, IHttpContextAccessor httpContextAccessor)
+        public OrdersController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;

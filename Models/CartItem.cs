@@ -1,15 +1,19 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 
-namespace MTKPM_Clothing_Store_web.Models
+namespace MTKPM_Clothing_Store_web.Models;
+
+public partial class CartItem
 {
-    public class CartItem
-    {
-        public int ProductId { get; set; }
-        public string Name { get; set; } = null!;
-        public decimal Price { get; set; }
-        public int Quantity { get; set; }
-        public string? Pic { get; set; }
+    public int CartItemId { get; set; }
 
-        public decimal LineTotal => Price * Quantity;
-    }
+    public int CartId { get; set; }
+
+    public int ProductId { get; set; }
+
+    public int Quantity { get; set; }
+
+    public virtual Cart Cart { get; set; } = null!;
+
+    public virtual Product Product { get; set; } = null!;
 }
