@@ -145,7 +145,7 @@
                 <div class="product-card">
                     <div class="card">
                         <div class="img-wrap">
-                            <img src="@(string.IsNullOrEmpty(p.Pic) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + p.Pic))" alt="@p.Name" />
+                            <img src="@(string.IsNullOrEmpty(p.Image) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + p.Image))" alt="@p.Name" />
                         </div>
                         <div class="card-body">
                             <div>
@@ -184,7 +184,7 @@
                 <div class="product-card">
                     <div class="card">
                         <div class="img-wrap">
-                            <img src="@(string.IsNullOrEmpty(product.Pic) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + product.Pic))" alt="@product.Name" />
+                            <img src="@(string.IsNullOrEmpty(product.Image) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + product.Image))" alt="@product.Name" />
                         </div>
                         <div class="card-body">
                             <div class="card-top">

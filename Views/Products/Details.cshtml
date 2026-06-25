@@ -10,7 +10,7 @@
 <div class="card mb-3">
     <div class="row g-0">
         <div class="col-md-4 text-center p-3">
-            <img src="@(string.IsNullOrEmpty(Model.Pic) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + Model.Pic))" class="img-fluid rounded" style="max-height:320px;object-fit:cover;" alt="@Model.Name" />
+            <img src="@(string.IsNullOrEmpty(Model.Image) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + Model.Image))" class="img-fluid rounded" style="max-height:320px;object-fit:cover;" alt="@Model.Name" />
         </div>
         <div class="col-md-8">
             <div class="card-body">

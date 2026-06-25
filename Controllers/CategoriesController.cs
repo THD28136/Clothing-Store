@@ -11,9 +11,9 @@ namespace MTKPM_Clothing_Store_web.Controllers
 {
     public class CategoriesController : Controller
     {
-        private readonly ClothingStoreContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public CategoriesController(ClothingStoreContext context)
+        public CategoriesController(ApplicationDbContext context)
         {
             _context = context;
         }

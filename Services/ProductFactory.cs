@@ -8,9 +8,9 @@ public static class ProductFactory
 {
     public static void ApplyDefaults(Product product)
     {
-        if (string.IsNullOrWhiteSpace(product.Pic))
+        if (string.IsNullOrWhiteSpace(product.Image))
         {
-            product.Pic = "images/PlaceHolder.png";
+            product.Image = "images/PlaceHolder.png";
         }
     }
 }

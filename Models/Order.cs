@@ -13,7 +13,17 @@ public partial class Order
 
     public string? Status { get; set; }
 
+    public int? CouponId { get; set; }
+
+    public int? PaymentMethodId { get; set; }
+
+    public decimal? TotalAmount { get; set; }
+
+    public virtual Coupon? Coupon { get; set; }
+
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+
+    public virtual PaymentMethod? PaymentMethod { get; set; }
 
     public virtual User? User { get; set; }
 }

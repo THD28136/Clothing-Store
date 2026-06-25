@@ -10,10 +10,10 @@ namespace MTKPM_Clothing_Store_web.ViewComponents;
 
 public class DbFunctionsViewComponent : ViewComponent
 {
-    private readonly ClothingStoreContext _context;
+    private readonly ApplicationDbContext _context;
     private readonly ILogger<DbFunctionsViewComponent> _logger;
 
-    public DbFunctionsViewComponent(ClothingStoreContext context, ILogger<DbFunctionsViewComponent> logger)
+    public DbFunctionsViewComponent(ApplicationDbContext context, ILogger<DbFunctionsViewComponent> logger)
     {
         _context = context;
         _logger = logger;

@@ -1,12 +1,12 @@
 ﻿@using System.Globalization
 @using System.Linq
-@model IEnumerable<MTKPM_Clothing_Store_web.Models.CartItem>
+@model IEnumerable<MTKPM_Clothing_Store_web.Models.SessionCartItem>
 
 @{
     ViewData["Title"] = "Giỏ hàng";
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
     var vn = CultureInfo.GetCultureInfo("vi-VN");
-    var items = Model ?? Enumerable.Empty<MTKPM_Clothing_Store_web.Models.CartItem>();
+    var items = Model ?? Enumerable.Empty<MTKPM_Clothing_Store_web.Models.SessionCartItem>();
     var total = items.Sum(i => i.LineTotal);
 }
 

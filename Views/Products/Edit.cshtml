@@ -17,7 +17,7 @@
             <div class="col-md-4">
                 <div class="mb-3 text-center">
                     <label class="form-label d-block">Ảnh hiện tại</label>
-                    <img id="currentImage" src="@(string.IsNullOrEmpty(Model.Pic) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + Model.Pic))" class="img-fluid rounded" style="max-height:220px;object-fit:cover;" alt="@Model.Name" />
+                    <img id="currentImage" src="@(string.IsNullOrEmpty(Model.Image) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + Model.Image))" class="img-fluid rounded" style="max-height:220px;object-fit:cover;" alt="@Model.Name" />
                 </div>
 
                 <div class="mb-3">

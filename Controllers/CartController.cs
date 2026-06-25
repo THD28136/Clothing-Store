@@ -9,10 +9,10 @@ namespace MTKPM_Clothing_Store_web.Controllers
 {
     public class CartController : Controller
     {
-        private readonly ClothingStoreContext _context;
+        private readonly ApplicationDbContext _context;
         private const string CartSessionKey = "Cart";
 
-        public CartController(ClothingStoreContext context)
+        public CartController(ApplicationDbContext context)
         {
             _context = context;
         }
@@ -20,7 +20,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
         // GET: /Cart
         public IActionResult Index()
         {
-            var cart = HttpContext.Session.GetObject<List<CartItem>>(CartSessionKey) ?? new List<CartItem>();
+            var cart = HttpContext.Session.GetObject<List<SessionCartItem>>(CartSessionKey) ?? new List<SessionCartItem>();
             ViewData["Total"] = cart.Sum(i => i.LineTotal);
             return View(cart);
         }
@@ -33,7 +33,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
             var product = await _context.Products.FindAsync(productId);
             if (product == null) return NotFound();
 
-            var cart = HttpContext.Session.GetObject<List<CartItem>>(CartSessionKey) ?? new List<CartItem>();
+            var cart = HttpContext.Session.GetObject<List<SessionCartItem>>(CartSessionKey) ?? new List<SessionCartItem>();
 
             var existing = cart.FirstOrDefault(c => c.ProductId == productId);
             if (existing != null)
@@ -42,7 +42,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
             }
             else
             {
-                // Use adapter to convert Product -> CartItem
+                // Use adapter to convert Product -> SessionCartItem
                 var adapter = new ProductToCartItemAdapter(product, quantity);
                 cart.Add(adapter.Adapt());
             }
@@ -73,7 +73,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Remove(int productId, string? returnUrl = null)
         {
-            var cart = HttpContext.Session.GetObject<List<CartItem>>(CartSessionKey) ?? new List<CartItem>();
+            var cart = HttpContext.Session.GetObject<List<SessionCartItem>>(CartSessionKey) ?? new List<SessionCartItem>();
             var item = cart.FirstOrDefault(c => c.ProductId == productId);
             if (item != null)
             {
@@ -99,7 +99,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Update(int productId, int quantity)
         {
-            var cart = HttpContext.Session.GetObject<List<CartItem>>(CartSessionKey) ?? new List<CartItem>();
+            var cart = HttpContext.Session.GetObject<List<SessionCartItem>>(CartSessionKey) ?? new List<SessionCartItem>();
             var item = cart.FirstOrDefault(c => c.ProductId == productId);
             if (item != null)
             {
