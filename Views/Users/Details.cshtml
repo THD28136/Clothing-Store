@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Thông tin người dùng";
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    var currentId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 }
 
 <h2>Thông tin người dùng</h2>
@@ -13,14 +14,31 @@
             <dt class="col-sm-3">Tên</dt>
             <dd class="col-sm-9">@Model.Name</dd>
 
+            <dt class="col-sm-3">Username</dt>
+            <dd class="col-sm-9">@Model.Username</dd>
+
             <dt class="col-sm-3">Email</dt>
             <dd class="col-sm-9">@Model.Email</dd>
 
-            <dt class="col-sm-3">Vai trò</dt>
+            <dt class="col-sm-3">Phone</dt>
+            <dd class="col-sm-9">@Model.Phone</dd>
+
+            <dt class="col-sm-3">Address</dt>
+            <dd class="col-sm-9">@Model.Address</dd>
+
+            <dt class="col-sm-3">Role</dt>
             <dd class="col-sm-9">@Model.Role</dd>
         </dl>
 
         <button type="button" onclick="history.back()" class="btn btn-outline-secondary">Quay lại</button>
-        <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.UserId">Chỉnh sửa</a>
+
+        @if (User.IsInRole("Admin"))
+        {
+            <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.UserId">Chỉnh sửa (Admin)</a>
+        }
+        else if (currentId == Model.UserId.ToString())
+        {
+            <a class="btn btn-primary" asp-action="EditProfile" asp-route-id="@Model.UserId">Chỉnh sửa thông tin</a>
+        }
     </div>
 </div>

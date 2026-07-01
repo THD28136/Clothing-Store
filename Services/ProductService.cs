@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 /// </summary>
 public class ProductService
 {
-    private readonly ClothingStoreContext _context;
+    private readonly ApplicationDbContext _context;
 
-    public ProductService(ClothingStoreContext context)
+    public ProductService(ApplicationDbContext context)
     {
         _context = context;
     }

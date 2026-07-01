@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace MTKPM_Clothing_Store_web.Controllers
 {
@@ -62,7 +64,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
             return View(user);
         }
 
-        // GET: Users/Edit/5
+        // GET: Users/Edit/5 (admin)
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -75,7 +77,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
             return View(user);
         }
 
-        // POST: Users/Edit/5
+        // POST: Users/Edit/5 (admin)
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
@@ -155,14 +157,11 @@ namespace MTKPM_Clothing_Store_web.Controllers
 
                 if (user != null)
                 {
-                    // Here you should verify the password
-                    // Assuming you have hashed the password, you need to compare the hashed value
                     var hasher = new PasswordHasher<User>();
                     var result = hasher.VerifyHashedPassword(user, user.Password, password);
 
                     if (result == PasswordVerificationResult.Success)
                     {
-                        // Authentication successful
                         var claims = new List<Claim>
                         {
                             new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
@@ -198,15 +197,100 @@ namespace MTKPM_Clothing_Store_web.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Hash the password before storing it
                 var hasher = new PasswordHasher<User>();
                 user.Password = hasher.HashPassword(user, user.Password);
 
                 _context.Add(user);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Login));
             }
             return View(user);
+        }
+
+        // GET: Users/EditProfile/5 - allow user to edit their own profile
+        [Authorize]
+        public async Task<IActionResult> EditProfile(int? id)
+        {
+            if (id == null) return NotFound();
+
+            // only allow admin or the user themselves
+            var currentIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(currentIdStr, out var currentId))
+                return Forbid();
+
+            if (!User.IsInRole("Admin") && currentId != id.Value)
+                return Forbid();
+
+            var user = await _context.Users.FindAsync(id.Value);
+            if (user == null) return NotFound();
+
+            return View("EditProfile", user);
+        }
+
+        // POST: Users/EditProfile/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> EditProfile(int id, [Bind("UserId,Name,Email,Username,Phone,Address")] User posted)
+        {
+            if (id != posted.UserId) return BadRequest();
+
+            // ownership check
+            var currentIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(currentIdStr, out var currentId))
+                return Forbid();
+
+            if (!User.IsInRole("Admin") && currentId != id)
+                return Forbid();
+
+            ModelState.Remove("Password"); // Do not require password for profile update
+
+            // check email uniqueness
+            var exists = await _context.Users.AnyAsync(u => u.Email == posted.Email && u.UserId != id);
+            if (exists)
+            {
+                ModelState.AddModelError(nameof(posted.Email), "Email đã được sử dụng bởi người khác.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View("EditProfile", posted);
+            }
+
+            try
+            {
+                var user = await _context.Users.FindAsync(id);
+                if (user == null) return NotFound();
+
+                user.Name = posted.Name;
+                user.Email = posted.Email;
+                user.Username = posted.Username;
+                user.Phone = posted.Phone;
+                user.Address = posted.Address;
+
+                _context.Update(user);
+                await _context.SaveChangesAsync();
+
+                // If user updated their name/email, update claims cookie (optional)
+                if (currentId == id)
+                {
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                        new Claim(ClaimTypes.Name, user.Name ?? string.Empty),
+                        new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+                        new Claim(ClaimTypes.Role, user.Role ?? string.Empty)
+                    };
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)));
+                }
+
+                return RedirectToAction(nameof(Details), new { id = id });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!UserExists(posted.UserId)) return NotFound();
+                throw;
+            }
         }
 
         // POST: Users/Logout
@@ -215,9 +299,14 @@ namespace MTKPM_Clothing_Store_web.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Logout()
         {
+            // Sign out the cookie authentication
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            // Clear session to remove any user-related data (cart, user id, etc.)
             HttpContext.Session.Clear();
-            return RedirectToAction("Login", "Users");
+
+            // Redirect to login page (or home)
+            return RedirectToAction(nameof(Login));
         }
 
         private bool UserExists(int id)

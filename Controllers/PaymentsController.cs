@@ -3,42 +3,53 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MTKPM_Clothing_Store_web.Helpers;
 using MTKPM_Clothing_Store_web.Models;
-using Microsoft.Extensions.Logging;         
+using Microsoft.Extensions.Logging;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Data.Common;
 using System.Linq;
+using System.Globalization;
+using System.Security.Claims;
 
 namespace MTKPM_Clothing_Store_web.Controllers
 {
     [Authorize]
     public class PaymentsController : Controller
     {
-        private readonly ClothingStoreContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ILogger<PaymentsController> _logger;
+        // Single, unambiguous DbContext field (ApplicationDbContext is registered in DI)
+        private readonly ApplicationDbContext _dbContext;
+        private readonly IHttpContextAccessor _httpAccessor;
+        private readonly ILogger<PaymentsController> _loggerInstance;
 
-        public PaymentsController(ClothingStoreContext context, IHttpContextAccessor httpContextAccessor, ILogger<PaymentsController> logger)
+        public PaymentsController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ILogger<PaymentsController> logger)
         {
-            _context = context;
-            _httpContextAccessor = httpContextAccessor;
-            _logger = logger;
+            this._dbContext = context;
+            this._httpAccessor = httpContextAccessor;
+            this._loggerInstance = logger;
         }
 
         // GET: show checkout page
         [HttpGet]
         public async Task<IActionResult> Checkout()
         {
-            var cart = _httpContextAccessor.HttpContext?.Session.GetObject<List<CartItem>>("Cart") ?? new List<CartItem>();
+            var cart = this._httpAccessor.HttpContext?.Session.GetObject<List<SessionCartItem>>("Cart") ?? new List<SessionCartItem>();
             if (!cart.Any()) return RedirectToAction("Index", "Cart");
 
             var vm = new CheckoutViewModel();
             foreach (var ci in cart)
             {
-                var prod = await _context.Products.FindAsync(ci.ProductId);
+                var prod = await this._dbContext.Products.FindAsync(ci.ProductId);
                 if (prod == null) continue;
                 vm.Items.Add(new CheckoutItem { Product = prod, Quantity = ci.Quantity });
+            }
+
+            // populate UserId for convenience (if authenticated or session has UserId)
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                            ?? _httpAccessor.HttpContext?.Session.GetString("UserId");
+            if (int.TryParse(userIdStr, out var uid))
+            {
+                vm.UserId = uid;
             }
 
             return View(vm);
@@ -47,44 +58,79 @@ namespace MTKPM_Clothing_Store_web.Controllers
         // POST: mock payment (school project) with raw-insert Order creation workaround
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CheckoutPost()
+        public async Task<IActionResult> CheckoutPost(CheckoutViewModel model)
         {
-            var cart = _httpContextAccessor.HttpContext?.Session.GetObject<List<CartItem>>("Cart") ?? new List<CartItem>();
+            // repopulate items from session
+            var cart = _httpAccessor.HttpContext?.Session.GetObject<List<SessionCartItem>>("Cart") ?? new List<SessionCartItem>();
             if (!cart.Any()) return RedirectToAction("Index", "Cart");
 
-            var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
-                            ?? _httpContextAccessor.HttpContext?.Session.GetString("UserId");
-
-            if (!int.TryParse(userIdStr, out var userId))
+            model.Items.Clear();
+            foreach (var ci in cart)
             {
-                return Challenge();
+                var prod = await _dbContext.Products.FindAsync(ci.ProductId);
+                if (prod == null) continue;
+                model.Items.Add(new CheckoutItem { Product = prod, Quantity = ci.Quantity });
             }
 
+            // model validation
+            if (!ModelState.IsValid)
+            {
+                return View("Checkout", model);
+            }
+
+            // expiry date validation
+            var now = DateTime.UtcNow;
+            if (model.ExpiryYear < now.Year || (model.ExpiryYear == now.Year && model.ExpiryMonth < now.Month))
+            {
+                ModelState.AddModelError(string.Empty, "Ngày hết hạn thẻ đã qua. Vui lòng kiểm tra lại.");
+                return View("Checkout", model);
+            }
+
+            // Basic card-number sanitization (we are not performing real payment)
+            var normalizedCard = new string(model.CardNumber.Where(char.IsDigit).ToArray());
+            if (normalizedCard.Length < 12 || normalizedCard.Length > 19)
+            {
+                ModelState.AddModelError(nameof(model.CardNumber), "Số thẻ không hợp lệ.");
+                return View("Checkout", model);
+            }
+
+            // Ensure we have the current user id (prefer claim, fallback to session)
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                            ?? _httpAccessor.HttpContext?.Session.GetString("UserId");
+            if (!int.TryParse(userIdStr, out var userId))
+            {
+                // If user is not authenticated, challenge/login
+                return Challenge();
+            }
+            model.UserId = userId;
+
+            // CVV check already done by DataAnnotations; proceed with mock payment processing
             try
             {
-                _logger.LogInformation("Mock checkout started for user {UserId}. Cart: {@Cart}", userId, cart);
+                _loggerInstance.LogInformation("Mock checkout started for user {UserId}. Cart: {@Cart}", userId, cart);
 
                 // Basic pre-check: ensure all products exist and have enough stock
                 foreach (var ci in cart)
                 {
-                    var prod = await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.ProductId == ci.ProductId);
+                    var prod = await _dbContext.Products.AsNoTracking().FirstOrDefaultAsync(p => p.ProductId == ci.ProductId);
                     if (prod == null)
                     {
-                        _logger.LogWarning("Mock checkout: product {ProductId} not found.", ci.ProductId);
+                        _loggerInstance.LogWarning("Mock checkout: product {ProductId} not found.", ci.ProductId);
                         return BadRequest("Một sản phẩm không tồn tại. Vui lòng kiểm tra giỏ hàng.");
                     }
 
                     if (prod.Stock < ci.Quantity)
                     {
-                        _logger.LogInformation("Mock checkout: insufficient stock for product {ProductId} (need {Need}, have {Have}).", ci.ProductId, ci.Quantity, prod.Stock);
+                        _loggerInstance.LogInformation("Mock checkout: insufficient stock for product {ProductId} (need {Need}, have {Have}).", ci.ProductId, ci.Quantity, prod.Stock);
                         return BadRequest($"Không đủ hàng cho sản phẩm '{prod.Name}'. Có {prod.Stock} trong kho.");
                     }
                 }
 
                 // ----- WORKAROUND: create order via raw SQL to avoid EF rowcount/concurrency problem -----
                 int orderId;
-                var now = DateTime.UtcNow;
-                await using (var cmd = _context.Database.GetDbConnection().CreateCommand())
+
+                var conn = _dbContext.Database.GetDbConnection();
+                await using (var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = "INSERT INTO orders (user_id, order_date) VALUES (@uid, @odate); SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     cmd.CommandType = CommandType.Text;
@@ -95,17 +141,17 @@ namespace MTKPM_Clothing_Store_web.Controllers
                     cmd.Parameters.Add(p1);
                     var p2 = cmd.CreateParameter();
                     p2.ParameterName = "@odate";
-                    p2.Value = now;
+                    p2.Value = DateTime.UtcNow;
                     p2.DbType = DbType.DateTime2;
                     cmd.Parameters.Add(p2);
 
-                    if (cmd.Connection.State != ConnectionState.Open) await cmd.Connection.OpenAsync();
+                    if (conn.State != ConnectionState.Open) await conn.OpenAsync();
                     // if there is an ambient EF transaction, attach it
-                    cmd.Transaction = (_context.Database.CurrentTransaction as RelationalTransaction)?.GetDbTransaction();
+                    cmd.Transaction = (_dbContext.Database.CurrentTransaction as RelationalTransaction)?.GetDbTransaction();
                     var scalar = await cmd.ExecuteScalarAsync();
                     if (scalar == null || scalar == DBNull.Value)
                     {
-                        _logger.LogError("Failed to create order (raw insert returned null) for user {UserId}", userId);
+                        _loggerInstance.LogError("Failed to create order (raw insert returned null).");
                         return BadRequest("Không thể tạo đơn hàng. Vui lòng thử lại.");
                     }
                     orderId = Convert.ToInt32(scalar);
@@ -114,51 +160,43 @@ namespace MTKPM_Clothing_Store_web.Controllers
                 // For each cart item: reduce stock and add order detail (EF)
                 foreach (var ci in cart)
                 {
-                    var prod = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == ci.ProductId);
+                    var prod = await _dbContext.Products.FirstOrDefaultAsync(p => p.ProductId == ci.ProductId);
                     if (prod == null)
                     {
                         // unexpected, but handle gracefully
-                        _logger.LogWarning("Mock checkout: product {ProductId} disappeared after order creation.", ci.ProductId);
+                        _loggerInstance.LogWarning("Mock checkout: product {ProductId} disappeared after order creation.", ci.ProductId);
                         continue;
                     }
 
                     // reduce stock (basic check)
                     if (prod.Stock < ci.Quantity)
                     {
-                        _logger.LogInformation("Mock checkout: stock changed for product {ProductId} after order creation.", ci.ProductId);
+                        _loggerInstance.LogInformation("Mock checkout: stock changed for product {ProductId} after order creation.", ci.ProductId);
                         continue;
                     }
 
                     prod.Stock -= ci.Quantity;
-                    _context.OrderDetails.Add(new OrderDetail
+                    _dbContext.OrderDetails.Add(new OrderDetail
                     {
                         OrderId = orderId,
                         ProductId = ci.ProductId,
-                        Quantity = ci.Quantity
+                        Quantity = ci.Quantity,
+                        UnitPrice = prod.Price
                     });
                 }
 
-                try
-                {
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateException dbuEx)
-                {
-                    _logger.LogError(dbuEx, "DbUpdateException while saving OrderDetails for Order {OrderId}. Entries: {@Entries}", orderId, dbuEx.Entries.Select(e => new { e.Entity?.GetType().Name, e.State }));
-                    if (dbuEx.InnerException != null) _logger.LogError("Inner: {Inner}", dbuEx.InnerException.Message);
-                    return BadRequest("Lỗi khi lưu chi tiết đơn hàng (DB). Xem log để biết chi tiết.");
-                }
+                await _dbContext.SaveChangesAsync();
 
                 // Clear cart session
-                _httpContextAccessor.HttpContext?.Session.Remove("Cart");
+                _httpAccessor.HttpContext?.Session.Remove("Cart");
 
-                _logger.LogInformation("Mock checkout completed for order {OrderId}", orderId);
+                _loggerInstance.LogInformation("Mock checkout completed for order {OrderId}", orderId);
 
                 return RedirectToAction("Success", new { id = orderId });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error in mock checkout for user {UserId}", userId);
+                _loggerInstance.LogError(ex, "Unexpected error in mock checkout.");
                 return BadRequest("Lỗi khi tạo đơn hàng (mock). Vui lòng thử lại hoặc liên hệ giảng viên.");
             }
         }
@@ -168,67 +206,112 @@ namespace MTKPM_Clothing_Store_web.Controllers
         {
             ViewData["OrderId"] = id;
 
-            // Use views where possible to populate success info (uses the scaffolded view DbSets)
-            var totalRow = await _context.VwTotalOrderAmounts.AsNoTracking().FirstOrDefaultAsync(v => v.OrderId == id);
+            var totalRow = await _dbContext.VwTotalOrderAmounts.AsNoTracking().FirstOrDefaultAsync(v => v.OrderId == id);
             decimal? orderTotal = totalRow?.Total;
 
             var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
-                            ?? _httpContextAccessor.HttpContext?.Session.GetString("UserId");
+                            ?? _httpAccessor.HttpContext?.Session.GetString("UserId");
             int? userId = null;
             if (int.TryParse(userIdStr, out var uid)) userId = uid;
 
             int? userOrders = null;
             if (userId != null)
             {
-                // number of orders for this user (use Orders table / view if preferred)
-                userOrders = await _context.Orders.AsNoTracking().CountAsync(o => o.UserId == userId);
+                userOrders = await _dbContext.Orders.AsNoTracking().CountAsync(o => o.UserId == userId);
             }
 
-            // totalOrders via pkg_order.sp6 (package stored proc)
             var totalOrders = await ExecuteScalarIntAsync("EXEC pkg_order.sp6", null);
-
-            // product counts via pkg_order.sp7 (package stored proc)
             var totalProducts = await ExecuteScalarIntAsync("EXEC pkg_order.sp7", null);
-
-            // server time via pkg_order.sp8
             var serverNow = await ExecuteScalarDateTimeAsync("EXEC pkg_order.sp8", null);
 
-            // price aggregates via vw_ProductList
-            var maxPrice = await _context.VwProductLists.AsNoTracking().MaxAsync(p => (decimal?)p.Price);
-            var minPrice = await _context.VwProductLists.AsNoTracking().MinAsync(p => (decimal?)p.Price);
-            var avgPrice = await _context.VwProductLists.AsNoTracking().AverageAsync(p => (decimal?)p.Price);
+            var maxPrice = await _dbContext.VwProductLists.AsNoTracking().MaxAsync(p => (decimal?)p.Price);
+            var minPrice = await _dbContext.VwProductLists.AsNoTracking().MinAsync(p => (decimal?)p.Price);
+            var avgPrice = await _dbContext.VwProductLists.AsNoTracking().AverageAsync(p => (decimal?)p.Price);
 
-            // top selling products (from view)
-            var topProducts = await _context.VwTopSellingProducts.AsNoTracking().Take(5).ToListAsync();
+            var topProducts = await _dbContext.VwTopSellingProducts.AsNoTracking().Take(5).ToListAsync();
 
             // order details with product info from vw_OrderDetailsFull
-            var orderDetails = await _context.VwOrderDetailsFulls.AsNoTracking().Where(od => od.OrderId == id).ToListAsync();
-            var detailsExtended = new List<object>();
-            foreach (var od in orderDetails)
-            {
-                // load product to get category and featured flag
-                var prod = await _context.Products.Include(p => p.Category).AsNoTracking().FirstOrDefaultAsync(p => p.ProductId == od.ProductId);
+            var rawOrderDetails = await ExecuteReaderToListAsync(
+                "SELECT detail_id, order_id, product_id, quantity, name, price FROM vw_OrderDetailsFull WHERE order_id = @id",
+                new[] { new SqlParameter("@id", id) });
 
-                // total sold can be serviced by vw_TopSellingProducts (match by name). fall back to fn_TotalSold if needed.
-                var topRow = await _context.VwTopSellingProducts.AsNoTracking().FirstOrDefaultAsync(t => t.Name == od.Name);
+            var detailsExtended = new List<object>();
+            foreach (var od in rawOrderDetails)
+            {
+                // safe conversions from dictionary values (handle DBNull)
+                int productId = od.TryGetValue("product_id", out var pval) && pval != null ? Convert.ToInt32(pval) : 0;
+                string name = od.TryGetValue("name", out var nval) && nval != null ? nval.ToString()! : string.Empty;
+                int quantity = od.TryGetValue("quantity", out var qval) && qval != null ? Convert.ToInt32(qval) : 0;
+                
+                // load product to get category and featured flag (use as fallback for price if view value is invalid)
+                var prod = await _dbContext.Products.Include(p => p.Category).AsNoTracking().FirstOrDefaultAsync(p => p.ProductId == productId);
+
+                // determine price robustly
+                decimal? price = null;
+                if (od.TryGetValue("price", out var prval) && prval != null)
+                {
+                    switch (prval)
+                    {
+                        case decimal d: price = d; break;
+                        case double db: price = Convert.ToDecimal(db); break;
+                        case float f: price = Convert.ToDecimal(f); break;
+                        case int i: price = Convert.ToDecimal(i); break;
+                        case long l: price = Convert.ToDecimal(l); break;
+                        case string s:
+                            // Try invariant and Vietnamese formats
+                            if (decimal.TryParse(s, NumberStyles.Number | NumberStyles.AllowCurrencySymbol, CultureInfo.InvariantCulture, out var v1))
+                            {
+                                price = v1;
+                            }
+                            else if (decimal.TryParse(s, NumberStyles.Number | NumberStyles.AllowCurrencySymbol, CultureInfo.GetCultureInfo("vi-VN"), out var v2))
+                            {
+                                price = v2;
+                            }
+                            else
+                            {
+                                // not a numeric string — fall back to product price if available
+                                if (prod != null) price = prod.Price;
+                                else price = null;
+                            }
+                            break;
+                        default:
+                            try
+                            {
+                                price = Convert.ToDecimal(prval);
+                            }
+                            catch
+                            {
+                                if (prod != null) price = prod.Price;
+                            }
+                            break;
+                    }
+                }
+                else
+                {
+                    // no price column value — fall back to product price
+                    if (prod != null) price = prod.Price;
+                }
+
+                // total sold lookup (view may be trusted)
+                var topRow = await _dbContext.VwTopSellingProducts.AsNoTracking().FirstOrDefaultAsync(t => t.Name == name);
                 int? totalSold = topRow?.TotalSold;
 
                 int? categoryCount = null;
                 if (prod?.Category != null)
                 {
-                    var catRow = await _context.VwCategoryProductCounts.AsNoTracking().FirstOrDefaultAsync(c => c.Name == prod.Category.Name);
+                    var catRow = await _dbContext.VwCategoryProductCounts.AsNoTracking().FirstOrDefaultAsync(c => c.Name == prod.Category.Name);
                     categoryCount = catRow?.TotalProducts;
                 }
 
                 detailsExtended.Add(new
                 {
-                    ProductId = od.ProductId,
-                    Name = od.Name,
-                    Quantity = od.Quantity,
+                    ProductId = productId,
+                    Name = name,
+                    Quantity = quantity,
                     TotalSold = totalSold,
                     IsFeatured = prod?.IsFeatured,
                     CategoryProductCount = categoryCount,
-                    Price = od.Price
+                    Price = price
                 });
             }
 
@@ -280,16 +363,16 @@ namespace MTKPM_Clothing_Store_web.Controllers
                 results["sp_TotalRevenue"] = revenue;
 
                 // Views: quick counts
-                var totalProducts = await _context.VwProductLists.AsNoTracking().CountAsync();
+                var totalProducts = await _dbContext.VwProductLists.AsNoTracking().CountAsync();
                 results["vw_ProductList.Count"] = totalProducts;
-                var inStock = await _context.VwInStockProducts.AsNoTracking().CountAsync();
+                var inStock = await _dbContext.VwInStockProducts.AsNoTracking().CountAsync();
                 results["vw_InStockProducts.Count"] = inStock;
-                var topSelling = await _context.VwTopSellingProducts.AsNoTracking().Take(5).Select(v => new { v.Name, v.TotalSold }).ToListAsync();
+                var topSelling = await _dbContext.VwTopSellingProducts.AsNoTracking().Take(5).Select(v => new { v.Name, v.TotalSold }).ToListAsync();
                 results["vw_TopSellingProducts.Sample"] = topSelling;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "DbToolbox encountered an error");
+                _loggerInstance.LogError(ex, "DbToolbox encountered an error");
                 results["error"] = ex.Message;
             }
 
@@ -299,83 +382,67 @@ namespace MTKPM_Clothing_Store_web.Controllers
         // Helpers to call scalar DB functions safely and parameterized
         private async Task<decimal?> ExecuteScalarDecimalAsync(string sql, SqlParameter[]? parameters, DbTransaction? transaction = null)
         {
-            await using var cmd = _context.Database.GetDbConnection().CreateCommand();
+            await using var cmd = _dbContext.Database.GetDbConnection().CreateCommand();
             cmd.CommandText = sql;
             cmd.CommandType = CommandType.Text;
-            if (parameters != null)
-            {
-                foreach (var p in parameters) cmd.Parameters.Add(p);
-            }
+            if (parameters != null) foreach (var p in parameters) cmd.Parameters.Add(p);
 
             if (cmd.Connection.State != ConnectionState.Open) await cmd.Connection.OpenAsync();
 
-            var effectiveTx = transaction ?? (_context.Database.CurrentTransaction as RelationalTransaction)?.GetDbTransaction();
+            var effectiveTx = transaction ?? (_dbContext.Database.CurrentTransaction as RelationalTransaction)?.GetDbTransaction();
             if (effectiveTx != null) cmd.Transaction = effectiveTx;
 
             var obj = await cmd.ExecuteScalarAsync();
             if (obj == null || obj == DBNull.Value) return null;
+            
+            // Handle both decimal and other numeric types safely
+            if (obj is decimal decimalValue)
+                return decimalValue;
+            
             return Convert.ToDecimal(obj);
         }
 
         private async Task<int?> ExecuteScalarIntAsync(string sql, SqlParameter[]? parameters, DbTransaction? transaction = null)
         {
-            await using var cmd = _context.Database.GetDbConnection().CreateCommand();
+            await using var cmd = _dbContext.Database.GetDbConnection().CreateCommand();
             cmd.CommandText = sql;
             cmd.CommandType = CommandType.Text;
-            if (parameters != null)
-            {
-                foreach (var p in parameters) cmd.Parameters.Add(p);
-            }
+            if (parameters != null) foreach (var p in parameters) cmd.Parameters.Add(p);
 
             if (cmd.Connection.State != ConnectionState.Open) await cmd.Connection.OpenAsync();
 
-            var effectiveTx = transaction ?? (_context.Database.CurrentTransaction as RelationalTransaction)?.GetDbTransaction();
+            var effectiveTx = transaction ?? (_dbContext.Database.CurrentTransaction as RelationalTransaction)?.GetDbTransaction();
             if (effectiveTx != null) cmd.Transaction = effectiveTx;
 
             var obj = await cmd.ExecuteScalarAsync();
             if (obj == null || obj == DBNull.Value) return null;
+            
+            // Handle both int and other numeric types safely
+            if (obj is int intValue)
+                return intValue;
+            
             return Convert.ToInt32(obj);
-        }
-
-        private async Task<bool?> ExecuteScalarBoolAsync(string sql, SqlParameter[]? parameters, DbTransaction? transaction = null)
-        {
-            await using var cmd = _context.Database.GetDbConnection().CreateCommand();
-            cmd.CommandText = sql;
-            cmd.CommandType = CommandType.Text;
-            if (parameters != null)
-            {
-                foreach (var p in parameters) cmd.Parameters.Add(p);
-            }
-
-            if (cmd.Connection.State != ConnectionState.Open) await cmd.Connection.OpenAsync();
-
-            var effectiveTx = transaction ?? (_context.Database.CurrentTransaction as RelationalTransaction)?.GetDbTransaction();
-            if (effectiveTx != null) cmd.Transaction = effectiveTx;
-
-            var obj = await cmd.ExecuteScalarAsync();
-            if (obj == null || obj == DBNull.Value) return null;
-            // SQL BIT maps to bool or byte depending on provider; handle both
-            if (obj is bool b) return b;
-            return Convert.ToInt32(obj) != 0;
         }
 
         private async Task<DateTime?> ExecuteScalarDateTimeAsync(string sql, SqlParameter[]? parameters, DbTransaction? transaction = null)
         {
-            await using var cmd = _context.Database.GetDbConnection().CreateCommand();
+            await using var cmd = _dbContext.Database.GetDbConnection().CreateCommand();
             cmd.CommandText = sql;
             cmd.CommandType = CommandType.Text;
-            if (parameters != null)
-            {
-                foreach (var p in parameters) cmd.Parameters.Add(p);
-            }
+            if (parameters != null) foreach (var p in parameters) cmd.Parameters.Add(p);
 
             if (cmd.Connection.State != ConnectionState.Open) await cmd.Connection.OpenAsync();
 
-            var effectiveTx = transaction ?? (_context.Database.CurrentTransaction as RelationalTransaction)?.GetDbTransaction();
+            var effectiveTx = transaction ?? (_dbContext.Database.CurrentTransaction as RelationalTransaction)?.GetDbTransaction();
             if (effectiveTx != null) cmd.Transaction = effectiveTx;
 
             var obj = await cmd.ExecuteScalarAsync();
             if (obj == null || obj == DBNull.Value) return null;
+            
+            // Handle both DateTime and other types safely
+            if (obj is DateTime dateTimeValue)
+                return dateTimeValue;
+            
             return Convert.ToDateTime(obj);
         }
 
@@ -384,17 +451,15 @@ namespace MTKPM_Clothing_Store_web.Controllers
         {
             var list = new List<Dictionary<string, object?>>();
 
-            await using var cmd = _context.Database.GetDbConnection().CreateCommand();
+            var conn = _dbContext.Database.GetDbConnection();
+            await using var cmd = conn.CreateCommand();
             cmd.CommandText = sql;
             cmd.CommandType = CommandType.Text;
-            if (parameters != null)
-            {
-                foreach (var p in parameters) cmd.Parameters.Add(p);
-            }
+            if (parameters != null) foreach (var p in parameters) cmd.Parameters.Add(p);
 
-            if (cmd.Connection.State != ConnectionState.Open) await cmd.Connection.OpenAsync();
+            if (conn.State != ConnectionState.Open) await conn.OpenAsync();
 
-            var effectiveTx = transaction ?? (_context.Database.CurrentTransaction as RelationalTransaction)?.GetDbTransaction();
+            var effectiveTx = transaction ?? (_dbContext.Database.CurrentTransaction as RelationalTransaction)?.GetDbTransaction();
             if (effectiveTx != null) cmd.Transaction = effectiveTx;
 
             await using var reader = await cmd.ExecuteReaderAsync();
