@@ -144,6 +144,15 @@ public partial class ApplicationDbContext : DbContext
 
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.CouponId).HasColumnName("coupon_id");
+            entity.Property(e => e.GuestEmail)
+                .HasMaxLength(255)
+                .HasColumnName("guest_email");
+            entity.Property(e => e.GuestName)
+                .HasMaxLength(200)
+                .HasColumnName("guest_name");
+            entity.Property(e => e.GuestPhone)
+                .HasMaxLength(20)
+                .HasColumnName("guest_phone");
             entity.Property(e => e.OrderDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")

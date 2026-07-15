@@ -1,0 +1,104 @@
+﻿@model MTKPM_Clothing_Store_web.Models.CheckoutViewModel
+
+@{
+    ViewData["Title"] = "Thanh toán";
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+}
+
+<h2>Thanh toán</h2>
+
+<form asp-controller="Payments" asp-action="CheckoutPost" method="post" novalidate>
+    @Html.AntiForgeryToken()
+
+    @if (!Model.Items.Any())
+    {
+        <div class="alert alert-info">Giỏ hàng trống.</div>
+    }
+    else
+    {
+        <div class="table-responsive mb-3">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Đơn giá</th>
+                        <th>Số lượng</th>
+                        <th>Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var it in Model.Items)
+                    {
+                        var subtotal = it.Product.Price * it.Quantity;
+                        <tr>
+                            <td>@it.Product.Name</td>
+                            <td>@($"{it.Product.Price:C0}")</td>
+                            <td>@it.Quantity</td>
+                            <td>@($"{subtotal:C0}")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mb-3">
+            <h5>Tổng: @($"{Model.Total:C0}")</h5>
+        </div>
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="CardName" class="form-label">Tên trên thẻ</label>
+            <input asp-for="CardName" class="form-control" />
+            <span asp-validation-for="CardName" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CardNumber" class="form-label">Số thẻ</label>
+            <input asp-for="CardNumber" class="form-control" inputmode="numeric" />
+            <span asp-validation-for="CardNumber" class="text-danger"></span>
+        </div>
+
+        <div class="row g-2 mb-3">
+            <div class="col-auto">
+                <label asp-for="ExpiryMonth" class="form-label">Tháng</label>
+                <select asp-for="ExpiryMonth" class="form-select">
+                    <option value="">MM</option>
+                    @for (int m = 1; m <= 12; m++)
+                    {
+                        <option value="@m" selected="@(Model.ExpiryMonth==m ? "selected" : null)">@m.ToString("D2")</option>
+                    }
+                </select>
+                <span asp-validation-for="ExpiryMonth" class="text-danger"></span>
+            </div>
+            <div class="col-auto">
+                <label asp-for="ExpiryYear" class="form-label">Năm</label>
+                <select asp-for="ExpiryYear" class="form-select">
+                    <option value="">YYYY</option>
+                    @{
+                        var start = System.DateTime.UtcNow.Year;
+                        for (int y = start; y <= start + 12; y++)
+                        {
+                            <option value="@y" selected="@(Model.ExpiryYear==y ? "selected" : null)">@y</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="ExpiryYear" class="text-danger"></span>
+            </div>
+            <div class="col-auto">
+                <label asp-for="CVV" class="form-label">CVV/CVC</label>
+                <input asp-for="CVV" class="form-control" inputmode="numeric" />
+                <span asp-validation-for="CVV" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Thanh toán</button>
+            <a class="btn btn-outline-secondary" asp-controller="Cart" asp-action="Index">Quay lại giỏ hàng</a>
+        </div>
+    }
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

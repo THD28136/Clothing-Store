@@ -51,5 +51,11 @@ namespace MTKPM_Clothing_Store_web.Models
 
         // New: will be populated from current user (or session) in controller
         public int? UserId { get; set; }
+
+        // Guest checkout: required only when there's no logged-in user
+        // (enforced in the controller, since that's where we know auth state).
+        [EmailAddress(ErrorMessage = "Email không hợp lệ.")]
+        [Display(Name = "Email")]
+        public string? GuestEmail { get; set; }
     }
 }
