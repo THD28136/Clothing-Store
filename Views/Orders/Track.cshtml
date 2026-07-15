@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Tra cứu đơn hàng";
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+}
+
+<h2>Tra cứu đơn hàng</h2>
+<p class="text-muted">Nhập mã đơn hàng và email bạn đã dùng khi đặt hàng.</p>
+
+<form asp-controller="Orders" asp-action="Track" method="post" novalidate>
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="mb-3">
+        <label for="orderId" class="form-label">Mã đơn hàng</label>
+        <input id="orderId" name="orderId" class="form-control" type="number" required />
+    </div>
+
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input id="email" name="email" class="form-control" type="email" required />
+    </div>
+
+    <button class="btn btn-primary" type="submit">Tra cứu</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

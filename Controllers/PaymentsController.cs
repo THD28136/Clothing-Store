@@ -14,7 +14,7 @@ using System.Security.Claims;
 
 namespace MTKPM_Clothing_Store_web.Controllers
 {
-    [Authorize]
+    [AllowAnonymous]
     public class PaymentsController : Controller
     {
         // Single, unambiguous DbContext field (ApplicationDbContext is registered in DI)
@@ -97,10 +97,19 @@ namespace MTKPM_Clothing_Store_web.Controllers
             // Ensure we have the current user id (prefer claim, fallback to session)
             var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                             ?? _httpAccessor.HttpContext?.Session.GetString("UserId");
-            if (!int.TryParse(userIdStr, out var userId))
+            int? userId = null;
+            if (int.TryParse(userIdStr, out var uid)) userId = uid;
+
+            // Guest checkout: no account, so require an email instead of a login
+            string? guestEmail = null;
+            if (userId == null)
             {
-                // If user is not authenticated, challenge/login
-                return Challenge();
+                guestEmail = model.GuestEmail?.Trim();
+                if (string.IsNullOrWhiteSpace(guestEmail))
+                {
+                    ModelState.AddModelError(nameof(model.GuestEmail), "Vui lòng nhập email để nhận xác nhận đơn hàng.");
+                    return View("Checkout", model);
+                }
             }
             model.UserId = userId;
 
@@ -132,11 +141,11 @@ namespace MTKPM_Clothing_Store_web.Controllers
                 var conn = _dbContext.Database.GetDbConnection();
                 await using (var cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "INSERT INTO orders (user_id, order_date) VALUES (@uid, @odate); SELECT CAST(SCOPE_IDENTITY() AS INT);";
+                    cmd.CommandText = "INSERT INTO orders (user_id, order_date, guest_email) VALUES (@uid, @odate, @gemail); SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     cmd.CommandType = CommandType.Text;
                     var p1 = cmd.CreateParameter();
                     p1.ParameterName = "@uid";
-                    p1.Value = userId;
+                    p1.Value = (object?)userId ?? DBNull.Value;
                     p1.DbType = DbType.Int32;
                     cmd.Parameters.Add(p1);
                     var p2 = cmd.CreateParameter();
@@ -144,6 +153,11 @@ namespace MTKPM_Clothing_Store_web.Controllers
                     p2.Value = DateTime.UtcNow;
                     p2.DbType = DbType.DateTime2;
                     cmd.Parameters.Add(p2);
+                    var p3 = cmd.CreateParameter();
+                    p3.ParameterName = "@gemail";
+                    p3.Value = (object?)guestEmail ?? DBNull.Value;
+                    p3.DbType = DbType.String;
+                    cmd.Parameters.Add(p3);
 
                     if (conn.State != ConnectionState.Open) await conn.OpenAsync();
                     // if there is an ambient EF transaction, attach it
@@ -197,7 +211,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
             catch (Exception ex)
             {
                 _loggerInstance.LogError(ex, "Unexpected error in mock checkout.");
-                return BadRequest("Lỗi khi tạo đơn hàng (mock). Vui lòng thử lại hoặc liên hệ giảng viên.");
+                return BadRequest("Lỗi khi tạo đơn hàng (mock). Vui lòng thử lại.");
             }
         }
 
@@ -242,7 +256,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
                 int productId = od.TryGetValue("product_id", out var pval) && pval != null ? Convert.ToInt32(pval) : 0;
                 string name = od.TryGetValue("name", out var nval) && nval != null ? nval.ToString()! : string.Empty;
                 int quantity = od.TryGetValue("quantity", out var qval) && qval != null ? Convert.ToInt32(qval) : 0;
-                
+
                 // load product to get category and featured flag (use as fallback for price if view value is invalid)
                 var prod = await _dbContext.Products.Include(p => p.Category).AsNoTracking().FirstOrDefaultAsync(p => p.ProductId == productId);
 
@@ -394,11 +408,11 @@ namespace MTKPM_Clothing_Store_web.Controllers
 
             var obj = await cmd.ExecuteScalarAsync();
             if (obj == null || obj == DBNull.Value) return null;
-            
+
             // Handle both decimal and other numeric types safely
             if (obj is decimal decimalValue)
                 return decimalValue;
-            
+
             return Convert.ToDecimal(obj);
         }
 
@@ -416,11 +430,11 @@ namespace MTKPM_Clothing_Store_web.Controllers
 
             var obj = await cmd.ExecuteScalarAsync();
             if (obj == null || obj == DBNull.Value) return null;
-            
+
             // Handle both int and other numeric types safely
             if (obj is int intValue)
                 return intValue;
-            
+
             return Convert.ToInt32(obj);
         }
 
@@ -438,11 +452,11 @@ namespace MTKPM_Clothing_Store_web.Controllers
 
             var obj = await cmd.ExecuteScalarAsync();
             if (obj == null || obj == DBNull.Value) return null;
-            
+
             // Handle both DateTime and other types safely
             if (obj is DateTime dateTimeValue)
                 return dateTimeValue;
-            
+
             return Convert.ToDateTime(obj);
         }
 

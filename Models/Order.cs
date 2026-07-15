@@ -19,6 +19,12 @@ public partial class Order
 
     public decimal? TotalAmount { get; set; }
 
+    public string? GuestName { get; set; }
+
+    public string? GuestPhone { get; set; }
+
+    public string? GuestEmail { get; set; }
+
     public virtual Coupon? Coupon { get; set; }
 
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();

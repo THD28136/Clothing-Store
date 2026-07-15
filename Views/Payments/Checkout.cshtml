@@ -47,6 +47,18 @@
 
         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
+        var isLoggedIn = User.Identity?.IsAuthenticated == true
+            || !string.IsNullOrEmpty(Context.Session.GetString("UserId"));
+
+        @if (!isLoggedIn)
+        {
+            <div class="mb-3">
+                <label asp-for="GuestEmail" class="form-label">Email (để nhận xác nhận đơn hàng và tra cứu sau này)</label>
+                <input asp-for="GuestEmail" class="form-control" type="email" />
+                <span asp-validation-for="GuestEmail" class="text-danger"></span>
+            </div>
+        }
+
         <div class="mb-3">
             <label asp-for="CardName" class="form-label">Tên trên thẻ</label>
             <input asp-for="CardName" class="form-control" />
