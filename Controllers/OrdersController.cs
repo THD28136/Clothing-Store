@@ -170,7 +170,6 @@ namespace MTKPM_Clothing_Store_web.Controllers
         }
 
         // Admin-only: update order status
-        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateStatus(int id, string status)
@@ -181,11 +180,56 @@ namespace MTKPM_Clothing_Store_web.Controllers
                 return RedirectToAction(nameof(Details), new { id });
             }
 
-            var order = await _context.Orders.FindAsync(id);
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
             if (order == null) return NotFound();
 
+            var wasCancelled = order.Status == "Cancelled";
+            var isNowCancelled = status == "Cancelled";
+
+            if (isNowCancelled && !wasCancelled)
+            {
+                // Order is being cancelled for the first time: give the stock back.
+                // The wasCancelled/isNowCancelled guard stops this running again
+                // if someone clicks "Cancelled" a second time on an already-
+                // cancelled order (which would otherwise credit stock twice).
+                foreach (var detail in order.OrderDetails)
+                {
+                    var product = await _context.Products.FindAsync(detail.ProductId);
+                    if (product != null)
+                    {
+                        product.Stock += detail.Quantity;
+                    }
+                }
+            }
+            else if (!isNowCancelled && wasCancelled)
+            {
+                // Symmetric case: admin reverses a cancellation back to an
+                // active status. Re-deduct the stock we gave back above, but
+                // refuse if there isn't enough left (someone else may have
+                // bought it in the meantime).
+                foreach (var detail in order.OrderDetails)
+                {
+                    var product = await _context.Products.FindAsync(detail.ProductId);
+                    if (product != null && product.Stock < detail.Quantity)
+                    {
+                        ModelState.AddModelError(string.Empty, $"Không đủ hàng tồn kho cho sản phẩm '{product.Name}' để khôi phục đơn hàng.");
+                        return RedirectToAction(nameof(Details), new { id });
+                    }
+                }
+
+                foreach (var detail in order.OrderDetails)
+                {
+                    var product = await _context.Products.FindAsync(detail.ProductId);
+                    if (product != null)
+                    {
+                        product.Stock -= detail.Quantity;
+                    }
+                }
+            }
+
             order.Status = status;
-            _context.Update(order);
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Details), new { id });

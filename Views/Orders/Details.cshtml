@@ -6,7 +6,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var vn = CultureInfo.GetCultureInfo("vi-VN");
     var totalAmount = Model.OrderDetails?.Sum(od => od.Quantity * od.Product?.Price ?? 0) ?? 0;
-    var allowedStatuses = ViewBag.AllowedStatuses as string[] ?? new string[] { "Pending", "Processing", "Shipped", "Delivered", "Cancelled" };
+    var allowedStatuses = ViewBag.AllowedStatuses as string[] ?? new string[] { "Pending", "Processing", "Cancelled" };
 }
 
 <div class="row">
@@ -96,6 +96,16 @@
                 }
 
                 <div class="mt-3">
+                    <form asp-action="UpdateStatus" asp-controller="Orders" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" name="id" value="@Model.OrderId" />
+                        <input type="hidden" name="status" value="Cancelled" />
+
+                        <button class="btn btn-danger w-100">
+                            Hủy đơn
+                        </button>
+                    </form>
                     <a class="btn btn-outline-secondary w-100" asp-action="UserOrders">Quay lại</a>
                 </div>
             </div>
