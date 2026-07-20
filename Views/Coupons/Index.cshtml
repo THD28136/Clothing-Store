@@ -1,0 +1,75 @@
+﻿@using System.Globalization
+@model IEnumerable<MTKPM_Clothing_Store_web.Models.Coupon>
+
+@{
+    ViewData["Title"] = "Quản lý mã giảm giá";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var vn = CultureInfo.GetCultureInfo("vi-VN");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Quản lý mã giảm giá</h1>
+    <div>
+        <a class="btn btn-success" asp-action="Create">Tạo mã mới</a>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Chưa có mã giảm giá nào.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Tên</th>
+                    <th>Giảm giá</th>
+                    <th>Đơn tối thiểu</th>
+                    <th>Hết hạn</th>
+                    <th>Đã dùng / Giới hạn</th>
+                    <th>Trạng thái</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    var expired = c.ExpiryDate.HasValue && c.ExpiryDate.Value.Date < DateTime.UtcNow.Date;
+                    var usedUp = c.UsageLimit.HasValue && c.UsedCount >= c.UsageLimit.Value;
+                    <tr>
+                        <td><code>@c.Code</code></td>
+                        <td>@c.CouponName</td>
+                        <td>@(c.DiscountPercent?.ToString("0.##") ?? "0")%</td>
+                        <td>@(c.MinOrderAmount.HasValue? c.MinOrderAmount.Value.ToString("C0", vn) : "Không có")</td>
+                        <td>@(c.ExpiryDate.HasValue? c.ExpiryDate.Value.ToString("dd/MM/yyyy") : "Không hết hạn")</td>
+                        <td>@c.UsedCount / @(c.UsageLimit.HasValue? c.UsageLimit.Value.ToString() : "∞")</td>
+                        <td>
+                            @if (expired)
+                            {
+                                <span class="badge bg-secondary">Hết hạn</span>
+                            }
+                            else if (usedUp)
+                            {
+                                <span class="badge bg-secondary">Hết lượt</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">Đang hoạt động</span>
+                            }
+                        </td>
+                        <td class="d-flex gap-2">
+                            <a class="btn btn-sm btn-warning" asp-action="Edit" asp-route-id="@c.CouponId">Sửa</a>
+                            <form asp-action="Delete" asp-route-id="@c.CouponId" method="post" onsubmit="return confirm('Xác nhận xóa mã giảm giá này?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

@@ -1,0 +1,65 @@
+﻿@model MTKPM_Clothing_Store_web.Models.Coupon
+
+@{
+    ViewData["Title"] = "Sửa mã giảm giá";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Sửa mã giảm giá</h1>
+
+<form asp-action="Edit" method="post" class="col-md-6">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="CouponId" />
+    <input type="hidden" asp-for="UsedCount" />
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="mb-3">
+        <label class="form-label">Đã sử dụng</label>
+        <input class="form-control" value="@Model.UsedCount lượt" disabled />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CouponName" class="form-label">Tên mã (hiển thị nội bộ)</label>
+        <input asp-for="CouponName" class="form-control" />
+        <span asp-validation-for="CouponName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Code" class="form-label">Mã giảm giá (khách nhập khi thanh toán)</label>
+        <input asp-for="Code" class="form-control" />
+        <span asp-validation-for="Code" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="DiscountPercent" class="form-label">Phần trăm giảm giá</label>
+        <input asp-for="DiscountPercent" class="form-control" type="number" step="0.01" min="1" max="100" />
+        <span asp-validation-for="DiscountPercent" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="MinOrderAmount" class="form-label">Đơn hàng tối thiểu (để trống nếu không giới hạn)</label>
+        <input asp-for="MinOrderAmount" class="form-control" type="number" step="1000" min="0" />
+        <span asp-validation-for="MinOrderAmount" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="UsageLimit" class="form-label">Số lượt sử dụng tối đa (để trống nếu không giới hạn)</label>
+        <input asp-for="UsageLimit" class="form-control" type="number" step="1" min="1" />
+        <span asp-validation-for="UsageLimit" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ExpiryDate" class="form-label">Ngày hết hạn (để trống nếu không hết hạn)</label>
+        <input asp-for="ExpiryDate" class="form-control" type="date" value="@(Model.ExpiryDate?.ToString("yyyy-MM-dd"))" />
+        <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary" type="submit">Lưu</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Hủy</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

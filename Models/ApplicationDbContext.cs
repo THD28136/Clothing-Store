@@ -134,6 +134,12 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.DiscountPercent)
                 .HasColumnType("decimal(5, 2)")
                 .HasColumnName("discount_percent");
+            entity.Property(e => e.ExpiryDate).HasColumnName("expiry_date");
+            entity.Property(e => e.MinOrderAmount)
+                .HasColumnType("decimal(18, 2)")
+                .HasColumnName("min_order_amount");
+            entity.Property(e => e.UsageLimit).HasColumnName("usage_limit");
+            entity.Property(e => e.UsedCount).HasColumnName("used_count");
         });
 
         modelBuilder.Entity<Order>(entity =>
