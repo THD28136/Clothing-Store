@@ -5,7 +5,14 @@
     ViewData["Title"] = "Chi tiết đơn hàng";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var vn = CultureInfo.GetCultureInfo("vi-VN");
-    var totalAmount = Model.OrderDetails?.Sum(od => od.Quantity * od.Product?.Price ?? 0) ?? 0;
+    // Raw subtotal (sum of line items) — used both as a fallback and to compute
+    // the discount amount for display, since we only ever stored a percentage.
+    var rawSubtotal = Model.OrderDetails?.Sum(od => od.Quantity * (od.UnitPrice ?? od.Product?.Price ?? 0)) ?? 0;
+    // total_amount is the authoritative, already-discounted total (set at checkout).
+    // Orders created before that feature existed may still have it as null, so
+    // fall back to the raw subtotal for those.
+    var totalAmount = Model.TotalAmount ?? rawSubtotal;
+    var discountAmount = rawSubtotal - totalAmount;
     var allowedStatuses = ViewBag.AllowedStatuses as string[] ?? new string[] { "Pending", "Processing", "Cancelled" };
 }
 
@@ -15,8 +22,16 @@
 
         <div class="card mb-4">
             <div class="card-body">
-                <p><strong>Khách hàng:</strong> @Model.User?.Name</p>
-                <p><strong>Email:</strong> @Model.User?.Email</p>
+                @if (Model.User != null)
+                {
+                    <p><strong>Khách hàng:</strong> @Model.User.Name</p>
+                    <p><strong>Email:</strong> @Model.User.Email</p>
+                }
+                else
+                {
+                    <p><strong>Khách hàng:</strong> @(Model.GuestName ?? "Khách (không có tài khoản)")</p>
+                    <p><strong>Email:</strong> @(Model.GuestEmail ?? "—")</p>
+                }
                 <p><strong>Ngày đặt hàng:</strong> @Model.OrderDate?.ToString("dd/MM/yyyy HH:mm")</p>
                 <p><strong>Trạng thái:</strong> <span class="badge @(Model.Status == "Delivered" ? "bg-success" : Model.Status == "Cancelled" ? "bg-danger" : "bg-secondary")">@((string.IsNullOrWhiteSpace(Model.Status) ? "Pending" : Model.Status))</span></p>
             </div>
@@ -38,7 +53,9 @@
                     {
                         @foreach (var detail in Model.OrderDetails)
                         {
-                            var price = detail.Product?.Price ?? 0m;
+                            @* Prefer the price actually charged at order time over the product's
+                               current (possibly since-changed) price. *@
+                            var price = detail.UnitPrice ?? detail.Product?.Price ?? 0m;
                             var subtotal = (detail.Quantity * price);
                             <tr>
                                 <td>@detail.Product?.Name</td>
@@ -64,6 +81,21 @@
                     <strong>@Model.OrderDetails?.Sum(od => od.Quantity)</strong>
                 </div>
                 <hr />
+
+                @if (Model.Coupon != null)
+                {
+                    <div class="alert alert-success py-2 px-3 mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Tạm tính:</span>
+                            <span>@rawSubtotal.ToString("C0", vn)</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Mã giảm giá <code>@Model.Coupon.Code</code> (-@Model.Coupon.DiscountPercent%):</span>
+                            <span>-@discountAmount.ToString("C0", vn)</span>
+                        </div>
+                    </div>
+                }
+
                 <div class="d-flex justify-content-between mb-3">
                     <span>Tổng cộng:</span>
                     <h5>@totalAmount.ToString("C0", vn)</h5>

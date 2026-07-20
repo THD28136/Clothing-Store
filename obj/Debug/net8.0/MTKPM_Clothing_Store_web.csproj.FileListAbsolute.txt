@@ -755,7 +755,6 @@ D:\Github Repos\Clothing-Store\obj\Debug\net8.0\staticwebassets.build.json
 D:\Github Repos\Clothing-Store\obj\Debug\net8.0\staticwebassets.build.json.cache
 D:\Github Repos\Clothing-Store\obj\Debug\net8.0\staticwebassets.development.json
 D:\Github Repos\Clothing-Store\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-D:\Github Repos\Clothing-Store\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 D:\Github Repos\Clothing-Store\obj\Debug\net8.0\MTKPM_Cl.F7F8108F.Up2Date
 D:\Github Repos\Clothing-Store\obj\Debug\net8.0\MTKPM_Clothing_Store_web.dll
 D:\Github Repos\Clothing-Store\obj\Debug\net8.0\refint\MTKPM_Clothing_Store_web.dll

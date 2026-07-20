@@ -1,8 +1,12 @@
-﻿@model dynamic
+﻿@using System.Globalization
+@model dynamic
 @{
     ViewData["Title"] = "Thanh toán thành công";
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
     var orderId = ViewData["OrderId"];
+    var vn = CultureInfo.GetCultureInfo("vi-VN");
+    var orderTotal = ViewData["OrderTotal"] as decimal?;
+    var appliedCoupon = ViewData["AppliedCoupon"] as MTKPM_Clothing_Store_web.Models.Coupon;
 }
 
 <h2>Đơn hàng #@ViewData["OrderId"]</h2>
@@ -10,6 +14,19 @@
 <div class="alert alert-success">
     <h4 class="alert-heading">Thanh toán thành công!</h4>
     <p>Đơn hàng của bạn đã được tạo. Mã đơn hàng: <strong>#@orderId</strong></p>
+
+    @if (appliedCoupon != null)
+    {
+        <div class="bg-white bg-opacity-50 rounded p-2 mb-2">
+            Đã áp dụng mã giảm giá <code>@appliedCoupon.Code</code> (-@appliedCoupon.DiscountPercent%)
+        </div>
+    }
+
+    @if (orderTotal.HasValue)
+    {
+        <p class="mb-0"><strong>Tổng thanh toán: @orderTotal.Value.ToString("C0", vn)</strong></p>
+    }
+
     <hr />
     <p class="mb-0">
         <a class="btn btn-primary" asp-controller="Orders" asp-action="UserOrders">Xem lịch sử đặt hàng</a>

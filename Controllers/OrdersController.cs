@@ -122,6 +122,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
         {
             var order = await _context.Orders
                 .Include(o => o.User)
+                .Include(o => o.Coupon)
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Product)
                 .FirstOrDefaultAsync(o => o.OrderId == id);
@@ -170,6 +171,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
         }
 
         // Admin-only: update order status
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateStatus(int id, string status)

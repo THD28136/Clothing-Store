@@ -29,9 +29,33 @@ namespace MTKPM_Clothing_Store_web.Controllers
             this._loggerInstance = logger;
         }
 
+        // Validates a coupon code against a cart subtotal. Returns the coupon
+        // (untracked) if valid, or null + a Vietnamese error message if not.
+        // Called on both GET (preview) and POST (authoritative) — POST must
+        // never trust a discount value that came from the client.
+        private async Task<(Coupon? coupon, string? error)> ValidateCouponAsync(string? code, decimal cartSubtotal)
+        {
+            if (string.IsNullOrWhiteSpace(code)) return (null, null);
+
+            var normalized = code.Trim();
+            var coupon = await _dbContext.Coupons.AsNoTracking().FirstOrDefaultAsync(c => c.Code == normalized);
+            if (coupon == null) return (null, "Mã giảm giá không hợp lệ.");
+
+            if (coupon.ExpiryDate.HasValue && coupon.ExpiryDate.Value.Date < DateTime.UtcNow.Date)
+                return (null, "Mã giảm giá đã hết hạn.");
+
+            if (coupon.UsageLimit.HasValue && coupon.UsedCount >= coupon.UsageLimit.Value)
+                return (null, "Mã giảm giá đã hết lượt sử dụng.");
+
+            if (coupon.MinOrderAmount.HasValue && cartSubtotal < coupon.MinOrderAmount.Value)
+                return (null, $"Đơn hàng phải từ {coupon.MinOrderAmount.Value:C0} trở lên để áp dụng mã này.");
+
+            return (coupon, null);
+        }
+
         // GET: show checkout page
         [HttpGet]
-        public async Task<IActionResult> Checkout()
+        public async Task<IActionResult> Checkout(string? couponCode = null)
         {
             var cart = this._httpAccessor.HttpContext?.Session.GetObject<List<SessionCartItem>>("Cart") ?? new List<SessionCartItem>();
             if (!cart.Any()) return RedirectToAction("Index", "Cart");
@@ -52,7 +76,74 @@ namespace MTKPM_Clothing_Store_web.Controllers
                 vm.UserId = uid;
             }
 
+            if (!string.IsNullOrWhiteSpace(couponCode))
+            {
+                var (coupon, error) = await ValidateCouponAsync(couponCode, vm.Total);
+                vm.CouponCode = couponCode;
+                if (coupon != null)
+                {
+                    vm.AppliedDiscountPercent = coupon.DiscountPercent;
+                }
+                else
+                {
+                    vm.CouponMessage = error;
+                }
+            }
+
             return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApplyCoupon(CheckoutViewModel model)
+        {
+            // Load cart từ Session
+            var cart = _httpAccessor.HttpContext?.Session
+                .GetObject<List<SessionCartItem>>("Cart") ?? new();
+
+            if (!cart.Any())
+                return RedirectToAction("Index", "Cart");
+
+            model.Items.Clear();
+
+            foreach (var ci in cart)
+            {
+                var product = await _dbContext.Products.FindAsync(ci.ProductId);
+                if (product == null) continue;
+
+                model.Items.Add(new CheckoutItem
+                {
+                    Product = product,
+                    Quantity = ci.Quantity
+                });
+            }
+
+            // Remove payment-related fields from ModelState so that we can validate the coupon without requiring card info
+            ModelState.Remove(nameof(model.CardName));
+            ModelState.Remove(nameof(model.CardNumber));
+            ModelState.Remove(nameof(model.ExpiryMonth));
+            ModelState.Remove(nameof(model.ExpiryYear));
+            ModelState.Remove(nameof(model.CVV));
+            ModelState.Remove(nameof(model.GuestEmail));
+
+            if (string.IsNullOrWhiteSpace(model.CouponCode))
+            {
+                model.CouponMessage = "Vui lòng nhập mã giảm giá.";
+                return View("Checkout", model);
+            }
+
+            var (coupon, error) = await ValidateCouponAsync(model.CouponCode, model.Total);
+
+            if (coupon == null)
+            {
+                model.CouponMessage = error;
+                return View("Checkout", model);
+            }
+
+            model.AppliedDiscountPercent = coupon.DiscountPercent;
+            model.CouponMessage = "Áp dụng mã giảm giá thành công.";
+
+            return View("Checkout", model);
         }
 
         // POST: mock payment (school project) with raw-insert Order creation workaround
@@ -100,8 +191,9 @@ namespace MTKPM_Clothing_Store_web.Controllers
             int? userId = null;
             if (int.TryParse(userIdStr, out var uid)) userId = uid;
 
-            // Guest checkout: no account, so require an email instead of a login
+            // Guest checkout: no account, so require a name + email instead of a login
             string? guestEmail = null;
+            string? guestName = null;
             if (userId == null)
             {
                 guestEmail = model.GuestEmail?.Trim();
@@ -110,8 +202,37 @@ namespace MTKPM_Clothing_Store_web.Controllers
                     ModelState.AddModelError(nameof(model.GuestEmail), "Vui lòng nhập email để nhận xác nhận đơn hàng.");
                     return View("Checkout", model);
                 }
+
+                guestName = model.GuestName?.Trim();
+                if (string.IsNullOrWhiteSpace(guestName))
+                {
+                    ModelState.AddModelError(nameof(model.GuestName), "Vui lòng nhập họ tên.");
+                    return View("Checkout", model);
+                }
             }
             model.UserId = userId;
+
+            // Re-validate the coupon here, authoritatively — model.AppliedDiscountPercent
+            // from the GET preview is never trusted for the actual charge/order.
+            Coupon? appliedCoupon = null;
+
+            if (!string.IsNullOrWhiteSpace(model.CouponCode))
+            {
+                var (coupon, error) = await ValidateCouponAsync(model.CouponCode, model.Total);
+
+                if (coupon == null)
+                {
+                    model.CouponMessage = error;
+                    ModelState.AddModelError(nameof(model.CouponCode), error ?? "Mã giảm giá không hợp lệ.");
+                    return View("Checkout", model);
+                }
+
+                appliedCoupon = coupon;
+                model.AppliedDiscountPercent = coupon.DiscountPercent;
+            }
+
+            var discountAmount = model.DiscountAmount;
+            var finalTotal = model.FinalTotal;
 
             // CVV check already done by DataAnnotations; proceed with mock payment processing
             try
@@ -135,13 +256,39 @@ namespace MTKPM_Clothing_Store_web.Controllers
                     }
                 }
 
+                // Atomically claim one use of the coupon (if any) before creating
+                // the order — the WHERE clause re-checks the limit at the DB level
+                // so two concurrent checkouts can't both redeem the last slot.
+                if (appliedCoupon != null)
+                {
+                    var couponConn = _dbContext.Database.GetDbConnection();
+                    if (couponConn.State != ConnectionState.Open) await couponConn.OpenAsync();
+                    await using var incCmd = couponConn.CreateCommand();
+                    incCmd.CommandText = "UPDATE coupons SET used_count = used_count + 1 WHERE coupon_id = @cid AND (usage_limit IS NULL OR used_count < usage_limit)";
+                    incCmd.CommandType = CommandType.Text;
+                    incCmd.Transaction = (_dbContext.Database.CurrentTransaction as RelationalTransaction)?.GetDbTransaction();
+                    var pcid = incCmd.CreateParameter();
+                    pcid.ParameterName = "@cid";
+                    pcid.Value = appliedCoupon.CouponId;
+                    pcid.DbType = DbType.Int32;
+                    incCmd.Parameters.Add(pcid);
+
+                    var rowsAffected = await incCmd.ExecuteNonQueryAsync();
+                    if (rowsAffected == 0)
+                    {
+                        _loggerInstance.LogInformation("Coupon {Code} hit its usage limit at checkout time.", appliedCoupon.Code);
+                        ModelState.AddModelError(nameof(model.CouponCode), "Mã giảm giá vừa hết lượt sử dụng. Vui lòng bỏ mã và thử lại.");
+                        return View("Checkout", model);
+                    }
+                }
+
                 // ----- WORKAROUND: create order via raw SQL to avoid EF rowcount/concurrency problem -----
                 int orderId;
 
                 var conn = _dbContext.Database.GetDbConnection();
                 await using (var cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "INSERT INTO orders (user_id, order_date, guest_email) VALUES (@uid, @odate, @gemail); SELECT CAST(SCOPE_IDENTITY() AS INT);";
+                    cmd.CommandText = "INSERT INTO orders (user_id, order_date, guest_email, guest_name, coupon_id, total_amount) VALUES (@uid, @odate, @gemail, @gname, @cid, @total); SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     cmd.CommandType = CommandType.Text;
                     var p1 = cmd.CreateParameter();
                     p1.ParameterName = "@uid";
@@ -158,6 +305,21 @@ namespace MTKPM_Clothing_Store_web.Controllers
                     p3.Value = (object?)guestEmail ?? DBNull.Value;
                     p3.DbType = DbType.String;
                     cmd.Parameters.Add(p3);
+                    var pgn = cmd.CreateParameter();
+                    pgn.ParameterName = "@gname";
+                    pgn.Value = (object?)guestName ?? DBNull.Value;
+                    pgn.DbType = DbType.String;
+                    cmd.Parameters.Add(pgn);
+                    var p4 = cmd.CreateParameter();
+                    p4.ParameterName = "@cid";
+                    p4.Value = (object?)appliedCoupon?.CouponId ?? DBNull.Value;
+                    p4.DbType = DbType.Int32;
+                    cmd.Parameters.Add(p4);
+                    var p5 = cmd.CreateParameter();
+                    p5.ParameterName = "@total";
+                    p5.Value = finalTotal;
+                    p5.DbType = DbType.Decimal;
+                    cmd.Parameters.Add(p5);
 
                     if (conn.State != ConnectionState.Open) await conn.OpenAsync();
                     // if there is an ambient EF transaction, attach it
@@ -221,7 +383,16 @@ namespace MTKPM_Clothing_Store_web.Controllers
             ViewData["OrderId"] = id;
 
             var totalRow = await _dbContext.VwTotalOrderAmounts.AsNoTracking().FirstOrDefaultAsync(v => v.OrderId == id);
-            decimal? orderTotal = totalRow?.Total;
+            var storedOrder = await _dbContext.Orders.AsNoTracking()
+                .Include(o => o.Coupon)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+
+            // total_amount is only populated by CheckoutPost as of this change (it
+            // reflects any coupon discount); vw_TotalOrderAmounts sums the raw
+            // order_details and knows nothing about discounts, so prefer the
+            // stored value whenever it's present.
+            decimal? orderTotal = storedOrder?.TotalAmount ?? totalRow?.Total;
+            ViewData["AppliedCoupon"] = storedOrder?.Coupon;
 
             var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
                             ?? _httpAccessor.HttpContext?.Session.GetString("UserId");

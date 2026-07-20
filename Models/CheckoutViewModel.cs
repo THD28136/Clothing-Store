@@ -57,5 +57,23 @@ namespace MTKPM_Clothing_Store_web.Models
         [EmailAddress(ErrorMessage = "Email không hợp lệ.")]
         [Display(Name = "Email")]
         public string? GuestEmail { get; set; }
+
+        [Display(Name = "Họ tên")]
+        [StringLength(100)]
+        public string? GuestName { get; set; }
+
+        // Coupon: user-entered code, plus what the server determined about it.
+        // AppliedDiscountPercent/CouponMessage are set by the controller after
+        // validation — never trust a discount value coming from the client.
+        [Display(Name = "Mã giảm giá")]
+        public string? CouponCode { get; set; }
+
+        public decimal? AppliedDiscountPercent { get; set; }
+
+        public string? CouponMessage { get; set; }
+
+        public decimal DiscountAmount => Total * (AppliedDiscountPercent ?? 0m) / 100m;
+
+        public decimal FinalTotal => Total - DiscountAmount;
     }
 }

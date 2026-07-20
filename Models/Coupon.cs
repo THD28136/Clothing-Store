@@ -13,5 +13,13 @@ public partial class Coupon
 
     public decimal? DiscountPercent { get; set; }
 
+    public DateTime? ExpiryDate { get; set; }
+
+    public int? UsageLimit { get; set; }
+
+    public int UsedCount { get; set; }
+
+    public decimal? MinOrderAmount { get; set; }
+
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 }

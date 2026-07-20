@@ -5,11 +5,10 @@
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
 }
 
+<link rel="stylesheet" href="~/css/checkout.css" />
 <h2>Thanh toán</h2>
 
-<form asp-controller="Payments" asp-action="CheckoutPost" method="post" novalidate>
-    @Html.AntiForgeryToken()
-
+<div class="checkout-container">
     @if (!Model.Items.Any())
     {
         <div class="alert alert-info">Giỏ hàng trống.</div>
@@ -41,75 +40,123 @@
             </table>
         </div>
 
-        <div class="mb-3">
-            <h5>Tổng: @($"{Model.Total:C0}")</h5>
+        <div class="card p-3 mb-3" id="couponForm">
+            <form asp-controller="Payments" asp-action="ApplyCoupon" method="post" class="row g-2 align-items-end mb-2">
+                @Html.AntiForgeryToken()
+                <div class="col-auto">
+                    <label class="form-label">Mã giảm giá</label>
+                    <input asp-for="CouponCode" class="form-control" placeholder="Nhập mã..." />
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-outline-primary" type="submit">Áp dụng</button>
+                </div>
+            </form>
+
+            @if (!string.IsNullOrEmpty(Model.CouponMessage))
+            {
+                <div class="text-danger mb-0">@Model.CouponMessage</div>
+            }
+            else if (Model.AppliedDiscountPercent.HasValue)
+            {
+                <div class="text-success mb-0">
+                    Đã áp dụng mã <strong>@Model.CouponCode</strong>: giảm @Model.AppliedDiscountPercent%
+                    (-@($"{Model.DiscountAmount:C0}")) — Tổng thanh toán: <strong>@($"{Model.FinalTotal:C0}")</strong>
+                </div>
+            }
         </div>
 
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <form asp-controller="Payments" asp-action="CheckoutPost" method="post" novalidate id="checkoutForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="CouponCode" />
 
-        var isLoggedIn = User.Identity?.IsAuthenticated == true
-            || !string.IsNullOrEmpty(Context.Session.GetString("UserId"));
-
-        @if (!isLoggedIn)
-        {
             <div class="mb-3">
-                <label asp-for="GuestEmail" class="form-label">Email (để nhận xác nhận đơn hàng và tra cứu sau này)</label>
-                <input asp-for="GuestEmail" class="form-control" type="email" />
-                <span asp-validation-for="GuestEmail" class="text-danger"></span>
+                @if (Model.AppliedDiscountPercent.HasValue)
+                {
+                    <h5>
+                        Tổng: <span class="text-decoration-line-through text-muted">@($"{Model.Total:C0}")</span>
+                        <strong class="text-success">@($"{Model.FinalTotal:C0}")</strong>
+                    </h5>
+                }
+                else
+                {
+                    <h5>Tổng: @($"{Model.Total:C0}")</h5>
+                }
             </div>
-        }
 
-        <div class="mb-3">
-            <label asp-for="CardName" class="form-label">Tên trên thẻ</label>
-            <input asp-for="CardName" class="form-control" />
-            <span asp-validation-for="CardName" class="text-danger"></span>
-        </div>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-        <div class="mb-3">
-            <label asp-for="CardNumber" class="form-label">Số thẻ</label>
-            <input asp-for="CardNumber" class="form-control" inputmode="numeric" />
-            <span asp-validation-for="CardNumber" class="text-danger"></span>
-        </div>
+            @{
+                var isLoggedIn = User.Identity?.IsAuthenticated == true
+                    || !string.IsNullOrEmpty(Context.Session.GetString("UserId"));
+            }
 
-        <div class="row g-2 mb-3">
-            <div class="col-auto">
-                <label asp-for="ExpiryMonth" class="form-label">Tháng</label>
-                <select asp-for="ExpiryMonth" class="form-select">
-                    <option value="">MM</option>
-                    @for (int m = 1; m <= 12; m++)
-                    {
-                        <option value="@m" selected="@(Model.ExpiryMonth==m ? "selected" : null)">@m.ToString("D2")</option>
-                    }
-                </select>
-                <span asp-validation-for="ExpiryMonth" class="text-danger"></span>
+            @if (!isLoggedIn)
+            {
+                <div class="mb-3">
+                    <label asp-for="GuestName" class="form-label">Họ tên</label>
+                    <input asp-for="GuestName" class="form-control" />
+                    <span asp-validation-for="GuestName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="GuestEmail" class="form-label">Email (để nhận xác nhận đơn hàng và tra cứu sau này)</label>
+                    <input asp-for="GuestEmail" class="form-control" type="email" />
+                    <span asp-validation-for="GuestEmail" class="text-danger"></span>
+                </div>
+            }
+
+            <div class="mb-3">
+                <label asp-for="CardName" class="form-label">Tên trên thẻ</label>
+                <input asp-for="CardName" class="form-control" />
+                <span asp-validation-for="CardName" class="text-danger"></span>
             </div>
-            <div class="col-auto">
-                <label asp-for="ExpiryYear" class="form-label">Năm</label>
-                <select asp-for="ExpiryYear" class="form-select">
-                    <option value="">YYYY</option>
-                    @{
-                        var start = System.DateTime.UtcNow.Year;
-                        for (int y = start; y <= start + 12; y++)
+
+            <div class="mb-3">
+                <label asp-for="CardNumber" class="form-label">Số thẻ</label>
+                <input asp-for="CardNumber" class="form-control" inputmode="numeric" />
+                <span asp-validation-for="CardNumber" class="text-danger"></span>
+            </div>
+
+            <div class="row g-2 mb-3">
+                <div class="col-auto">
+                    <label asp-for="ExpiryMonth" class="form-label">Tháng</label>
+                    <select asp-for="ExpiryMonth" class="form-select">
+                        <option value="">MM</option>
+                        @for (int m = 1; m <= 12; m++)
                         {
-                            <option value="@y" selected="@(Model.ExpiryYear==y ? "selected" : null)">@y</option>
+                            <option value="@m" selected="@(Model.ExpiryMonth==m ? "selected" : null)">@m.ToString("D2")</option>
                         }
-                    }
-                </select>
-                <span asp-validation-for="ExpiryYear" class="text-danger"></span>
+                    </select>
+                    <span asp-validation-for="ExpiryMonth" class="text-danger"></span>
+                </div>
+                <div class="col-auto">
+                    <label asp-for="ExpiryYear" class="form-label">Năm</label>
+                    <select asp-for="ExpiryYear" class="form-select">
+                        <option value="">YYYY</option>
+                        @{
+                            var start = System.DateTime.UtcNow.Year;
+                            for (int y = start; y <= start + 12; y++)
+                            {
+                                <option value="@y" selected="@(Model.ExpiryYear==y ? "selected" : null)">@y</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="ExpiryYear" class="text-danger"></span>
+                </div>
+                <div class="col-auto">
+                    <label asp-for="CVV" class="form-label">CVV/CVC</label>
+                    <input asp-for="CVV" class="form-control" inputmode="numeric" />
+                    <span asp-validation-for="CVV" class="text-danger"></span>
+                </div>
             </div>
-            <div class="col-auto">
-                <label asp-for="CVV" class="form-label">CVV/CVC</label>
-                <input asp-for="CVV" class="form-control" inputmode="numeric" />
-                <span asp-validation-for="CVV" class="text-danger"></span>
-            </div>
-        </div>
 
-        <div class="d-flex gap-2">
-            <button class="btn btn-primary" type="submit">Thanh toán</button>
-            <a class="btn btn-outline-secondary" asp-controller="Cart" asp-action="Index">Quay lại giỏ hàng</a>
-        </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary" type="submit">Thanh toán</button>
+                <a class="btn btn-outline-secondary" asp-controller="Cart" asp-action="Index">Quay lại giỏ hàng</a>
+            </div>
+        </form>
     }
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
