@@ -1,0 +1,381 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\models\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:models\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\views\\orders\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:views\\orders\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\controllers\\orderscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:controllers\\orderscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\views\\products\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:views\\products\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\controllers\\productscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:controllers\\productscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\controllers\\reviewscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:controllers\\reviewscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\views\\payments\\checkout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:views\\payments\\checkout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\controllers\\paymentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:controllers\\paymentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\controllers\\couponscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:controllers\\couponscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\models\\checkoutviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:models\\checkoutviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\views\\shared\\_customerlayout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:views\\shared\\_customerlayout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\views\\coupons\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:views\\coupons\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\views\\coupons\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:views\\coupons\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\views\\coupons\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:views\\coupons\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\models\\coupon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:models\\coupon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\views\\products\\adminindex.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:views\\products\\adminindex.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:controllers\\userscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\views\\orders\\userorders.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:views\\orders\\userorders.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\models\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:models\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|c:\\users\\tranv\\source\\repos\\clothing-store\\views\\orders\\track.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:views\\orders\\track.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 8,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0174dea2-fdbe-4ef1-8f99-c0beae78880f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Delete.cshtml",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Coupons\\Delete.cshtml",
+              "RelativeDocumentMoniker": "Views\\Coupons\\Delete.cshtml",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Coupons\\Delete.cshtml",
+              "RelativeToolTip": "Views\\Coupons\\Delete.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAUwBQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-07-20T09:46:38.63Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Products\\Details.cshtml",
+              "RelativeDocumentMoniker": "Views\\Products\\Details.cshtml",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Products\\Details.cshtml",
+              "RelativeToolTip": "Views\\Products\\Details.cshtml",
+              "ViewState": "AgIAALsAAAAAAAAAAAAQwNoAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-07-20T09:59:56.616Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAADMAAAAAAAAAAAAqwFEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-20T10:19:32.777Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ProductsController.cs",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Controllers\\ProductsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ProductsController.cs",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Controllers\\ProductsController.cs",
+              "RelativeToolTip": "Controllers\\ProductsController.cs",
+              "ViewState": "AgIAAAcBAAAAAAAAAAAqwBwBAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-20T09:46:38.637Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "OrdersController.cs",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Controllers\\OrdersController.cs",
+              "RelativeDocumentMoniker": "Controllers\\OrdersController.cs",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Controllers\\OrdersController.cs",
+              "RelativeToolTip": "Controllers\\OrdersController.cs",
+              "ViewState": "AgIAAP0AAAAAAAAAAAAuwA0BAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-20T09:46:38.643Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Orders\\Details.cshtml",
+              "RelativeDocumentMoniker": "Views\\Orders\\Details.cshtml",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Orders\\Details.cshtml",
+              "RelativeToolTip": "Views\\Orders\\Details.cshtml",
+              "ViewState": "AgIAABQAAAAAAAAAAAAuwCQAAABCAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-07-20T09:46:38.645Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Order.cs",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Models\\Order.cs",
+              "RelativeDocumentMoniker": "Models\\Order.cs",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Models\\Order.cs*",
+              "RelativeToolTip": "Models\\Order.cs*",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAYwBwAAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-20T09:46:38.65Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "_CustomerLayout.cshtml",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Shared\\_CustomerLayout.cshtml",
+              "RelativeDocumentMoniker": "Views\\Shared\\_CustomerLayout.cshtml",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Shared\\_CustomerLayout.cshtml",
+              "RelativeToolTip": "Views\\Shared\\_CustomerLayout.cshtml",
+              "ViewState": "AgIAACIAAAAAAAAAAAAAACMAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-07-20T09:46:38.629Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Checkout.cshtml",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Payments\\Checkout.cshtml",
+              "RelativeDocumentMoniker": "Views\\Payments\\Checkout.cshtml",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Payments\\Checkout.cshtml",
+              "RelativeToolTip": "Views\\Payments\\Checkout.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAHUAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-07-20T09:46:38.617Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ReviewsController.cs",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Controllers\\ReviewsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ReviewsController.cs",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Controllers\\ReviewsController.cs",
+              "RelativeToolTip": "Controllers\\ReviewsController.cs",
+              "ViewState": "AgIAAGEAAAAAAAAAAAAqwHkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-20T09:58:29.295Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAACEAAAAAAAAAAAAAADoAAABoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-07-20T09:46:38.627Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "PaymentsController.cs",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Controllers\\PaymentsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\PaymentsController.cs",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Controllers\\PaymentsController.cs",
+              "RelativeToolTip": "Controllers\\PaymentsController.cs",
+              "ViewState": "AgIAAGcAAAAAAAAAAADwv3gAAAB7AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-20T09:46:38.625Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "CouponsController.cs",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Controllers\\CouponsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\CouponsController.cs",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Controllers\\CouponsController.cs",
+              "RelativeToolTip": "Controllers\\CouponsController.cs",
+              "ViewState": "AgIAAG4AAAAAAAAAAAAswH8AAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-20T09:46:38.585Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "Create.cshtml",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Coupons\\Create.cshtml",
+              "RelativeDocumentMoniker": "Views\\Coupons\\Create.cshtml",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Coupons\\Create.cshtml",
+              "RelativeToolTip": "Views\\Coupons\\Create.cshtml",
+              "ViewState": "AgIAABkAAAAAAAAAAAAUwDoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-07-20T09:46:38.634Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Coupons\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Coupons\\Index.cshtml",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Coupons\\Index.cshtml",
+              "RelativeToolTip": "Views\\Coupons\\Index.cshtml",
+              "ViewState": "AgIAACEAAAAAAAAAAAAAAEsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-07-20T09:46:38.635Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "AdminIndex.cshtml",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Products\\AdminIndex.cshtml",
+              "RelativeDocumentMoniker": "Views\\Products\\AdminIndex.cshtml",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Products\\AdminIndex.cshtml",
+              "RelativeToolTip": "Views\\Products\\AdminIndex.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-07-20T09:46:38.639Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "Coupon.cs",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Models\\Coupon.cs",
+              "RelativeDocumentMoniker": "Models\\Coupon.cs",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Models\\Coupon.cs",
+              "RelativeToolTip": "Models\\Coupon.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-20T09:46:38.641Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "UserOrders.cshtml",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Orders\\UserOrders.cshtml",
+              "RelativeDocumentMoniker": "Views\\Orders\\UserOrders.cshtml",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Orders\\UserOrders.cshtml",
+              "RelativeToolTip": "Views\\Orders\\UserOrders.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-07-20T09:46:38.647Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "Product.cs",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Models\\Product.cs",
+              "RelativeDocumentMoniker": "Models\\Product.cs",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Models\\Product.cs",
+              "RelativeToolTip": "Models\\Product.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-20T09:46:38.648Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "Track.cshtml",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Orders\\Track.cshtml",
+              "RelativeDocumentMoniker": "Views\\Orders\\Track.cshtml",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Views\\Orders\\Track.cshtml",
+              "RelativeToolTip": "Views\\Orders\\Track.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-07-20T09:46:38.653Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "CheckoutViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Models\\CheckoutViewModel.cs",
+              "RelativeDocumentMoniker": "Models\\CheckoutViewModel.cs",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Models\\CheckoutViewModel.cs",
+              "RelativeToolTip": "Models\\CheckoutViewModel.cs",
+              "ViewState": "AgIAACAAAAAAAAAAAAAcwEoAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-20T09:46:38.655Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "UsersController.cs",
+              "DocumentMoniker": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Controllers\\UsersController.cs",
+              "RelativeDocumentMoniker": "Controllers\\UsersController.cs",
+              "ToolTip": "C:\\Users\\tranv\\source\\repos\\Clothing-Store\\Controllers\\UsersController.cs",
+              "RelativeToolTip": "Controllers\\UsersController.cs",
+              "ViewState": "AgIAAI0AAAAAAAAAAAD4v6IAAABFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-20T09:46:38.657Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
