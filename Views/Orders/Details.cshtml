@@ -1,0 +1,163 @@
+﻿@using System.Globalization
+@model MTKPM_Clothing_Store_web.Models.Order
+
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+    // Admin dùng layout quản trị, còn user/khách vãng lai dùng layout khách hàng
+    Layout = User.IsInRole("Admin") ? "~/Views/Shared/_Layout.cshtml" : "~/Views/Shared/_CustomerLayout.cshtml";
+    var vn = CultureInfo.GetCultureInfo("vi-VN");
+    var totalAmount = Model.OrderDetails?.Sum(od => od.Quantity * od.Product?.Price ?? 0) ?? 0;
+    var allowedStatuses = ViewBag.AllowedStatuses as string[] ?? new string[] { "Pending", "Processing", "Shipped", "Delivered", "Cancelled" };
+    bool canCancel = ViewBag.CanCancel == true;
+    bool isGuestOrder = ViewBag.IsGuestOrder == true;
+    bool canReviewThisOrder = ViewBag.CanReviewThisOrder == true;
+    var reviewedProductIds = ViewBag.ReviewedProductIds as List<int> ?? new List<int>();
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <h1>Chi tiết đơn hàng #@Model.OrderId</h1>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                @if (isGuestOrder)
+                {
+                    <p><strong>Khách hàng:</strong> @Model.GuestName <span class="badge bg-secondary">Khách vãng lai</span></p>
+                    <p><strong>Email:</strong> @Model.GuestEmail</p>
+                    <p><strong>Số điện thoại:</strong> @Model.GuestPhone</p>
+                    <p><strong>Địa chỉ giao hàng:</strong> @Model.GuestAddress</p>
+                }
+                else
+                {
+                    <p><strong>Khách hàng:</strong> @Model.User?.Name</p>
+                    <p><strong>Email:</strong> @Model.User?.Email</p>
+                }
+                <p><strong>Ngày đặt hàng:</strong> @Model.OrderDate?.ToString("dd/MM/yyyy HH:mm")</p>
+                <p><strong>Trạng thái:</strong> <span class="badge @(Model.Status == "Delivered" ? "bg-success" : Model.Status == "Cancelled" ? "bg-danger" : "bg-secondary")">@((string.IsNullOrWhiteSpace(Model.Status) ? "Pending" : Model.Status))</span></p>
+            </div>
+        </div>
+
+        <h5>Các sản phẩm trong đơn hàng</h5>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="table-light">
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Đơn giá</th>
+                        <th>Số lượng</th>
+                        <th>Thành tiền</th>
+                        @if (canReviewThisOrder)
+                        {
+                            <th>Đánh giá</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.OrderDetails != null && Model.OrderDetails.Any())
+                    {
+                        @foreach (var detail in Model.OrderDetails)
+                        {
+                            var price = detail.Product?.Price ?? 0m;
+                            var subtotal = (detail.Quantity * price);
+                            bool alreadyReviewed = detail.ProductId.HasValue && reviewedProductIds.Contains(detail.ProductId.Value);
+                            <tr>
+                                <td>@detail.Product?.Name</td>
+                                <td>@price.ToString("C0", vn)</td>
+                                <td>@detail.Quantity</td>
+                                <td>@subtotal.ToString("C0", vn)</td>
+                                @if (canReviewThisOrder)
+                                {
+                                    <td>
+                                        <a class="btn btn-sm @(alreadyReviewed ? "btn-outline-secondary" : "btn-warning")"
+                                           asp-controller="Products" asp-action="Details" asp-route-id="@detail.ProductId" asp-fragment="review-form">
+                                            @(alreadyReviewed ? "Xem đánh giá" : "Đánh giá")
+                                        </a>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Tóm tắt đơn hàng</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Số lượng sản phẩm:</span>
+                    <strong>@Model.OrderDetails?.Sum(od => od.Quantity)</strong>
+                </div>
+                <hr />
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Tổng cộng:</span>
+                    <h5>@totalAmount.ToString("C0", vn)</h5>
+                </div>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <hr />
+                    <h6>Thay đổi trạng thái</h6>
+                    <form asp-action="UpdateStatus" method="post" class="mt-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.OrderId" />
+                        <div class="input-group">
+                            <select name="status" class="form-select">
+                                @foreach (var st in allowedStatuses)
+                                {
+                                    if (string.Equals(st, Model.Status, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <option value="@st" selected>@st</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@st">@st</option>
+                                    }
+                                }
+                            </select>
+                            <button type="submit" class="btn btn-primary">Cập nhật</button>
+                        </div>
+                    </form>
+                }
+
+                @if (canCancel)
+                {
+                    <hr />
+                    <form asp-action="Cancel" asp-route-id="@Model.OrderId" method="post" class="mt-2"
+                          onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng #@Model.OrderId này không?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-danger w-100">Hủy đơn hàng</button>
+                    </form>
+                }
+
+                <div class="mt-3">
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a class="btn btn-outline-secondary w-100" asp-action="Index">Quay lại danh sách</a>
+                    }
+                    else if (isGuestOrder)
+                    {
+                        <a class="btn btn-outline-secondary w-100" asp-action="GuestLookup">Tra cứu đơn khác</a>
+                    }
+                    else
+                    {
+                        <a class="btn btn-outline-secondary w-100" asp-action="UserOrders">Quay lại</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

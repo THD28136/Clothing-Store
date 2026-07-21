@@ -11,6 +11,26 @@ public partial class Order
 
     public DateTime? OrderDate { get; set; }
 
+<<<<<<< Updated upstream
+=======
+    public string? Status { get; set; }
+
+    public int? CouponId { get; set; }
+
+    public int? PaymentMethodId { get; set; }
+
+    public decimal? TotalAmount { get; set; }
+
+    public string? GuestName { get; set; }
+
+    public string? GuestPhone { get; set; }
+
+    public string? GuestEmail { get; set; }
+
+    public virtual Coupon? Coupon { get; set; }
+    public string? GuestAddress { get; set; }   
+
+>>>>>>> Stashed changes
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
     public virtual User? User { get; set; }

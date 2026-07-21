@@ -14,11 +14,19 @@ namespace MTKPM_Clothing_Store_web.Controllers
 {
     public class ProductsController : Controller
     {
+<<<<<<< Updated upstream
         private readonly ClothingStoreContext _context;
 
         public ProductsController(ClothingStoreContext context)
+=======
+        private readonly ApplicationDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public ProductsController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
+>>>>>>> Stashed changes
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         // GET: Products (customer)
@@ -85,9 +93,31 @@ namespace MTKPM_Clothing_Store_web.Controllers
 
             var product = await _context.Products
                 .Include(p => p.Category)
+                .Include(p => p.Reviews)
+                    .ThenInclude(r => r.User)
                 .FirstOrDefaultAsync(m => m.ProductId == id);
 
             if (product == null) return NotFound();
+
+            var reviews = product.Reviews.OrderByDescending(r => r.ReviewDate).ToList();
+            ViewBag.Reviews = reviews;
+            ViewBag.ReviewCount = reviews.Count;
+            ViewBag.AverageRating = reviews.Count > 0 ? Math.Round(reviews.Average(r => r.Rating), 1) : 0;
+
+            var userIdString = _httpContextAccessor.HttpContext?.Session.GetString("UserId")
+                ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(userIdString, out var currentUserId))
+            {
+                ViewBag.MyReview = reviews.FirstOrDefault(r => r.UserId == currentUserId);
+
+                ViewBag.CanReview = await _context.Orders
+                    .Where(o => o.UserId == currentUserId && o.Status != "Cancelled")
+                    .AnyAsync(o => o.OrderDetails.Any(od => od.ProductId == product.ProductId));
+            }
+            else
+            {
+                ViewBag.CanReview = false;
+            }
 
             return View(product);
         }
@@ -106,9 +136,14 @@ namespace MTKPM_Clothing_Store_web.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([Bind("ProductId,Name,Description,Price,CategoryId,IsFeatured")] Product product, IFormFile? ImageFile)
         {
+<<<<<<< Updated upstream
             ModelState.Remove("Pic");
 
             // image handling remains identical (keeps existing behavior)
+=======
+            ModelState.Remove("Pic"); // Remove old field validation if it exists
+
+>>>>>>> Stashed changes
             if (ImageFile != null && ImageFile.Length > 0)
             {
                 var ext = Path.GetExtension(ImageFile.FileName).ToLower();
