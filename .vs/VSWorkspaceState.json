@@ -1,6 +1,14 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\Adapters",
+    "\\bin\\Debug",
+    "\\bin\\Release",
+    "\\Views",
+    "\\Views\\Payments",
+    "\\Views\\Shared",
+    "\\wwwroot",
+    "\\wwwroot\\css"
   ],
   "SelectedNode": "\\MTKPM_Clothing_Store_web.sln",
   "PreviewInSolutionExplorer": false

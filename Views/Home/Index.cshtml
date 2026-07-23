@@ -4,223 +4,462 @@
 @{
     ViewData["Title"] = "Home";
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
-    // Tập hợp sản phẩm nổi bật từ các category đã nạp
     var featured = Model.SelectMany(c => c.Products).Where(p => p.IsFeatured).OrderByDescending(p => p.Price).Take(12).ToList();
+    var vnd = new CultureInfo("vi-VN");
 }
 
 <style>
-    /* Scroll container for horizontal product rows */
-    .product-row {
-        overflow-x: auto;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 8px;
-
-        /* hide scrollbar while keeping scrolling usable */
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;     /* Firefox */
-    }
-    /* Chrome, Safari, Opera */
-    .product-row::-webkit-scrollbar {
-        height: 0;
-        display: none;
+    /* ---------- Boutique tokens (match layout) ---------- */
+    :root {
+        --ink: #1a1a1a;
+        --muted: #8a8a8a;
+        --line: #ececec;
+        --bg-soft: #faf8f5;
+        --accent: #1a1a1a;
     }
 
-    /* Card: cố định kích thước, hiển thị inline để cuộn ngang */
-    .product-card {
-        display: inline-block;
-        white-space: normal;
-        width: 200px;
-        margin-right: 12px;
-        vertical-align: top;
-    }
+    body { background: #fff; }
 
-    /* Đặt chiều cao cố định cho khung card để mọi card đồng đều */
-    .product-card .card {
-        width: 100%;
-        height: 260px; /* tổng chiều cao card (ảnh + body) */
-        display: flex;
-        flex-direction: column;
-        border-radius: 6px;
-        overflow: hidden;
-    }
-
-    /* Khung chứa ảnh: cố định chiều cao, overflow hidden */
-    .product-card .img-wrap {
-        height: 140px;
-        width: 100%;
-        overflow: hidden;
-        flex: 0 0 140px;
-        background-color: #f8f9fa;
-    }
-
-    /* Ảnh luôn phủ kín khung, được crop đều */
-    .product-card .img-wrap img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-    }
-
-    /* Body có chiều cao cố định, bố trí nội dung theo cột, nút ở dưới */
-    .product-card .card-body {
-        padding: 8px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        flex: 1 1 auto;
-    }
-
-    .product-card .card-body .card-top {
-        /* phần chứa tiêu đề + giá */
-    }
-
-    .product-card .card-title {
-        font-size: 0.95rem;
-        margin-bottom: 4px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .product-card .card-price {
-        font-size: 0.85rem;
-        color: #6c757d;
-    }
-
-    .product-card .card-actions {
-        display: flex;
-        gap: 6px;
-        margin-top: 6px;
-    }
-
-    .banner {
+    /* ---------- Hero ---------- */
+    .hero {
         position: relative;
+        height: 560px;
+        margin: 0 0 72px;
+        overflow: hidden;
         background-size: cover;
         background-position: center;
-        height: 300px;
-        border-radius: 6px;
-        margin-bottom: 24px;
-        color: white;
+        color: #fff;
     }
-
-    .banner-overlay {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.35));
-        border-radius: 6px;
+    .hero::after {
+        content: "";
+        position: absolute; inset: 0;
+        background: linear-gradient(90deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.15) 60%, rgba(0,0,0,0) 100%);
     }
-    .banner-content {
-        position: absolute;
-        left: 40px;
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 560px;
+        padding: 0 64px;
         top: 50%;
         transform: translateY(-50%);
     }
+    .hero-eyebrow {
+        font-size: .72rem;
+        letter-spacing: .32em;
+        text-transform: uppercase;
+        opacity: .85;
+        margin-bottom: 18px;
+    }
+    .hero-title {
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 500;
+        font-size: 3.6rem;
+        line-height: 1.05;
+        letter-spacing: -.01em;
+        margin-bottom: 20px;
+    }
+    .hero-lead {
+        font-size: 1.02rem;
+        opacity: .92;
+        margin-bottom: 32px;
+        max-width: 440px;
+    }
+    .btn-boutique {
+        display: inline-block;
+        background: #fff;
+        color: #1a1a1a;
+        border: none;
+        padding: 14px 38px;
+        font-size: .78rem;
+        letter-spacing: .22em;
+        text-transform: uppercase;
+        font-weight: 600;
+        border-radius: 0;
+        transition: all .25s ease;
+    }
+    .btn-boutique:hover { background: #1a1a1a; color: #fff; }
+
+    .btn-boutique-outline {
+        display: inline-block;
+        background: transparent;
+        color: #1a1a1a;
+        border: 1px solid #1a1a1a;
+        padding: 13px 34px;
+        font-size: .74rem;
+        letter-spacing: .22em;
+        text-transform: uppercase;
+        font-weight: 600;
+        border-radius: 0;
+        transition: all .25s ease;
+    }
+    .btn-boutique-outline:hover { background: #1a1a1a; color: #fff; }
+
+    /* ---------- Section headings ---------- */
+    .section { margin-bottom: 80px; }
+    .section-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 32px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--line);
+    }
+    .section-eyebrow {
+        font-size: .68rem;
+        letter-spacing: .3em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 8px;
+    }
+    .section-title {
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 500;
+        font-size: 1.9rem;
+        letter-spacing: -.01em;
+        color: var(--ink);
+        margin: 0;
+    }
+    .section-link {
+        font-size: .72rem;
+        letter-spacing: .22em;
+        text-transform: uppercase;
+        font-weight: 600;
+        color: var(--ink);
+        text-decoration: none;
+        border-bottom: 1px solid var(--ink);
+        padding-bottom: 2px;
+        transition: opacity .2s;
+    }
+    .section-link:hover { opacity: .55; color: var(--ink); }
+
+    /* ---------- Product row (horizontal scroll) ---------- */
+    .product-row {
+        display: flex;
+        gap: 24px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .product-row::-webkit-scrollbar { display: none; height: 0; }
+
+    /* ---------- Product card ---------- */
+    .product-card {
+        flex: 0 0 240px;
+        scroll-snap-align: start;
+        background: transparent;
+    }
+    .product-card .card {
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        overflow: visible;
+    }
+    .product-card .img-wrap {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 3 / 4;
+        overflow: hidden;
+        background: var(--bg-soft);
+        margin-bottom: 14px;
+    }
+    .product-card .img-wrap img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform .7s ease;
+    }
+    .product-card:hover .img-wrap img { transform: scale(1.05); }
+
+    .product-card .quick-add {
+        position: absolute;
+        left: 12px; right: 12px; bottom: 12px;
+        background: #fff;
+        color: #1a1a1a;
+        border: none;
+        padding: 11px 12px;
+        font-size: .7rem;
+        letter-spacing: .2em;
+        text-transform: uppercase;
+        font-weight: 600;
+        opacity: 0;
+        transform: translateY(8px);
+        transition: all .3s ease;
+        cursor: pointer;
+    }
+    .product-card:hover .quick-add { opacity: 1; transform: translateY(0); }
+    .product-card .quick-add:hover { background: #1a1a1a; color: #fff; }
+
+    .product-card .card-title {
+        font-size: .92rem;
+        font-weight: 500;
+        color: var(--ink);
+        margin: 0 0 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        letter-spacing: .01em;
+    }
+    .product-card .card-title a { color: inherit; text-decoration: none; }
+    .product-card .card-title a:hover { opacity: .6; }
+    .product-card .card-price {
+        font-size: .88rem;
+        color: var(--ink);
+        margin: 0;
+        letter-spacing: .02em;
+    }
+    .product-card .stock-tag {
+        display: inline-block;
+        font-size: .65rem;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-top: 6px;
+    }
+    .product-card .stock-tag.oos { color: #b23a3a; }
+
+    .badge-featured {
+        position: absolute;
+        top: 12px; left: 12px;
+        background: #1a1a1a;
+        color: #fff;
+        font-size: .6rem;
+        letter-spacing: .22em;
+        text-transform: uppercase;
+        padding: 5px 10px;
+        font-weight: 600;
+        z-index: 2;
+    }
+
+    /* ---------- Value strip ---------- */
+    .value-strip {
+        background: var(--bg-soft);
+        padding: 44px 0;
+        margin: 0 0 80px;
+    }
+    .value-item {
+        text-align: center;
+        padding: 0 20px;
+    }
+    .value-item i {
+        font-size: 1.6rem;
+        color: var(--ink);
+        margin-bottom: 10px;
+        display: block;
+    }
+    .value-item .v-title {
+        font-size: .78rem;
+        letter-spacing: .2em;
+        text-transform: uppercase;
+        font-weight: 600;
+        color: var(--ink);
+        margin-bottom: 4px;
+    }
+    .value-item .v-sub {
+        font-size: .82rem;
+        color: var(--muted);
+        margin: 0;
+    }
+
+    /* ---------- Editorial split ---------- */
+    .editorial {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        margin-bottom: 80px;
+        min-height: 460px;
+    }
+    .editorial-img {
+        background-size: cover;
+        background-position: center;
+        min-height: 420px;
+    }
+    .editorial-body {
+        background: var(--bg-soft);
+        padding: 70px 64px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .editorial-body .section-eyebrow { color: var(--muted); }
+    .editorial-body h2 {
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 500;
+        font-size: 2.2rem;
+        line-height: 1.15;
+        margin: 4px 0 18px;
+        color: var(--ink);
+    }
+    .editorial-body p {
+        color: #555;
+        font-size: .98rem;
+        line-height: 1.7;
+        margin-bottom: 28px;
+        max-width: 420px;
+    }
+
+    @@media (max-width: 768px) {
+        .hero { height: 460px; }
+        .hero-content { padding: 0 24px; }
+        .hero-title { font-size: 2.4rem; }
+        .section-title { font-size: 1.5rem; }
+        .editorial { grid-template-columns: 1fr; }
+        .editorial-body { padding: 44px 28px; }
+        .product-card { flex: 0 0 180px; }
+    }
 </style>
 
-<h1 class="mb-3">Chào mừng tới  LOVSTORE</h1>
-
-<!-- Banner dưới navbar -->
-<div class="banner" style="background-image: url('/images/H_FASHION.jpg'); background-size:auto">
-    <div class="banner-overlay"></div>
-    <div class="banner-content">
-        <h1 class="display-5">Mùa mới đã có mặt</h1>
-        <p class="lead">Khám phá bộ sưu tập mới — giảm giá đến 30% cho các sản phẩm chọn lọc.</p>
-        <a class="btn btn-primary btn-lg" asp-controller="Products" asp-action="Index">Mua ngay</a>
+<!-- ============ HERO ============ -->
+<section class="hero" style="background-image: url('/images/H_FASHION.jpg');">
+    <div class="hero-content">
+        <div class="hero-eyebrow">Bộ sưu tập Thu / Đông</div>
+        <h1 class="hero-title">Mùa mới<br/>đã có mặt.</h1>
+        <p class="hero-lead">Khám phá những thiết kế được chọn lọc — giảm đến 30% cho các mẫu chọn lọc trong tuần này.</p>
+        <a class="btn-boutique" asp-controller="Products" asp-action="Index">Mua ngay</a>
     </div>
-</div>
+</section>
 
-<!-- Danh mục + hàng sản phẩm ngang có thể scroll -->
-@if (featured.Any())
-{
-    <section class="mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <h4 class="mb-0">Sản phẩm nổi bật</h4>
-            <a class="small text-decoration-none" asp-controller="Products" asp-action="Index">Xem tất cả</a>
-        </div>
+<div class="container">
 
-        <div class="product-row">
-            @foreach (var p in featured)
-            {
-                <div class="product-card">
-                    <div class="card">
-                        <div class="img-wrap">
-                            <img src="@(string.IsNullOrEmpty(p.Image) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + p.Image))" alt="@p.Name" />
-                        </div>
-                        <div class="card-body">
-                            <div>
-                                <h6 class="card-title">@p.Name</h6>
-                                <p class="card-price mb-1">@p.Price.ToString("C0", new CultureInfo("vi-VN"))</p>
-                            </div>
-                            <div class="card-actions">
-                                <a class="btn btn-sm btn-outline-primary flex-grow-1" asp-controller="Products" asp-action="Details" asp-route-id="@p.ProductId">Chi tiết</a>
-                                <form asp-controller="Cart" asp-action="Add" method="post" class="d-inline">
+    <!-- ============ FEATURED ============ -->
+    @if (featured.Any())
+    {
+        <section class="section">
+            <div class="section-head">
+                <div>
+                    <div class="section-eyebrow">Được chọn lọc</div>
+                    <h2 class="section-title">Sản phẩm nổi bật</h2>
+                </div>
+                <a class="section-link" asp-controller="Products" asp-action="Index">Xem tất cả</a>
+            </div>
+
+            <div class="product-row">
+                @foreach (var p in featured)
+                {
+                    <div class="product-card">
+                        <div class="card">
+                            <div class="img-wrap">
+                                <span class="badge-featured">Nổi bật</span>
+                                <img src="@(string.IsNullOrEmpty(p.Image) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + p.Image))" alt="@p.Name" />
+                                <form asp-controller="Cart" asp-action="Add" method="post" class="m-0">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="productId" value="@p.ProductId" />
                                     <input type="hidden" name="quantity" value="1" />
-                                    <button type="submit" class="btn btn-sm btn-primary">Thêm vào giỏ</button>
+                                    <button type="submit" class="quick-add">Thêm vào giỏ</button>
                                 </form>
                             </div>
+                            <h6 class="card-title">
+                                <a asp-controller="Products" asp-action="Details" asp-route-id="@p.ProductId">@p.Name</a>
+                            </h6>
+                            <p class="card-price">@p.Price.ToString("C0", vnd)</p>
                         </div>
                     </div>
-                </div>
-            }
+                }
+            </div>
+        </section>
+    }
+
+    <!-- ============ EDITORIAL ============ -->
+    <section class="editorial">
+        <div class="editorial-img" style="background-image: url('/images/H_FASHION.jpg');"></div>
+        <div class="editorial-body">
+            <div class="section-eyebrow">Câu chuyện LOVSTORE</div>
+            <h2>Thiết kế tinh tế<br/>cho mỗi khoảnh khắc.</h2>
+            <p>Chúng tôi tuyển chọn từng thiết kế với sự chú trọng đến chất liệu, phom dáng và độ bền — để bạn mặc lâu, mặc đẹp, và mặc đúng chất riêng.</p>
+            <div>
+                <a class="btn-boutique-outline" asp-controller="Products" asp-action="Index">Khám phá</a>
+            </div>
         </div>
     </section>
-}
 
-<!-- Các danh mục như cũ -->
-@foreach (var category in Model)
-{
-    <section class="mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <h4 class="mb-0">@category.Name</h4>
-            <a class="small text-decoration-none" asp-controller="Products" asp-action="Index" asp-route-categoryId="@category.CategoryId">Xem tất cả</a>
+</div>
+
+<!-- ============ VALUE STRIP ============ -->
+<section class="value-strip">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-6 col-md-3">
+                <div class="value-item">
+                    <i class="bi bi-truck"></i>
+                    <div class="v-title">Miễn phí giao</div>
+                    <p class="v-sub">Cho đơn từ 500.000₫</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="value-item">
+                    <i class="bi bi-arrow-repeat"></i>
+                    <div class="v-title">Đổi trả 30 ngày</div>
+                    <p class="v-sub">Đơn giản, nhanh chóng</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="value-item">
+                    <i class="bi bi-shield-check"></i>
+                    <div class="v-title">Chính hãng</div>
+                    <p class="v-sub">Cam kết 100%</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="value-item">
+                    <i class="bi bi-headset"></i>
+                    <div class="v-title">Hỗ trợ 24/7</div>
+                    <p class="v-sub">Luôn sẵn sàng cho bạn</p>
+                </div>
+            </div>
         </div>
+    </div>
+</section>
 
-        <div class="product-row">
-            @foreach (var product in category.Products.Take(12))
-            {
-                <div class="product-card">
-                    <div class="card">
-                        <div class="img-wrap">
-                            <img src="@(string.IsNullOrEmpty(product.Image) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + product.Image))" alt="@product.Name" />
-                        </div>
-                        <div class="card-body">
-                            <div class="card-top">
-                                <h6 class="card-title">@product.Name</h6>
-                                <p class="card-price mb-1">@product.Price.ToString("C0", new CultureInfo("vi-VN"))</p>
+<div class="container">
+
+    <!-- ============ CATEGORIES ============ -->
+    @foreach (var category in Model)
+    {
+        <section class="section">
+            <div class="section-head">
+                <div>
+                    <div class="section-eyebrow">Danh mục</div>
+                    <h2 class="section-title">@category.Name</h2>
+                </div>
+                <a class="section-link" asp-controller="Products" asp-action="Index" asp-route-categoryId="@category.CategoryId">Xem tất cả</a>
+            </div>
+
+            <div class="product-row">
+                @foreach (var product in category.Products.Take(12))
+                {
+                    <div class="product-card">
+                        <div class="card">
+                            <div class="img-wrap">
+                                <img src="@(string.IsNullOrEmpty(product.Image) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + product.Image))" alt="@product.Name" />
                                 @if (product.Stock > 0)
                                 {
-                                    <small class="text-success">Còn @product.Stock</small>
-                                }
-                                else
-                                {
-                                    <small class="text-danger">Hết hàng</small>
-                                }
-                            </div>
-
-                            <div class="card-actions">
-                                <a class="btn btn-sm btn-outline-primary flex-grow-1" asp-controller="Products" asp-action="Details" asp-route-id="@product.ProductId">Chi tiết</a>
-
-                                @if (product.Stock > 0)
-                                {
-                                    <form asp-controller="Cart" asp-action="Add" method="post" class="d-inline">
+                                    <form asp-controller="Cart" asp-action="Add" method="post" class="m-0">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="productId" value="@product.ProductId" />
                                         <input type="hidden" name="quantity" value="1" />
-                                        <button type="submit" class="btn btn-sm btn-primary">Thêm vào giỏ</button>
+                                        <button type="submit" class="quick-add">Thêm vào giỏ</button>
                                     </form>
                                 }
-                                else
-                                {
-                                    <button class="btn btn-sm btn-secondary" disabled>Hết hàng</button>
-                                }
                             </div>
+                            <h6 class="card-title">
+                                <a asp-controller="Products" asp-action="Details" asp-route-id="@product.ProductId">@product.Name</a>
+                            </h6>
+                            <p class="card-price">@product.Price.ToString("C0", vnd)</p>
+                            @if (product.Stock > 0)
+                            {
+                                <span class="stock-tag">Còn @product.Stock sản phẩm</span>
+                            }
+                            else
+                            {
+                                <span class="stock-tag oos">Hết hàng</span>
+                            }
                         </div>
                     </div>
-                </div>
-            }
-        </div>
-    </section>
-}
+                }
+            </div>
+        </section>
+    }
+
+</div>

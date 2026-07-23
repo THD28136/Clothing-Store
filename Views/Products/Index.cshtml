@@ -7,116 +7,149 @@
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
 }
 
-<h1>Danh sách sản phẩm</h1>
-
-<form asp-action="Index" method="get" class="row g-2 mb-3 align-items-end">
-    <div class="col-auto">
-        <input type="search" name="q" class="form-control" placeholder="Tìm kiếm..." value="@(ViewData["q"] ?? "")" />
+<!-- Page Header -->
+<section class="page-header py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <p class="eyebrow text-uppercase tracking-widest mb-2">Bộ sưu tập</p>
+                <h1 class="display-5 serif-heading mb-3">Danh sách sản phẩm</h1>
+                <p class="text-muted mb-0">Khám phá những thiết kế mới nhất, được chọn lọc dành cho bạn.</p>
+            </div>
+        </div>
     </div>
+</section>
 
-    <div class="col-auto">
-        <select name="categoryId" class="form-select">
-            <option value="">Tất cả danh mục</option>
-            @if (ViewBag.Categories is IEnumerable<SelectListItem> list)
-            {
-                foreach (var c in list)
-                {
-                    var isSelected = (ViewData["categoryId"]?.ToString() == c.Value);
-                    if (isSelected)
-                    {
-                        <option value="@c.Value" selected>@c.Text</option>
-                    }
-                    else
-                    {
-                        <option value="@c.Value">@c.Text</option>
-                    }
-                }
-            }
-        </select>
-    </div>
-
-    <div class="col-auto">
-        <input type="number" name="minPrice" class="form-control" placeholder="Giá từ" step="0.01" value="@(ViewData["minPrice"] ?? "")" />
-    </div>
-
-    <div class="col-auto">
-        <input type="number" name="maxPrice" class="form-control" placeholder="Đến" step="0.01" value="@(ViewData["maxPrice"] ?? "")" />
-    </div>
-
-    <div class="col-auto">
-        <select name="sort" class="form-select">
-            <option value="">Sắp xếp</option>
-            @{
-                var sort = ViewData["sort"]?.ToString();
-            }
-            <option value="price_asc" selected="@(sort == "price_asc" ? "selected" : null)">Giá: thấp → cao</option>
-            <option value="price_desc" selected="@(sort == "price_desc" ? "selected" : null)">Giá: cao → thấp</option>
-            <option value="newest" selected="@(sort == "newest" ? "selected" : null)">Mới nhất</option>
-        </select>
-    </div>
-
-    <div class="col-auto">
-        <button class="btn btn-primary">Tìm</button>
-    </div>
-</form>
-
-<div class="row">
-    @if (Model != null && Model.Any())
-    {
-        @foreach (var product in Model)
-        {
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100">
-                    <img src="@(string.IsNullOrEmpty(product.Image) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + product.Image))" class="card-img-top" style="height: 250px; object-fit: cover;" alt="@product.Name" />
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">@product.Name</h5>
-                        <p class="text-muted small">@product.Category?.Name</p>
-
-                        <div class="mb-2">
-                            <strong>Giá:</strong> @product.Price.ToString("C0", new CultureInfo("vi-VN"))
-                        </div>
-
-                        <div class="mb-2">
-                            @if (product.Stock > 10)
-                            {
-                                <span class="badge bg-success">Còn hàng (@product.Stock)</span>
-                            }
-                            else if (product.Stock > 0)
-                            {
-                                <span class="badge bg-warning">Còn lại @product.Stock</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger">Hết hàng</span>
-                            }
-                        </div>
-
-                        <div class="d-flex gap-2 mt-auto">
-                            <a class="btn btn-sm btn-outline-primary flex-grow-1" asp-action="Details" asp-route-id="@product.ProductId">Chi tiết</a>
-                            @if (product.Stock > 0)
-                            {
-                                <form asp-controller="Cart" asp-action="Add" method="post" class="d-inline flex-grow-1 ajax-add-to-cart">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="productId" value="@product.ProductId" />
-                                    <input type="hidden" name="quantity" value="1" />
-                                    <button type="submit" class="btn btn-sm btn-primary w-100">Thêm vào giỏ</button>
-                                </form>
-                            }
-                            else
-                            {
-                                <button class="btn btn-sm btn-secondary flex-grow-1" disabled>Hết hàng</button>
-                            }
-                        </div>
-                    </div>
+<!-- Filter Bar -->
+<section class="filter-bar py-4 border-top border-bottom">
+    <div class="container">
+        <form asp-action="Index" method="get" class="row g-3 align-items-end">
+            <div class="col-12 col-md-4 col-lg-3">
+                <label for="q" class="form-label small text-uppercase tracking-wide">Tìm kiếm</label>
+                <div class="search-input-wrapper position-relative">
+                    <input type="search" id="q" name="q" class="form-control" placeholder="Tìm kiếm..." value="@(ViewData["q"] ?? "")" />
+                    <i class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3 text-muted"></i>
                 </div>
             </div>
+
+            <div class="col-12 col-md-4 col-lg-2">
+                <label for="categoryId" class="form-label small text-uppercase tracking-wide">Danh mục</label>
+                <select id="categoryId" name="categoryId" class="form-select">
+                    <option value="">Tất cả danh mục</option>
+                    @if (ViewBag.Categories is IEnumerable<SelectListItem> list)
+                    {
+                        foreach (var c in list)
+                        {
+                            var isSelected = (ViewData["categoryId"]?.ToString() == c.Value);
+                            if (isSelected)
+                            {
+                                <option value="@c.Value" selected>@c.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@c.Value">@c.Text</option>
+                            }
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-6 col-md-4 col-lg-2">
+                <label for="minPrice" class="form-label small text-uppercase tracking-wide">Giá từ</label>
+                <input type="number" id="minPrice" name="minPrice" class="form-control" placeholder="0" step="0.01" value="@(ViewData["minPrice"] ?? "")" />
+            </div>
+
+            <div class="col-6 col-md-4 col-lg-2">
+                <label for="maxPrice" class="form-label small text-uppercase tracking-wide">Đến</label>
+                <input type="number" id="maxPrice" name="maxPrice" class="form-control" placeholder="0" step="0.01" value="@(ViewData["maxPrice"] ?? "")" />
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-2">
+                <label for="sort" class="form-label small text-uppercase tracking-wide">Sắp xếp</label>
+                <select id="sort" name="sort" class="form-select">
+                    <option value="">Sắp xếp</option>
+                    @{
+                        var sort = ViewData["sort"]?.ToString();
+                    }
+                    <option value="price_asc" selected="@(sort == "price_asc" ? "selected" : null)">Giá: thấp → cao</option>
+                    <option value="price_desc" selected="@(sort == "price_desc" ? "selected" : null)">Giá: cao → thấp</option>
+                    <option value="newest" selected="@(sort == "newest" ? "selected" : null)">Mới nhất</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-1">
+                <button class="btn btn-dark w-100 text-uppercase tracking-wide">Tìm</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Product Grid -->
+<section class="product-grid py-5">
+    <div class="container">
+        @if (Model != null && Model.Any())
+        {
+            <div class="row g-4">
+                @foreach (var product in Model)
+                {
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <article class="product-card position-relative">
+                            <a asp-action="Details" asp-route-id="@product.ProductId" class="product-image-link d-block overflow-hidden rounded-4 mb-3">
+                                <img src="@(string.IsNullOrEmpty(product.Image) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + product.Image))" class="product-image w-100" alt="@product.Name" />
+                                <div class="product-overlay position-absolute inset-0 d-flex align-items-center justify-content-center">
+                                    @if (product.Stock > 0)
+                                    {
+                                        <form asp-controller="Cart" asp-action="Add" method="post" class="ajax-add-to-cart">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="productId" value="@product.ProductId" />
+                                            <input type="hidden" name="quantity" value="1" />
+                                            <button type="submit" class="btn btn-light btn-add-cart text-uppercase tracking-wide">Thêm vào giỏ</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="btn btn-secondary btn-add-cart text-uppercase tracking-wide" disabled>Hết hàng</span>
+                                    }
+                                </div>
+                            </a>
+
+                            <div class="product-info text-center">
+                                <p class="product-category text-muted small text-uppercase tracking-wide mb-1">@product.Category?.Name</p>
+                                <h2 class="product-title serif-heading h6 mb-2">
+                                    <a asp-action="Details" asp-route-id="@product.ProductId" class="text-decoration-none text-reset stretched-link">@product.Name</a>
+                                </h2>
+                                <p class="product-price fw-semibold mb-2">@product.Price.ToString("C0", new CultureInfo("vi-VN"))</p>
+
+                                @if (product.Stock > 10)
+                                {
+                                    <span class="badge-stock badge-instock">Còn hàng</span>
+                                }
+                                else if (product.Stock > 0)
+                                {
+                                    <span class="badge-stock badge-low">Còn lại @product.Stock</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-stock badge-out">Hết hàng</span>
+                                }
+                            </div>
+                        </article>
+                    </div>
+                }
+            </div>
         }
-    }
-    else
-    {
-        <div class="alert alert-info">Không có sản phẩm nào.</div>
-    }
-</div>
+        else
+        {
+            <div class="empty-state text-center py-5">
+                <div class="mb-3">
+                    <i class="bi bi-inbox display-4 text-muted"></i>
+                </div>
+                <h3 class="serif-heading h4">Không có sản phẩm nào</h3>
+                <p class="text-muted">Thử điều chỉnh bộ lọc hoặc tìm kiếm với từ khóa khác.</p>
+            </div>
+        }
+    </div>
+</section>
 
 @section Scripts {
     <script>
@@ -170,3 +203,149 @@
         })();
     </script>
 }
+
+<style>
+    .page-header {
+        background-color: #f9f9f7;
+    }
+
+    .eyebrow {
+        font-size: 0.75rem;
+        letter-spacing: 0.2em;
+        color: #8c8c8c;
+    }
+
+    .serif-heading {
+        font-family: 'Playfair Display', serif;
+    }
+
+    .tracking-widest {
+        letter-spacing: 0.2em;
+    }
+
+    .tracking-wide {
+        letter-spacing: 0.08em;
+    }
+
+    .filter-bar {
+        background-color: #ffffff;
+        border-color: #eceae6 !important;
+    }
+
+    .filter-bar .form-control,
+    .filter-bar .form-select {
+        border-radius: 0.5rem;
+        border-color: #ddd9d4;
+        font-size: 0.9rem;
+        padding: 0.65rem 0.9rem;
+    }
+
+    .filter-bar .form-control:focus,
+    .filter-bar .form-select:focus {
+        border-color: #1a1a1a;
+        box-shadow: 0 0 0 0.15rem rgba(26, 26, 26, 0.08);
+    }
+
+    .search-input-wrapper input {
+        padding-right: 2.5rem;
+    }
+
+    .filter-bar .btn-dark {
+        border-radius: 0.5rem;
+        padding: 0.65rem 1rem;
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+    }
+
+    .product-card {
+        transition: transform 0.25s ease;
+    }
+
+    .product-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .product-image-link {
+        aspect-ratio: 3 / 4;
+        background-color: #f4f4f2;
+    }
+
+    .product-image {
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .product-card:hover .product-image {
+        transform: scale(1.05);
+    }
+
+    .product-overlay {
+        inset: 0;
+        background: rgba(0, 0, 0, 0.22);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+
+    .product-card:hover .product-overlay {
+        opacity: 1;
+    }
+
+    .product-overlay .btn-add-cart {
+        pointer-events: auto;
+        border-radius: 0;
+        padding: 0.65rem 1.5rem;
+        font-size: 0.75rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        transform: translateY(12px);
+        transition: transform 0.3s ease, background-color 0.2s ease;
+    }
+
+    .product-card:hover .btn-add-cart {
+        transform: translateY(0);
+    }
+
+    .product-category {
+        font-size: 0.7rem;
+    }
+
+    .product-title {
+        line-height: 1.35;
+    }
+
+    .product-price {
+        color: #1a1a1a;
+        font-size: 0.95rem;
+    }
+
+    .badge-stock {
+        display: inline-block;
+        font-size: 0.7rem;
+        letter-spacing: 0.05em;
+        padding: 0.35em 0.75em;
+        border-radius: 999px;
+        text-transform: uppercase;
+    }
+
+    .badge-instock {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .badge-low {
+        background-color: #fff3e0;
+        color: #ef6c00;
+    }
+
+    .badge-out {
+        background-color: #ffebee;
+        color: #c62828;
+    }
+
+    .empty-state {
+        background-color: #fafaf9;
+        border-radius: 1rem;
+    }
+</style>

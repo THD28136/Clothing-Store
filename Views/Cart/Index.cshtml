@@ -8,71 +8,138 @@
     var vn = CultureInfo.GetCultureInfo("vi-VN");
     var items = Model ?? Enumerable.Empty<MTKPM_Clothing_Store_web.Models.SessionCartItem>();
     var total = items.Sum(i => i.LineTotal);
+    var count = items.Sum(i => i.Quantity);
 }
 
-<h2>Giỏ hàng</h2>
+<style>
+    .cart-wrap { max-width: 1200px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+    .cart-header { text-align: center; margin-bottom: 3rem; }
+    .cart-eyebrow { font-size: .72rem; letter-spacing: .3em; text-transform: uppercase; color: #999; margin-bottom: .75rem; }
+    .cart-title { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 2.75rem); font-weight: 500; letter-spacing: -.01em; margin: 0; color: #1a1a1a; }
+    .cart-subtitle { color: #777; margin-top: .5rem; font-size: .95rem; }
 
-@if (!items.Any())
-{
-    <div class="alert alert-info">Giỏ hàng trống.</div>
-}
-else
-{
-    <div class="table-responsive mb-3">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Sản phẩm</th>
-                    <th>Đơn giá</th>
-                    <th style="width:140px">Số lượng</th>
-                    <th>Thành tiền</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
+    .cart-layout { display: grid; grid-template-columns: 1fr 380px; gap: 3rem; align-items: start; }
+    @@media (max-width: 900px) { .cart-layout { grid-template-columns: 1fr; } }
+
+    .cart-items { border-top: 1px solid #ececec; }
+    .cart-item { display: grid; grid-template-columns: 100px 1fr auto; gap: 1.5rem; padding: 1.75rem 0; border-bottom: 1px solid #ececec; align-items: center; }
+    .cart-item-thumb { width: 100px; height: 130px; background: #f5f5f2; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; color: #bbb; font-size: 1.5rem; }
+    .cart-item-name { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 500; color: #1a1a1a; margin: 0 0 .35rem; }
+    .cart-item-price { color: #777; font-size: .9rem; margin-bottom: .85rem; }
+    .cart-item-actions { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+
+    .qty-group { display: inline-flex; align-items: center; border: 1px solid #d9d9d9; }
+    .qty-group input { width: 56px; border: none; text-align: center; padding: .5rem .25rem; font-size: .9rem; -moz-appearance: textfield; background: transparent; }
+    .qty-group input::-webkit-outer-spin-button, .qty-group input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .qty-update { border: none; background: #1a1a1a; color: #fff; padding: .5rem .9rem; font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; cursor: pointer; transition: background .2s; }
+    .qty-update:hover { background: #333; }
+
+    .link-remove { background: none; border: none; color: #999; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 4px; transition: color .2s; }
+    .link-remove:hover { color: #c0392b; }
+
+    .cart-item-total { text-align: right; }
+    .item-total { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #1a1a1a; }
+
+    .cart-summary { border: 1px solid #ececec; padding: 2rem; background: #fafaf7; position: sticky; top: 100px; }
+    .summary-title { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 500; margin: 0 0 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e5e5; }
+    .summary-row { display: flex; justify-content: space-between; padding: .6rem 0; color: #555; font-size: .95rem; }
+    .summary-row.total { border-top: 1px solid #e5e5e5; margin-top: .75rem; padding-top: 1.15rem; font-family: 'Playfair Display', serif; font-size: 1.3rem; color: #1a1a1a; }
+    .summary-note { font-size: .8rem; color: #888; margin-top: .5rem; font-style: italic; }
+
+    .btn-checkout { display: block; width: 100%; text-align: center; background: #1a1a1a; color: #fff !important; border: none; padding: 1rem; margin-top: 1.5rem; font-size: .78rem; letter-spacing: .25em; text-transform: uppercase; text-decoration: none; cursor: pointer; transition: background .25s; }
+    .btn-checkout:hover { background: #333; }
+    .btn-continue { display: block; width: 100%; text-align: center; background: transparent; color: #1a1a1a !important; border: 1px solid #1a1a1a; padding: .95rem; margin-top: .75rem; font-size: .72rem; letter-spacing: .22em; text-transform: uppercase; text-decoration: none; transition: all .25s; }
+    .btn-continue:hover { background: #1a1a1a; color: #fff !important; }
+
+    .cart-empty { text-align: center; padding: 5rem 1rem; border: 1px solid #ececec; }
+    .cart-empty-icon { font-size: 3rem; color: #d9d9d9; margin-bottom: 1rem; }
+    .cart-empty-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: #1a1a1a; margin-bottom: .5rem; }
+    .cart-empty-text { color: #888; margin-bottom: 2rem; }
+
+    .toast-mini { position: fixed; bottom: 30px; right: 30px; background: #1a1a1a; color: #fff; padding: .9rem 1.5rem; font-size: .82rem; letter-spacing: .1em; z-index: 9999; opacity: 0; transform: translateY(10px); transition: all .3s; }
+    .toast-mini.show { opacity: 1; transform: translateY(0); }
+    .toast-mini.error { background: #8b2e2e; }
+</style>
+
+<div class="cart-wrap">
+    <div class="cart-header">
+        <div class="cart-eyebrow">Shopping Bag</div>
+        <h1 class="cart-title">Giỏ hàng của bạn</h1>
+        @if (items.Any())
+        {
+            <div class="cart-subtitle">@count sản phẩm trong giỏ</div>
+        }
+    </div>
+
+    @if (!items.Any())
+    {
+        <div class="cart-empty">
+            <div class="cart-empty-icon">🛍</div>
+            <h3 class="cart-empty-title">Giỏ hàng đang trống</h3>
+            <p class="cart-empty-text">Khám phá bộ sưu tập mới nhất và thêm những món yêu thích của bạn.</p>
+            <a class="btn-checkout" style="max-width:280px;margin:0 auto;" asp-controller="Products" asp-action="Index">Tiếp tục mua sắm</a>
+        </div>
+    }
+    else
+    {
+        <div class="cart-layout">
+            <div class="cart-items">
                 @foreach (var it in items)
                 {
-                    <tr data-product-id="@it.ProductId">
-                        <td>@it.Name</td>
-                        <td>@it.Price.ToString("C0", vn)</td>
-                        <td>
-                            <form asp-controller="Cart" asp-action="Update" method="post" class="d-inline cart-update-form">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="productId" value="@it.ProductId" />
-                                <div class="input-group input-group-sm">
-                                    <input type="number" name="quantity" value="@it.Quantity" min="0" class="form-control form-control-sm quantity-input" style="max-width:90px" />
-                                    <button class="btn btn-outline-secondary" type="submit">Cập nhật</button>
-                                </div>
-                            </form>
-                        </td>
-                        <td class="item-total">@it.LineTotal.ToString("C0", vn)</td>
-                        <td>
-                            <form asp-controller="Cart" asp-action="Remove" method="post" class="d-inline cart-remove-form">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="productId" value="@it.ProductId" />
-                                <button class="btn btn-sm btn-outline-danger" type="submit">Xóa</button>
-                            </form>
-                        </td>
-                    </tr>
+                    <div class="cart-item" data-product-id="@it.ProductId">
+                        <div class="cart-item-thumb">@(it.Name?.Substring(0,1).ToUpper())</div>
+                        <div>
+                            <h3 class="cart-item-name">@it.Name</h3>
+                            <div class="cart-item-price">@it.Price.ToString("C0", vn)</div>
+                            <div class="cart-item-actions">
+                                <form asp-controller="Cart" asp-action="Update" method="post" class="cart-update-form" style="margin:0;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@it.ProductId" />
+                                    <div class="qty-group">
+                                        <input type="number" name="quantity" value="@it.Quantity" min="0" class="quantity-input" />
+                                        <button class="qty-update" type="submit">Cập nhật</button>
+                                    </div>
+                                </form>
+                                <form asp-controller="Cart" asp-action="Remove" method="post" class="cart-remove-form" style="margin:0;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@it.ProductId" />
+                                    <button class="link-remove" type="submit">Xóa</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="cart-item-total">
+                            <div class="item-total">@it.LineTotal.ToString("C0", vn)</div>
+                        </div>
+                    </div>
                 }
-            </tbody>
-        </table>
-    </div>
+            </div>
 
-    <div class="mb-3">
-        <h5>Tổng: <span id="cart-total">@total.ToString("C0", vn)</span></h5>
-    </div>
+            <aside class="cart-summary">
+                <h3 class="summary-title">Tóm tắt đơn hàng</h3>
+                <div class="summary-row"><span>Tạm tính</span><span id="cart-subtotal">@total.ToString("C0", vn)</span></div>
+                <div class="summary-row"><span>Vận chuyển</span><span>Miễn phí</span></div>
+                <div class="summary-row total"><span>Tổng cộng</span><span id="cart-total">@total.ToString("C0", vn)</span></div>
+                <p class="summary-note">Thuế được tính khi thanh toán.</p>
+                <a class="btn-checkout" asp-controller="Payments" asp-action="Checkout">Thanh toán</a>
+                <a class="btn-continue" asp-controller="Products" asp-action="Index">Tiếp tục mua sắm</a>
+            </aside>
+        </div>
+    }
+</div>
 
-    <div class="d-flex gap-2">
-        <a class="btn btn-outline-secondary" asp-controller="Products" asp-action="Index">Tiếp tục mua</a>
-        <a class="btn btn-primary" asp-controller="Payments" asp-action="Checkout">Thanh toán</a>
-    </div>
-}
+<div id="toast-mini" class="toast-mini"></div>
 
 @section Scripts {
     <script>
         (function () {
-            // Helper to read antiforgery token from a form
+            const toast = document.getElementById('toast-mini');
+            function showToast(msg, isError) {
+                toast.textContent = msg;
+                toast.classList.toggle('error', !!isError);
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2200);
+            }
+            function fmt(n) { return (n || 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }); }
             function formFetch(form) {
                 const fd = new FormData(form);
                 return fetch(form.action, {
@@ -82,51 +149,58 @@ else
                 }).then(r => r.json());
             }
 
-            // Handle update quantity via AJAX
             document.querySelectorAll('form.cart-update-form').forEach(form => {
                 form.addEventListener('submit', async function (e) {
                     e.preventDefault();
-                    const tr = form.closest('tr');
-                    const productId = tr.getAttribute('data-product-id');
+                    const row = form.closest('.cart-item');
                     try {
                         const json = await formFetch(form);
                         if (json?.success) {
-                            // update item total and cart total and badge
-                            const itemTotalCell = tr.querySelector('.item-total');
-                            if (itemTotalCell) itemTotalCell.innerText = (json.itemTotal || 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 });
-                            if (document.getElementById('cart-total')) document.getElementById('cart-total').innerText = (json.cartTotal || 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 });
+                            const cell = row.querySelector('.item-total');
+                            if (cell) cell.innerText = fmt(json.itemTotal);
+                            const sub = document.getElementById('cart-subtotal');
+                            const tot = document.getElementById('cart-total');
+                            if (sub) sub.innerText = fmt(json.cartTotal);
+                            if (tot) tot.innerText = fmt(json.cartTotal);
                             const badge = document.querySelector('.cart-count-badge');
                             if (badge && typeof json.cartCount !== 'undefined') badge.innerText = json.cartCount;
+                            showToast('Đã cập nhật giỏ hàng');
                         } else {
-                            alert('Lỗi khi cập nhật giỏ hàng.');
+                            showToast('Lỗi khi cập nhật', true);
                         }
                     } catch (err) {
                         console.error(err);
-                        alert('Lỗi khi cập nhật giỏ hàng.');
+                        showToast('Lỗi khi cập nhật', true);
                     }
                 });
             });
 
-            // Handle remove via AJAX
             document.querySelectorAll('form.cart-remove-form').forEach(form => {
                 form.addEventListener('submit', async function (e) {
                     e.preventDefault();
-                    const tr = form.closest('tr');
+                    const row = form.closest('.cart-item');
                     try {
                         const json = await formFetch(form);
                         if (json?.success) {
-                            tr.remove();
-                            if (document.getElementById('cart-total')) document.getElementById('cart-total').innerText = (json.total || 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 });
-                            const badge = document.querySelector('.cart-count-badge');
-                            if (badge && typeof json.cartCount !== 'undefined') badge.innerText = json.cartCount;
-                            // If no rows left show empty message (simple reload is also fine)
-                            if (!document.querySelectorAll('tbody tr').length) location.reload();
+                            row.style.transition = 'opacity .25s';
+                            row.style.opacity = '0';
+                            setTimeout(() => {
+                                row.remove();
+                                const sub = document.getElementById('cart-subtotal');
+                                const tot = document.getElementById('cart-total');
+                                if (sub) sub.innerText = fmt(json.total);
+                                if (tot) tot.innerText = fmt(json.total);
+                                const badge = document.querySelector('.cart-count-badge');
+                                if (badge && typeof json.cartCount !== 'undefined') badge.innerText = json.cartCount;
+                                if (!document.querySelectorAll('.cart-item').length) location.reload();
+                            }, 250);
+                            showToast('Đã xóa khỏi giỏ hàng');
                         } else {
-                            alert('Lỗi khi xóa mục khỏi giỏ hàng.');
+                            showToast('Lỗi khi xóa', true);
                         }
                     } catch (err) {
                         console.error(err);
-                        alert('Lỗi khi xóa mục khỏi giỏ hàng.');
+                        showToast('Lỗi khi xóa', true);
                     }
                 });
             });
