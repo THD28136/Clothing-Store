@@ -164,6 +164,7 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("order_date");
             entity.Property(e => e.PaymentMethodId).HasColumnName("payment_method_id");
+            entity.Property(e => e.PaymentProviderId).HasMaxLength(255);
             entity.Property(e => e.Status).HasMaxLength(30);
             entity.Property(e => e.TotalAmount)
                 .HasColumnType("decimal(18, 2)")

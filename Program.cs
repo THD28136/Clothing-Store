@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MTKPM_Clothing_Store_web.Models;
+using MTKPM_Clothing_Store_web.Services;
 using System;
-using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +49,14 @@ builder.Services.AddLogging(config =>
     config.AddConsole();
     config.AddDebug();
 });
+
+// Add PayPal service configuration
+builder.Services.AddHttpClient();
+
+builder.Services.Configure<PayPalSettings>(
+    builder.Configuration.GetSection("PayPal"));
+
+builder.Services.AddScoped<PayPalService>();
 
 var app = builder.Build();
 

@@ -25,6 +25,8 @@ public partial class Order
 
     public string? GuestEmail { get; set; }
 
+    public string? PaymentProviderId { get; set; }
+
     public virtual Coupon? Coupon { get; set; }
 
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();

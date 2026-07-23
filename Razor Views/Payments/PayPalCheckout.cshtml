@@ -1,0 +1,85 @@
+﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@{
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    var clientId = Configuration["PayPal:ClientId"] ?? "";
+    var currency = Configuration["PayPal:Currency"] ?? "USD";
+    var localOrderId = (int?)ViewData["LocalOrderId"] ?? 0;
+}
+@Html.AntiForgeryToken()
+<h2>Thanh toán bằng PayPal</h2>
+
+<div id="paypal-button-container"></div>
+
+@section Scripts {
+    <script src="https://www.paypal.com/sdk/js?client-id=@clientId&currency=@currency"></script>
+    <script>
+        (function () {
+            var localOrderId = @localOrderId;
+            if (!localOrderId) {
+                console.error('Missing local order id');
+                return;
+            }
+
+            // read antiforgery token rendered on this page
+            var af = document.querySelector('input[name="__RequestVerificationToken"]');
+            var token = af ? af.value : '';
+
+            // Create order on server and return PayPal order id
+            function createOrderOnServer() {
+                return fetch('/PaymentsPayPal/CreateOrder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify({ localOrderId: localOrderId })
+                }).then(function (res) {
+                    if (!res.ok) throw new Error('create-order failed');
+                    return res.json();
+                }).then(function (json) {
+                    return json.id;
+                });
+            }
+
+            // Capture order on server after client approval
+            function captureOrderOnServer(paypalOrderId) {
+                return fetch('/PaymentsPayPal/CaptureOrder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify({ localOrderId: localOrderId, paypalOrderId: paypalOrderId })
+                }).then(function (res) {
+                    return res.json();
+                });
+            }
+
+            paypal.Buttons({
+                createOrder: function () {
+                    return createOrderOnServer();
+                },
+                onApprove: function (data, actions) {
+                    // data.orderID is the PayPal order id
+                    return captureOrderOnServer(data.orderID).then(function (res) {
+                        if (res && res.success) {
+                            // redirect to success page for the local order
+                            window.location = '/Payments/Success?id=' + localOrderId;
+                        } else {
+                            alert('Thanh toán không thành công. Vui lòng liên hệ hỗ trợ.');
+                            console.error(res);
+                        }
+                    });
+                },
+                onCancel: function (data) {
+                    window.location = '/Payments/Checkout';
+                },
+                onError: function (err) {
+                    console.error(err);
+                    alert('Lỗi thanh toán PayPal. Vui lòng thử lại.');
+                }
+            }).render('#paypal-button-container');
+        })();
+    </script>
+}

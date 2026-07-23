@@ -13,11 +13,20 @@ namespace MTKPM_Clothing_Store_web.Models
         public decimal SubTotal => Product?.Price * Quantity ?? 0m;
     }
 
+    public enum PaymentMethodType
+    {
+        Card = 1,
+        COD = 2,
+        PayPal = 3,
+        Momo = 4
+    }
+
     public class CheckoutViewModel
     {
         public CheckoutViewModel()
         {
             Items = new List<CheckoutItem>();
+            SelectedPaymentMethod = PaymentMethodType.Card;
         }
 
         public List<CheckoutItem> Items { get; set; }
@@ -49,6 +58,10 @@ namespace MTKPM_Clothing_Store_web.Models
         [Display(Name = "CVV/CVC")]
         public string CVV { get; set; } = string.Empty;
 
+        // Payment method selection
+        [Display(Name = "Phương thức thanh toán")]
+        public PaymentMethodType SelectedPaymentMethod { get; set; }
+
         // New: will be populated from current user (or session) in controller
         public int? UserId { get; set; }
 
@@ -61,6 +74,11 @@ namespace MTKPM_Clothing_Store_web.Models
         [Display(Name = "Họ tên")]
         [StringLength(100)]
         public string? GuestName { get; set; }
+
+        // Optional guest phone (Order model has GuestPhone)
+        [Phone(ErrorMessage = "Số điện thoại không hợp lệ.")]
+        [Display(Name = "Số điện thoại")]
+        public string? GuestPhone { get; set; }
 
         // Coupon: user-entered code, plus what the server determined about it.
         // AppliedDiscountPercent/CouponMessage are set by the controller after

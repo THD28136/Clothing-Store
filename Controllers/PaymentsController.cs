@@ -76,6 +76,9 @@ namespace MTKPM_Clothing_Store_web.Controllers
                 vm.UserId = uid;
             }
 
+            // default payment method remains Card; you can override with querystring if needed
+            vm.SelectedPaymentMethod = PaymentMethodType.Card;
+
             if (!string.IsNullOrWhiteSpace(couponCode))
             {
                 var (coupon, error) = await ValidateCouponAsync(couponCode, vm.Total);
@@ -163,26 +166,39 @@ namespace MTKPM_Clothing_Store_web.Controllers
                 model.Items.Add(new CheckoutItem { Product = prod, Quantity = ci.Quantity });
             }
 
+            // If the user did not choose Card, remove card-related modelstate so validation won't require them
+            if (model.SelectedPaymentMethod != PaymentMethodType.Card)
+            {
+                ModelState.Remove(nameof(model.CardName));
+                ModelState.Remove(nameof(model.CardNumber));
+                ModelState.Remove(nameof(model.ExpiryMonth));
+                ModelState.Remove(nameof(model.ExpiryYear));
+                ModelState.Remove(nameof(model.CVV));
+            }
+
             // model validation
             if (!ModelState.IsValid)
             {
                 return View("Checkout", model);
             }
 
-            // expiry date validation
-            var now = DateTime.UtcNow;
-            if (model.ExpiryYear < now.Year || (model.ExpiryYear == now.Year && model.ExpiryMonth < now.Month))
+            // If card chosen, validate expiry + basic card number
+            if (model.SelectedPaymentMethod == PaymentMethodType.Card)
             {
-                ModelState.AddModelError(string.Empty, "Ngày hết hạn thẻ đã qua. Vui lòng kiểm tra lại.");
-                return View("Checkout", model);
-            }
+                var now = DateTime.UtcNow;
+                if (model.ExpiryYear < now.Year || (model.ExpiryYear == now.Year && model.ExpiryMonth < now.Month))
+                {
+                    ModelState.AddModelError(string.Empty, "Ngày hết hạn thẻ đã qua. Vui lòng kiểm tra lại.");
+                    return View("Checkout", model);
+                }
 
-            // Basic card-number sanitization (we are not performing real payment)
-            var normalizedCard = new string(model.CardNumber.Where(char.IsDigit).ToArray());
-            if (normalizedCard.Length < 12 || normalizedCard.Length > 19)
-            {
-                ModelState.AddModelError(nameof(model.CardNumber), "Số thẻ không hợp lệ.");
-                return View("Checkout", model);
+                // Basic card-number sanitization (we are not performing real payment)
+                var normalizedCard = new string(model.CardNumber.Where(char.IsDigit).ToArray());
+                if (normalizedCard.Length < 12 || normalizedCard.Length > 19)
+                {
+                    ModelState.AddModelError(nameof(model.CardNumber), "Số thẻ không hợp lệ.");
+                    return View("Checkout", model);
+                }
             }
 
             // Ensure we have the current user id (prefer claim, fallback to session)
@@ -234,10 +250,19 @@ namespace MTKPM_Clothing_Store_web.Controllers
             var discountAmount = model.DiscountAmount;
             var finalTotal = model.FinalTotal;
 
-            // CVV check already done by DataAnnotations; proceed with mock payment processing
+            // Map selected payment method to an id stored in Order.PaymentMethodId
+            int paymentMethodId = model.SelectedPaymentMethod switch
+            {
+                PaymentMethodType.Card => 1,
+                PaymentMethodType.COD => 2,
+                PaymentMethodType.PayPal => 3,
+                PaymentMethodType.Momo => 4,
+                _ => 1
+            };
+
             try
             {
-                _loggerInstance.LogInformation("Mock checkout started for user {UserId}. Cart: {@Cart}", userId, cart);
+                _loggerInstance.LogInformation("Checkout started for user {UserId}. PaymentMethod={PaymentMethod}. Cart: {@Cart}", userId, model.SelectedPaymentMethod, cart);
 
                 // Basic pre-check: ensure all products exist and have enough stock
                 foreach (var ci in cart)
@@ -245,20 +270,18 @@ namespace MTKPM_Clothing_Store_web.Controllers
                     var prod = await _dbContext.Products.AsNoTracking().FirstOrDefaultAsync(p => p.ProductId == ci.ProductId);
                     if (prod == null)
                     {
-                        _loggerInstance.LogWarning("Mock checkout: product {ProductId} not found.", ci.ProductId);
+                        _loggerInstance.LogWarning("Checkout: product {ProductId} not found.", ci.ProductId);
                         return BadRequest("Một sản phẩm không tồn tại. Vui lòng kiểm tra giỏ hàng.");
                     }
 
                     if (prod.Stock < ci.Quantity)
                     {
-                        _loggerInstance.LogInformation("Mock checkout: insufficient stock for product {ProductId} (need {Need}, have {Have}).", ci.ProductId, ci.Quantity, prod.Stock);
+                        _loggerInstance.LogInformation("Checkout: insufficient stock for product {ProductId} (need {Need}, have {Have}).", ci.ProductId, ci.Quantity, prod.Stock);
                         return BadRequest($"Không đủ hàng cho sản phẩm '{prod.Name}'. Có {prod.Stock} trong kho.");
                     }
                 }
 
-                // Atomically claim one use of the coupon (if any) before creating
-                // the order — the WHERE clause re-checks the limit at the DB level
-                // so two concurrent checkouts can't both redeem the last slot.
+                // Atomically claim one use of the coupon (if any)
                 if (appliedCoupon != null)
                 {
                     var couponConn = _dbContext.Database.GetDbConnection();
@@ -282,13 +305,40 @@ namespace MTKPM_Clothing_Store_web.Controllers
                     }
                 }
 
-                // ----- WORKAROUND: create order via raw SQL to avoid EF rowcount/concurrency problem -----
+                // ----- create order via raw SQL (include payment_method_id) -----
                 int orderId;
+                bool isPayPal = model.SelectedPaymentMethod == PaymentMethodType.PayPal;
 
                 var conn = _dbContext.Database.GetDbConnection();
                 await using (var cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "INSERT INTO orders (user_id, order_date, guest_email, guest_name, coupon_id, total_amount) VALUES (@uid, @odate, @gemail, @gname, @cid, @total); SELECT CAST(SCOPE_IDENTITY() AS INT);";
+                    cmd.CommandText =
+                    @"INSERT INTO orders
+                    (
+                        user_id,
+                        order_date,
+                        status,
+                        guest_email,
+                        guest_name,
+                        guest_phone,
+                        coupon_id,
+                        payment_method_id,
+                        total_amount
+                    )
+                    VALUES
+                    (
+                        @uid,
+                        @odate,
+                        @status,
+                        @gemail,
+                        @gname,
+                        @gphone,
+                        @cid,
+                        @pmid,
+                        @total
+                    );
+
+                    SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     cmd.CommandType = CommandType.Text;
                     var p1 = cmd.CreateParameter();
                     p1.ParameterName = "@uid";
@@ -310,19 +360,33 @@ namespace MTKPM_Clothing_Store_web.Controllers
                     pgn.Value = (object?)guestName ?? DBNull.Value;
                     pgn.DbType = DbType.String;
                     cmd.Parameters.Add(pgn);
+                    var pphone = cmd.CreateParameter();
+                    pphone.ParameterName = "@gphone";
+                    pphone.Value = (object?)model.GuestPhone ?? DBNull.Value;
+                    pphone.DbType = DbType.String;
+                    cmd.Parameters.Add(pphone);
                     var p4 = cmd.CreateParameter();
                     p4.ParameterName = "@cid";
                     p4.Value = (object?)appliedCoupon?.CouponId ?? DBNull.Value;
                     p4.DbType = DbType.Int32;
                     cmd.Parameters.Add(p4);
                     var p5 = cmd.CreateParameter();
-                    p5.ParameterName = "@total";
-                    p5.Value = finalTotal;
-                    p5.DbType = DbType.Decimal;
+                    p5.ParameterName = "@pmid";
+                    p5.Value = paymentMethodId;
+                    p5.DbType = DbType.Int32;
                     cmd.Parameters.Add(p5);
+                    var p6 = cmd.CreateParameter();
+                    p6.ParameterName = "@total";
+                    p6.Value = finalTotal;
+                    p6.DbType = DbType.Decimal;
+                    cmd.Parameters.Add(p6);
+                    var p7 = cmd.CreateParameter();
+                    p7.ParameterName = "@status";
+                    p7.Value = isPayPal ? "PendingPayment" : "Pending";
+                    p7.DbType = DbType.String;
+                    cmd.Parameters.Add(p7);
 
                     if (conn.State != ConnectionState.Open) await conn.OpenAsync();
-                    // if there is an ambient EF transaction, attach it
                     cmd.Transaction = (_dbContext.Database.CurrentTransaction as RelationalTransaction)?.GetDbTransaction();
                     var scalar = await cmd.ExecuteScalarAsync();
                     if (scalar == null || scalar == DBNull.Value)
@@ -333,25 +397,33 @@ namespace MTKPM_Clothing_Store_web.Controllers
                     orderId = Convert.ToInt32(scalar);
                 }
 
-                // For each cart item: reduce stock and add order detail (EF)
+                // For PayPal: do not deduct stock now — create order details only and mark PendingPayment.
+                // For other methods: reduce stock and add order detail (existing behaviour).
+
                 foreach (var ci in cart)
                 {
                     var prod = await _dbContext.Products.FirstOrDefaultAsync(p => p.ProductId == ci.ProductId);
                     if (prod == null)
                     {
-                        // unexpected, but handle gracefully
-                        _loggerInstance.LogWarning("Mock checkout: product {ProductId} disappeared after order creation.", ci.ProductId);
+                        _loggerInstance.LogWarning("Checkout: product {ProductId} disappeared after order creation.", ci.ProductId);
                         continue;
                     }
 
-                    // reduce stock (basic check)
-                    if (prod.Stock < ci.Quantity)
+                    if (!isPayPal)
                     {
-                        _loggerInstance.LogInformation("Mock checkout: stock changed for product {ProductId} after order creation.", ci.ProductId);
-                        continue;
+                        if (prod.Stock < ci.Quantity)
+                        {
+                            _loggerInstance.LogInformation("Checkout: stock changed for product {ProductId} after order creation.", ci.ProductId);
+                            continue;
+                        }
+
+                        prod.Stock -= ci.Quantity;
+                    }
+                    else
+                    {
+                        // For PayPal we keep stock unchanged until capture; still check availability earlier already ensured.
                     }
 
-                    prod.Stock -= ci.Quantity;
                     _dbContext.OrderDetails.Add(new OrderDetail
                     {
                         OrderId = orderId,
@@ -364,16 +436,27 @@ namespace MTKPM_Clothing_Store_web.Controllers
                 await _dbContext.SaveChangesAsync();
 
                 // Clear cart session
-                _httpAccessor.HttpContext?.Session.Remove("Cart");
+                if (!isPayPal)
+                {
+                    _httpAccessor.HttpContext?.Session.Remove("Cart");
+                }
 
-                _loggerInstance.LogInformation("Mock checkout completed for order {OrderId}", orderId);
+                _loggerInstance.LogInformation("Checkout completed for order {OrderId}", orderId);
+                await _dbContext.SaveChangesAsync();
 
+                // If PayPal chosen, redirect into PayPal flow controller which will create PayPal order and redirect customer.
+                if (isPayPal)
+                {
+                    return RedirectToAction("Create", "PaymentsPayPal", new { orderId = orderId });
+                }
+
+                // For other methods we treat as immediate success (existing behaviour)
                 return RedirectToAction("Success", new { id = orderId });
             }
             catch (Exception ex)
             {
-                _loggerInstance.LogError(ex, "Unexpected error in mock checkout.");
-                return BadRequest("Lỗi khi tạo đơn hàng (mock). Vui lòng thử lại.");
+                _loggerInstance.LogError(ex, "Unexpected error in checkout.");
+                return BadRequest("Lỗi khi tạo đơn hàng. Vui lòng thử lại.");
             }
         }
 
@@ -521,8 +604,13 @@ namespace MTKPM_Clothing_Store_web.Controllers
         {
             // List of package procs and stored procs/views that may be unused.
             var results = new Dictionary<string, object?>();
+            Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction? transaction = null;
+
             try
             {
+
+                transaction = await _dbContext.Database.BeginTransactionAsync();
+
                 // pkg_order simple selects
                 var pkgNames = new[] { "pkg_order.sp1", "pkg_order.sp2", "pkg_order.sp3", "pkg_order.sp4", "pkg_order.sp5", "pkg_order.sp9", "pkg_order.sp10" };
                 foreach (var name in pkgNames)
@@ -554,11 +642,15 @@ namespace MTKPM_Clothing_Store_web.Controllers
                 results["vw_InStockProducts.Count"] = inStock;
                 var topSelling = await _dbContext.VwTopSellingProducts.AsNoTracking().Take(5).Select(v => new { v.Name, v.TotalSold }).ToListAsync();
                 results["vw_TopSellingProducts.Sample"] = topSelling;
+
+                await transaction.CommitAsync();
             }
             catch (Exception ex)
             {
                 _loggerInstance.LogError(ex, "DbToolbox encountered an error");
                 results["error"] = ex.Message;
+                if (transaction != null)
+                    await transaction.RollbackAsync();
             }
 
             return Json(results);

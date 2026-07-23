@@ -1,10 +1,12 @@
 ﻿@model MTKPM_Clothing_Store_web.Models.CheckoutViewModel
-
+@using System.Globalization
+@using MTKPM_Clothing_Store_web.Models
 @{
     ViewData["Title"] = "Thanh toán";
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
-}
 
+    var vn = CultureInfo.GetCultureInfo("vi-VN");
+}
 <link rel="stylesheet" href="~/css/checkout.css" />
 <h2>Thanh toán</h2>
 
@@ -31,9 +33,9 @@
                         var subtotal = it.Product.Price * it.Quantity;
                         <tr>
                             <td>@it.Product.Name</td>
-                            <td>@($"{it.Product.Price:C0}")</td>
+                            <td>@it.Product.Price.ToString("C0", vn)</td>
                             <td>@it.Quantity</td>
-                            <td>@($"{subtotal:C0}")</td>
+                            <td>@($"{subtotal.ToString("C0", vn)}")</td>
                         </tr>
                     }
                 </tbody>
@@ -60,7 +62,7 @@
             {
                 <div class="text-success mb-0">
                     Đã áp dụng mã <strong>@Model.CouponCode</strong>: giảm @Model.AppliedDiscountPercent%
-                    (-@($"{Model.DiscountAmount:C0}")) — Tổng thanh toán: <strong>@($"{Model.FinalTotal:C0}")</strong>
+                    (-@($"{Model.DiscountAmount.ToString("C0", vn)}")) — Tổng thanh toán: <strong>@($"{Model.FinalTotal.ToString("C0", vn)}")</strong>
                 </div>
             }
         </div>
@@ -73,13 +75,13 @@
                 @if (Model.AppliedDiscountPercent.HasValue)
                 {
                     <h5>
-                        Tổng: <span class="text-decoration-line-through text-muted">@($"{Model.Total:C0}")</span>
-                        <strong class="text-success">@($"{Model.FinalTotal:C0}")</strong>
+                        Tổng: <span class="text-decoration-line-through text-muted">@($"{Model.Total.ToString("C0", vn)}")</span>
+                        <strong class="text-success">@($"{Model.FinalTotal.ToString("C0", vn)}")</strong>
                     </h5>
                 }
                 else
                 {
-                    <h5>Tổng: @($"{Model.Total:C0}")</h5>
+                    <h5>Tổng: @($"{Model.Total.ToString("C0", vn)}")</h5>
                 }
             </div>
 
@@ -103,51 +105,85 @@
                     <input asp-for="GuestEmail" class="form-control" type="email" />
                     <span asp-validation-for="GuestEmail" class="text-danger"></span>
                 </div>
+
+                <div class="mb-3">
+                    <label asp-for="GuestPhone" class="form-label">Số điện thoại (tùy chọn)</label>
+                    <input asp-for="GuestPhone" class="form-control" />
+                    <span asp-validation-for="GuestPhone" class="text-danger"></span>
+                </div>
             }
 
             <div class="mb-3">
-                <label asp-for="CardName" class="form-label">Tên trên thẻ</label>
-                <input asp-for="CardName" class="form-control" />
-                <span asp-validation-for="CardName" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="CardNumber" class="form-label">Số thẻ</label>
-                <input asp-for="CardNumber" class="form-control" inputmode="numeric" />
-                <span asp-validation-for="CardNumber" class="text-danger"></span>
-            </div>
-
-            <div class="row g-2 mb-3">
-                <div class="col-auto">
-                    <label asp-for="ExpiryMonth" class="form-label">Tháng</label>
-                    <select asp-for="ExpiryMonth" class="form-select">
-                        <option value="">MM</option>
-                        @for (int m = 1; m <= 12; m++)
-                        {
-                            <option value="@m" selected="@(Model.ExpiryMonth==m ? "selected" : null)">@m.ToString("D2")</option>
-                        }
-                    </select>
-                    <span asp-validation-for="ExpiryMonth" class="text-danger"></span>
+                <label class="form-label">Phương thức thanh toán</label>
+                <div>
+                    <div class="form-check form-check-inline">
+                        <input asp-for="SelectedPaymentMethod" class="form-check-input" type="radio" value="1" id="pmCard" />
+                        <label class="form-check-label" for="pmCard">Thẻ tính dụng(Credit/Debit)</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input asp-for="SelectedPaymentMethod" class="form-check-input" type="radio" value="2" id="pmCod" />
+                        <label class="form-check-label" for="pmCod">Thanh toán khi nhận hàng</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input asp-for="SelectedPaymentMethod" class="form-check-input" type="radio" value="3" id="pmPaypal" />
+                        <label class="form-check-label" for="pmPaypal">PayPal</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input asp-for="SelectedPaymentMethod" class="form-check-input" type="radio" value="4" id="pmMomo" />
+                        <label class="form-check-label" for="pmMomo">Momo </label>
+                    </div>
                 </div>
-                <div class="col-auto">
-                    <label asp-for="ExpiryYear" class="form-label">Năm</label>
-                    <select asp-for="ExpiryYear" class="form-select">
-                        <option value="">YYYY</option>
-                        @{
-                            var start = System.DateTime.UtcNow.Year;
-                            for (int y = start; y <= start + 12; y++)
+            </div>
+
+            <div id="cardFields">
+                <div class="mb-3">
+                    <label asp-for="CardName" class="form-label">Tên trên thẻ</label>
+                    <input asp-for="CardName" class="form-control" />
+                    <span asp-validation-for="CardName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CardNumber" class="form-label">Số thẻ</label>
+                    <input asp-for="CardNumber" class="form-control" inputmode="numeric" />
+                    <span asp-validation-for="CardNumber" class="text-danger"></span>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-auto">
+                        <label asp-for="ExpiryMonth" class="form-label">Tháng</label>
+                        <select asp-for="ExpiryMonth" class="form-select">
+                            <option value="">MM</option>
+                            @for (int m = 1; m <= 12; m++)
                             {
-                                <option value="@y" selected="@(Model.ExpiryYear==y ? "selected" : null)">@y</option>
+                                <option value="@m" selected="@(Model.ExpiryMonth==m ? "selected" : null)">@m.ToString("D2")</option>
                             }
-                        }
-                    </select>
-                    <span asp-validation-for="ExpiryYear" class="text-danger"></span>
+                        </select>
+                        <span asp-validation-for="ExpiryMonth" class="text-danger"></span>
+                    </div>
+                    <div class="col-auto">
+                        <label asp-for="ExpiryYear" class="form-label">Năm</label>
+                        <select asp-for="ExpiryYear" class="form-select">
+                            <option value="">YYYY</option>
+                            @{
+                                var start = System.DateTime.UtcNow.Year;
+                                for (int y = start; y <= start + 12; y++)
+                                {
+                                    <option value="@y" selected="@(Model.ExpiryYear==y ? "selected" : null)">@y</option>
+                                }
+                            }
+                        </select>
+                        <span asp-validation-for="ExpiryYear" class="text-danger"></span>
+                    </div>
+                    <div class="col-auto">
+                        <label asp-for="CVV" class="form-label">CVV/CVC</label>
+                        <input asp-for="CVV" class="form-control" inputmode="numeric" />
+                        <span asp-validation-for="CVV" class="text-danger"></span>
+                    </div>
                 </div>
-                <div class="col-auto">
-                    <label asp-for="CVV" class="form-label">CVV/CVC</label>
-                    <input asp-for="CVV" class="form-control" inputmode="numeric" />
-                    <span asp-validation-for="CVV" class="text-danger"></span>
-                </div>
+            </div>
+
+            <div class="mb-2 text-muted" id="nonCardNote" style="display:none;">
+                PayPal/Momo sẽ chuyển hướng sang cổng thanh toán bên ngoài (tạm mô phỏng). COD: thanh toán trực tiếp khi nhận hàng.
             </div>
 
             <div class="d-flex gap-2">
@@ -160,4 +196,25 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function() {
+            function updateVisibility() {
+                var pm = document.querySelector('input[name="SelectedPaymentMethod"]:checked')?.value;
+                var card = document.getElementById('cardFields');
+                var note = document.getElementById('nonCardNote');
+                if (pm === '1') {
+                    card.style.display = '';
+                    note.style.display = 'none';
+                } else {
+                    card.style.display = 'none';
+                    note.style.display = '';
+                }
+            }
+            document.querySelectorAll('input[name="SelectedPaymentMethod"]').forEach(function(r) {
+                r.addEventListener('change', updateVisibility);
+            });
+            // initial
+            updateVisibility();
+        })();
+    </script>
 }
