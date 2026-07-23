@@ -761,3 +761,4 @@ D:\Github Repos\Clothing-Store\obj\Debug\net8.0\refint\MTKPM_Clothing_Store_web.
 D:\Github Repos\Clothing-Store\obj\Debug\net8.0\MTKPM_Clothing_Store_web.pdb
 D:\Github Repos\Clothing-Store\obj\Debug\net8.0\MTKPM_Clothing_Store_web.genruntimeconfig.cache
 D:\Github Repos\Clothing-Store\obj\Debug\net8.0\ref\MTKPM_Clothing_Store_web.dll
+D:\Github Repos\Clothing-Store\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
