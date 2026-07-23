@@ -236,5 +236,52 @@ namespace MTKPM_Clothing_Store_web.Controllers
 
             return RedirectToAction(nameof(Details), new { id });
         }
+
+        // Allow authenticated customers (owners) to cancel their own order.
+        // Admins can still use UpdateStatus.
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Cancel(int id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+
+            if (order == null) return NotFound();
+
+            var isAdmin = User.IsInRole("Admin");
+
+            // If not admin, ensure the caller is the owner of the order
+            if (!isAdmin)
+            {
+                var userIdString = _httpContextAccessor.HttpContext?.Session.GetString("UserId")
+                    ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                if (!int.TryParse(userIdString, out int userId) || order.UserId != userId)
+                {
+                    return Forbid();
+                }
+            }
+
+            var wasCancelled = order.Status == "Cancelled";
+            if (!wasCancelled)
+            {
+                // Return stock for each item once
+                foreach (var detail in order.OrderDetails)
+                {
+                    var product = await _context.Products.FindAsync(detail.ProductId);
+                    if (product != null)
+                    {
+                        product.Stock += detail.Quantity;
+                    }
+                }
+
+                order.Status = "Cancelled";
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Details), new { id });
+        }
     }
 }
