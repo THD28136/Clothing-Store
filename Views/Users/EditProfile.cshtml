@@ -5,47 +5,132 @@
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
 }
 
-<h2>Chỉnh sửa thông tin</h2>
+<style>
+    .lov-panel-wrap { max-width: 560px; margin: 20px auto; }
 
-<form asp-action="EditProfile" method="post" class="w-50">
-    @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="UserId" />
+    .lov-panel-card {
+        background: var(--lov-surface);
+        border: 1px solid var(--lov-line);
+        border-radius: 16px;
+        padding: 40px 36px;
+        box-shadow: 0 30px 60px -40px rgba(0,0,0,0.15);
+    }
 
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    .lov-panel-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-weight: 600;
+        font-size: 1.8rem;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--lov-ink);
+        margin: 0 0 28px;
+    }
 
-    <div class="mb-3">
-        <label asp-for="Name" class="form-label">Tên</label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+    .lov-field { margin-bottom: 18px; }
+
+    .lov-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--lov-muted);
+        margin-bottom: 8px;
+    }
+
+    .lov-input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid var(--lov-line);
+        border-radius: 10px;
+        font-family: inherit;
+        font-size: 14px;
+        color: var(--lov-ink);
+        background: #fff;
+        transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .lov-input:focus {
+        outline: none;
+        border-color: var(--lov-accent);
+        box-shadow: 0 0 0 3px rgba(184,137,90,0.15);
+    }
+
+    .lov-panel-actions { display: flex; gap: 10px; margin-top: 8px; }
+
+    .lov-btn {
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        padding: 13px 24px;
+        border-radius: 999px;
+        text-decoration: none;
+        text-align: center;
+        border: none;
+        cursor: pointer;
+        transition: background .2s ease, color .2s ease, border-color .2s ease;
+    }
+
+    .lov-btn.solid { background: var(--lov-ink); color: #fff; flex: 1; }
+    .lov-btn.solid:hover { background: var(--lov-accent-dark); }
+
+    .lov-btn.ghost {
+        background: transparent;
+        color: var(--lov-ink);
+        border: 1px solid var(--lov-line);
+    }
+
+    .lov-btn.ghost:hover { color: var(--lov-accent); border-color: var(--lov-accent); }
+</style>
+
+<div class="lov-panel-wrap">
+    <div class="lov-panel-card">
+        <h2 class="lov-panel-title">Chỉnh sửa thông tin</h2>
+
+        <form asp-action="EditProfile" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="UserId" />
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="lov-field">
+                <label asp-for="Name" class="lov-label">Tên</label>
+                <input asp-for="Name" class="lov-input" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="lov-field">
+                <label asp-for="Email" class="lov-label">Email</label>
+                <input asp-for="Email" class="lov-input" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="lov-field">
+                <label asp-for="Username" class="lov-label">Username</label>
+                <input asp-for="Username" class="lov-input" />
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+
+            <div class="lov-field">
+                <label asp-for="Phone" class="lov-label">Phone</label>
+                <input asp-for="Phone" class="lov-input" />
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+
+            <div class="lov-field">
+                <label asp-for="Address" class="lov-label">Address</label>
+                <input asp-for="Address" class="lov-input" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+
+            <div class="lov-panel-actions">
+                <button type="submit" class="lov-btn solid">Lưu</button>
+                <a class="lov-btn ghost" asp-action="Details" asp-route-id="@Model.UserId">Hủy</a>
+            </div>
+        </form>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="Email" class="form-label">Email</label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Username" class="form-label">Username</label>
-        <input asp-for="Username" class="form-control" />
-        <span asp-validation-for="Username" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Phone" class="form-label">Phone</label>
-        <input asp-for="Phone" class="form-control" />
-        <span asp-validation-for="Phone" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Address" class="form-label">Address</label>
-        <input asp-for="Address" class="form-control" />
-        <span asp-validation-for="Address" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Lưu</button>
-    <a class="btn btn-secondary ms-2" asp-action="Details" asp-route-id="@Model.UserId">Hủy</a>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

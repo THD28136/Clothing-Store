@@ -3,143 +3,179 @@
 
 @{
     ViewData["Title"] = "Chi tiết đơn hàng";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-    var vn = CultureInfo.GetCultureInfo("vi-VN");
-    // Raw subtotal (sum of line items) — used both as a fallback and to compute
-    // the discount amount for display, since we only ever stored a percentage.
-    var rawSubtotal = Model.OrderDetails?.Sum(od => od.Quantity * (od.UnitPrice ?? od.Product?.Price ?? 0)) ?? 0;
-    // total_amount is the authoritative, already-discounted total (set at checkout).
-    // Orders created before that feature existed may still have it as null, so
-    // fall back to the raw subtotal for those.
-    var totalAmount = Model.TotalAmount ?? rawSubtotal;
-    var discountAmount = rawSubtotal - totalAmount;
-    var allowedStatuses = ViewBag.AllowedStatuses as string[] ?? new string[] { "Pending", "Processing", "Cancelled" };
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    var vn = new CultureInfo("vi-VN");
+    string StatusClass(string s) => (s ?? "").ToLower() switch
+    {
+        "pending" or "chờ xử lý" => "lov-badge pending",
+        "processing" or "đang xử lý" => "lov-badge processing",
+        "shipped" or "đang giao" => "lov-badge shipped",
+        "completed" or "hoàn thành" or "delivered" => "lov-badge completed",
+        "cancelled" or "canceled" or "đã hủy" => "lov-badge cancelled",
+        _ => "lov-badge"
+    };
 }
 
-<div class="row">
-    <div class="col-md-8">
-        <h1>Chi tiết đơn hàng #@Model.OrderId</h1>
+<style>
+    .lov-page-head { display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px; margin:8px 0 28px; }
+    .lov-page-title { font-family:'Playfair Display',Georgia,serif; font-weight:600; font-size:2.2rem; letter-spacing:.08em; text-transform:uppercase; margin:0; }
+    .lov-page-sub { color:var(--lov-muted); font-size:13px; letter-spacing:.08em; margin-top:6px; }
 
-        <div class="card mb-4">
-            <div class="card-body">
-                @if (Model.User != null)
-                {
-                    <p><strong>Khách hàng:</strong> @Model.User.Name</p>
-                    <p><strong>Email:</strong> @Model.User.Email</p>
-                }
-                else
-                {
-                    <p><strong>Khách hàng:</strong> @(Model.GuestName ?? "Khách (không có tài khoản)")</p>
-                    <p><strong>Email:</strong> @(Model.GuestEmail ?? "—")</p>
-                }
-                <p><strong>Ngày đặt hàng:</strong> @Model.OrderDate?.ToString("dd/MM/yyyy HH:mm")</p>
-                <p><strong>Trạng thái:</strong> <span class="badge @(Model.Status == "Delivered" ? "bg-success" : Model.Status == "Cancelled" ? "bg-danger" : "bg-secondary")">@((string.IsNullOrWhiteSpace(Model.Status) ? "Pending" : Model.Status))</span></p>
-            </div>
-        </div>
+    .lov-btn { display:inline-block; font-size:12px; letter-spacing:.18em; text-transform:uppercase; padding:10px 22px; border-radius:999px; text-decoration:none; border:1px solid var(--lov-ink); color:var(--lov-ink); background:transparent; cursor:pointer; transition:all .2s ease; }
+    .lov-btn:hover { background:var(--lov-ink); color:#fff; }
+    .lov-btn.solid { background:var(--lov-ink); color:#fff; }
+    .lov-btn.solid:hover { background:var(--lov-accent-dark); border-color:var(--lov-accent-dark); }
+    .lov-btn.danger { border-color:#b83a3a; color:#b83a3a; }
+    .lov-btn.danger:hover { background:#b83a3a; color:#fff; }
 
-        <h5>Các sản phẩm trong đơn hàng</h5>
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead class="table-light">
-                    <tr>
-                        <th>Sản phẩm</th>
-                        <th>Đơn giá</th>
-                        <th>Số lượng</th>
-                        <th>Thành tiền</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.OrderDetails != null && Model.OrderDetails.Any())
-                    {
-                        @foreach (var detail in Model.OrderDetails)
-                        {
-                            @* Prefer the price actually charged at order time over the product's
-                               current (possibly since-changed) price. *@
-                            var price = detail.UnitPrice ?? detail.Product?.Price ?? 0m;
-                            var subtotal = (detail.Quantity * price);
-                            <tr>
-                                <td>@detail.Product?.Name</td>
-                                <td>@price.ToString("C0", vn)</td>
-                                <td>@detail.Quantity</td>
-                                <td>@subtotal.ToString("C0", vn)</td>
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
+    .lov-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-bottom:28px; }
+    .lov-card { background:var(--lov-surface); border:1px solid var(--lov-line); border-radius:14px; padding:20px 22px; }
+    .lov-card-label { font-size:11px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--lov-muted); margin-bottom:8px; }
+    .lov-card-value { font-size:15px; color:var(--lov-ink); line-height:1.5; }
+
+    .lov-section-title { font-family:'Playfair Display',Georgia,serif; font-size:1.35rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; margin:8px 0 14px; }
+
+    .lov-table-wrap { background:var(--lov-surface); border:1px solid var(--lov-line); border-radius:14px; overflow:hidden; margin-bottom:24px; }
+    .lov-table { width:100%; border-collapse:collapse; }
+    .lov-table thead th { background:#f7f3ec; color:var(--lov-ink); font-size:11px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; text-align:left; padding:14px 18px; border-bottom:1px solid var(--lov-line); }
+    .lov-table tbody td { padding:16px 18px; border-bottom:1px solid var(--lov-line); font-size:14px; color:var(--lov-ink); vertical-align:middle; }
+    .lov-table tbody tr:last-child td { border-bottom:0; }
+    .lov-table .num { text-align:right; font-variant-numeric:tabular-nums; }
+    .lov-thumb { width:56px; height:56px; object-fit:cover; border-radius:8px; border:1px solid var(--lov-line); background:#f2ede4; }
+    .lov-prod-name { font-weight:500; }
+    .lov-prod-meta { color:var(--lov-muted); font-size:12px; margin-top:2px; letter-spacing:.04em; }
+
+    .lov-totals { display:flex; justify-content:flex-end; margin-bottom:28px; }
+    .lov-totals-card { min-width:320px; background:var(--lov-surface); border:1px solid var(--lov-line); border-radius:14px; padding:20px 22px; }
+    .lov-totals-row { display:flex; justify-content:space-between; padding:8px 0; font-size:14px; color:var(--lov-ink); }
+    .lov-totals-row.muted { color:var(--lov-muted); }
+    .lov-totals-row.total { border-top:1px solid var(--lov-line); margin-top:8px; padding-top:14px; font-size:16px; font-weight:600; letter-spacing:.04em; }
+
+    .lov-badge { display:inline-block; padding:5px 12px; border-radius:999px; font-size:11px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; background:#eee; color:#444; }
+    .lov-badge.pending    { background:#fff3d6; color:#8a6a10; }
+    .lov-badge.processing { background:#e6efff; color:#29508f; }
+    .lov-badge.shipped    { background:#e4f0ea; color:#2f6a4a; }
+    .lov-badge.completed  { background:#dcead9; color:#345d2c; }
+    .lov-badge.cancelled  { background:#f7dede; color:#8a2a2a; }
+
+    .lov-actions { display:flex; gap:10px; flex-wrap:wrap; }
+
+    @@media (max-width:640px) {
+        .lov-page-title { font-size:1.6rem; }
+        .lov-totals-card { min-width:100%; }
+        .lov-table thead { display:none; }
+        .lov-table tbody td { display:block; border:0; padding:6px 18px; }
+        .lov-table tbody tr { display:block; padding:12px 0; border-bottom:1px solid var(--lov-line); }
+    }
+</style>
+
+<div class="lov-page-head">
+    <div>
+        <h1 class="lov-page-title">Đơn hàng #@Model.OrderId</h1>
+        <div class="lov-page-sub">
+            Đặt ngày @(Model.OrderDate?.ToString("dd/MM/yyyy HH:mm", vn) ?? "-")
+            &nbsp;·&nbsp;
+            <span class="@StatusClass(Model.Status)">@Model.Status</span>
         </div>
     </div>
+    <div class="lov-actions">
+        <a asp-action="UserOrders" class="lov-btn">← Quay lại đơn hàng</a>
+        @if ((Model.Status ?? "").ToLower() == "pending" || (Model.Status ?? "").ToLower() == "chờ xử lý")
+        {
+            <form asp-action="Cancel" method="post" style="display:inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.OrderId" />
+                <button type="submit" class="lov-btn danger"
+                        onclick="return confirm('Hủy đơn hàng này?');">Hủy đơn</button>
+            </form>
+        }
+    </div>
+</div>
 
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">Tóm tắt đơn hàng</h5>
-            </div>
-            <div class="card-body">
-                <div class="d-flex justify-content-between mb-3">
-                    <span>Số lượng sản phẩm:</span>
-                    <strong>@Model.OrderDetails?.Sum(od => od.Quantity)</strong>
-                </div>
-                <hr />
+<div class="lov-grid">
+    <div class="lov-card">
+        <div class="lov-card-label">Người nhận</div>
+        <div class="lov-card-value">
+            @Model.User?.Name<br />
+            <span style="color:var(--lov-muted); font-size:13px;">@Model.User?.Email</span>
+        </div>
+    </div>
+    <div class="lov-card">
+        @* <div class="lov-card-label">Địa chỉ giao hàng</div>
+        <div class="lov-card-value">@Model.ShippingAddress</div> *@
+    </div>
+    <div class="lov-card">
+        <div class="lov-card-label">Phương thức thanh toán</div>
+        <div class="lov-card-value">@Model.PaymentMethod</div>
+    </div>
+    <div class="lov-card">
+        <div class="lov-card-label">Trạng thái</div>
+        <div class="lov-card-value"><span class="@StatusClass(Model.Status)">@Model.Status</span></div>
+    </div>
+</div>
 
-                @if (Model.Coupon != null)
-                {
-                    <div class="alert alert-success py-2 px-3 mb-3">
-                        <div class="d-flex justify-content-between">
-                            <span>Tạm tính:</span>
-                            <span>@rawSubtotal.ToString("C0", vn)</span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span>Mã giảm giá <code>@Model.Coupon.Code</code> (-@Model.Coupon.DiscountPercent%):</span>
-                            <span>-@discountAmount.ToString("C0", vn)</span>
-                        </div>
-                    </div>
-                }
+<h2 class="lov-section-title">Sản phẩm</h2>
+<div class="lov-table-wrap">
+    <table class="lov-table">
+        <thead>
+            <tr>
+                <th style="width:80px"></th>
+                <th>Sản phẩm</th>
+                <th class="num" style="width:120px">Đơn giá</th>
+                <th class="num" style="width:100px">Số lượng</th>
+                <th class="num" style="width:140px">Thành tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (Model.OrderDetails != null)
+        {
+            foreach (var d in Model.OrderDetails)
+            {
+                var unitPrice = d.UnitPrice ?? 0m;
+                var line = unitPrice * d.Quantity;
+                <tr>
+                    <td>
+                        @if (!string.IsNullOrEmpty(d.Product?.Image))
+                        {
+                            <img src="@Url.Content("~/images/" + d.Product.Image)" alt="@d.Product?.Name" class="lov-thumb" />
+                        }
+                        else
+                        {
+                            <div class="lov-thumb"></div>
+                        }
+                    </td>
+                    <td>
+                        <div class="lov-prod-name">@d.Product?.Name</div>
+                        @if (d.Product?.Category != null)
+                        {
+                            <div class="lov-prod-meta">@d.Product.Category.Name</div>
+                        }
+                    </td>
+                    <td class="num">@unitPrice.ToString("N0", vn)₫</td>
+                    <td class="num">@d.Quantity</td>
+                    <td class="num">@line.ToString("N0", vn)₫</td>
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+</div>
 
-                <div class="d-flex justify-content-between mb-3">
-                    <span>Tổng cộng:</span>
-                    <h5>@totalAmount.ToString("C0", vn)</h5>
-                </div>
-
-                @if (User.IsInRole("Admin"))
-                {
-                    <hr />
-                    <h6>Thay đổi trạng thái</h6>
-                    <form asp-action="UpdateStatus" method="post" class="mt-2">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="id" value="@Model.OrderId" />
-                        <div class="input-group">
-                            <select name="status" class="form-select">
-                                @foreach (var st in allowedStatuses)
-                                {
-                                    if (string.Equals(st, Model.Status, StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        <option value="@st" selected>@st</option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@st">@st</option>
-                                    }
-                                }
-                            </select>
-                            <button type="submit" class="btn btn-primary">Cập nhật</button>
-                        </div>
-                    </form>
-                }
-
-                <div class="mt-3">
-                    <form asp-action="Cancel" asp-controller="Orders" method="post">
-                        @Html.AntiForgeryToken()
-
-                        <input type="hidden" name="id" value="@Model.OrderId" />
-
-                        <button class="btn btn-danger w-100">
-                            Hủy đơn
-                        </button>
-                    </form>
-                    <a class="btn btn-outline-secondary w-100" asp-action="UserOrders">Quay lại</a>
-                </div>
-            </div>
+<div class="lov-totals">
+    <div class="lov-totals-card">
+        <div class="lov-totals-row muted">
+            <span>Tạm tính</span>
+            <span>@(Model.TotalAmount?.ToString(format: "N0", vn) ?? "0")₫</span>
+        </div>
+        <div class="lov-totals-row muted">
+            <span>Phí vận chuyển</span>
+            <span>Miễn phí</span>
+        </div>
+        <div class="lov-totals-row total">
+            <span>Tổng cộng</span>
+            <span>@(Model.TotalAmount?.ToString(format: "N0", vn) ?? "0")₫</span>
         </div>
     </div>
 </div>
+
+

@@ -6,39 +6,120 @@
     var currentId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 }
 
-<h2>Thông tin người dùng</h2>
+<style>
+    .lov-panel-wrap { max-width: 560px; margin: 20px auto; }
 
-<div class="card mb-3">
-    <div class="card-body">
-        <dl class="row">
-            <dt class="col-sm-3">Tên</dt>
-            <dd class="col-sm-9">@Model.Name</dd>
+    .lov-panel-card {
+        background: var(--lov-surface);
+        border: 1px solid var(--lov-line);
+        border-radius: 16px;
+        padding: 40px 36px;
+        box-shadow: 0 30px 60px -40px rgba(0,0,0,0.15);
+    }
 
-            <dt class="col-sm-3">Username</dt>
-            <dd class="col-sm-9">@Model.Username</dd>
+    .lov-panel-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-weight: 600;
+        font-size: 1.8rem;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--lov-ink);
+        margin: 0 0 28px;
+    }
 
-            <dt class="col-sm-3">Email</dt>
-            <dd class="col-sm-9">@Model.Email</dd>
+    .lov-detail-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px 0;
+        border-top: 1px solid var(--lov-line);
+    }
 
-            <dt class="col-sm-3">Phone</dt>
-            <dd class="col-sm-9">@Model.Phone</dd>
+    .lov-detail-row:first-of-type { border-top: none; }
 
-            <dt class="col-sm-3">Address</dt>
-            <dd class="col-sm-9">@Model.Address</dd>
+    .lov-detail-label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--lov-muted);
+    }
 
-            <dt class="col-sm-3">Role</dt>
-            <dd class="col-sm-9">@Model.Role</dd>
-        </dl>
+    .lov-detail-value {
+        font-size: 14px;
+        color: var(--lov-ink);
+        text-align: right;
+    }
 
-        <button type="button" onclick="history.back()" class="btn btn-outline-secondary">Quay lại</button>
+    .lov-panel-actions { display: flex; gap: 10px; margin-top: 28px; }
 
-        @if (User.IsInRole("Admin"))
-        {
-            <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.UserId">Chỉnh sửa (Admin)</a>
-        }
-        else if (currentId == Model.UserId.ToString())
-        {
-            <a class="btn btn-primary" asp-action="EditProfile" asp-route-id="@Model.UserId">Chỉnh sửa thông tin</a>
-        }
+    .lov-btn {
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        padding: 13px 24px;
+        border-radius: 999px;
+        text-decoration: none;
+        text-align: center;
+        border: none;
+        cursor: pointer;
+        flex: 1;
+        transition: background .2s ease, color .2s ease, border-color .2s ease;
+    }
+
+    .lov-btn.solid { background: var(--lov-ink); color: #fff; }
+    .lov-btn.solid:hover { background: var(--lov-accent-dark); }
+
+    .lov-btn.ghost {
+        background: transparent;
+        color: var(--lov-ink);
+        border: 1px solid var(--lov-line);
+    }
+
+    .lov-btn.ghost:hover { color: var(--lov-accent); border-color: var(--lov-accent); }
+</style>
+
+<div class="lov-panel-wrap">
+    <div class="lov-panel-card">
+        <h2 class="lov-panel-title">Thông tin người dùng</h2>
+
+        <div class="lov-detail-row">
+            <span class="lov-detail-label">Tên</span>
+            <span class="lov-detail-value">@Model.Name</span>
+        </div>
+        <div class="lov-detail-row">
+            <span class="lov-detail-label">Username</span>
+            <span class="lov-detail-value">@Model.Username</span>
+        </div>
+        <div class="lov-detail-row">
+            <span class="lov-detail-label">Email</span>
+            <span class="lov-detail-value">@Model.Email</span>
+        </div>
+        <div class="lov-detail-row">
+            <span class="lov-detail-label">Phone</span>
+            <span class="lov-detail-value">@Model.Phone</span>
+        </div>
+        <div class="lov-detail-row">
+            <span class="lov-detail-label">Address</span>
+            <span class="lov-detail-value">@Model.Address</span>
+        </div>
+        <div class="lov-detail-row">
+            <span class="lov-detail-label">Role</span>
+            <span class="lov-detail-value">@Model.Role</span>
+        </div>
+
+        <div class="lov-panel-actions">
+            <button type="button" onclick="history.back()" class="lov-btn ghost">Quay lại</button>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <a class="lov-btn solid" asp-action="Edit" asp-route-id="@Model.UserId">Chỉnh sửa (Admin)</a>
+            }
+            else if (currentId == Model.UserId.ToString())
+            {
+                <a class="lov-btn solid" asp-action="EditProfile" asp-route-id="@Model.UserId">Chỉnh sửa thông tin</a>
+            }
+        </div>
     </div>
 </div>

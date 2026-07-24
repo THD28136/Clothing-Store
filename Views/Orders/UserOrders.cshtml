@@ -6,11 +6,87 @@
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
 }
 
-<h1>Lịch sử đặt hàng của tôi</h1>
+<style>
+    .lov-orders-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-weight: 600;
+        font-size: 1.7rem;
+        letter-spacing: 0.02em;
+        color: var(--lov-ink);
+        margin: 0 0 24px;
+    }
 
-<div class="table-responsive">
-    <table class="table table-hover">
-        <thead class="table-dark">
+    .lov-table-wrap {
+        background: var(--lov-surface);
+        border: 1px solid var(--lov-line);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 30px 60px -48px rgba(0,0,0,0.15);
+    }
+
+    .lov-table { width: 100%; border-collapse: collapse; }
+
+    .lov-table thead { background: var(--lov-ink); }
+
+    .lov-table thead th {
+        color: #f5f1ea;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: 600;
+        padding: 14px 20px;
+        text-align: left;
+    }
+
+    .lov-table tbody td {
+        padding: 14px 20px;
+        border-top: 1px solid var(--lov-line);
+        font-size: 14px;
+        vertical-align: middle;
+    }
+
+    .lov-table tbody tr:hover { background: var(--lov-bg); }
+
+    .lov-empty { text-align: center; color: var(--lov-muted); padding: 32px; }
+
+    .lov-badge {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 5px 12px;
+        border-radius: 999px;
+    }
+
+    .lov-badge.pending { background: #f1ece3; color: var(--lov-muted); }
+    .lov-badge.processing { background: #fbeedc; color: #a3702c; }
+    .lov-badge.shipped { background: #e4eef4; color: #3a6e8a; }
+    .lov-badge.delivered { background: #e7f2e6; color: #3f7a45; }
+    .lov-badge.cancelled { background: #f7e4e0; color: #b3432c; }
+
+    .lov-btn {
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        padding: 8px 18px;
+        border-radius: 999px;
+        text-decoration: none;
+        display: inline-block;
+        border: 1px solid var(--lov-line);
+        background: transparent;
+        color: var(--lov-ink);
+        transition: color .2s ease, border-color .2s ease;
+    }
+
+    .lov-btn:hover { color: var(--lov-accent); border-color: var(--lov-accent); }
+</style>
+
+<h1 class="lov-orders-title">Lịch sử đặt hàng của tôi</h1>
+
+<div class="lov-table-wrap">
+    <table class="lov-table">
+        <thead>
             <tr>
                 <th>Mã đơn hàng</th>
                 <th>Ngày đặt hàng</th>
@@ -25,24 +101,25 @@
             {
                 @foreach (var order in Model)
                 {
-                    var totalAmount = order.OrderDetails?.Sum(od => od.Quantity * od.Product?.Price ?? 0) ?? 0;
+                    var orderDetails = order.OrderDetails as IEnumerable<MTKPM_Clothing_Store_web.Models.OrderDetail>;
+                    var totalAmount = orderDetails?.Sum(od => od.Quantity * (od.Product?.Price ?? 0m)) ?? 0m;
                     var status = string.IsNullOrWhiteSpace(order.Status) ? "Pending" : order.Status;
                     string badgeClass = status switch
                     {
-                        "Processing" => "bg-warning text-dark",
-                        "Shipped" => "bg-info text-dark",
-                        "Delivered" => "bg-success",
-                        "Cancelled" => "bg-danger",
-                        _ => "bg-secondary"
+                        "Processing" => "processing",
+                        "Shipped" => "shipped",
+                        "Delivered" => "delivered",
+                        "Cancelled" => "cancelled",
+                        _ => "pending"
                     };
                     <tr>
                         <td>#@order.OrderId</td>
                         <td>@order.OrderDate?.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td>@order.OrderDetails?.Count()</td>
+                        <td>@orderDetails?.Count()</td>
                         <td>@totalAmount.ToString("C0")</td>
-                        <td><span class="badge @badgeClass">@status</span></td>
+                        <td><span class="lov-badge @badgeClass">@status</span></td>
                         <td>
-                            <a class="btn btn-sm btn-primary" asp-action="Details" asp-route-id="@order.OrderId">Xem chi tiết</a>
+                            <a class="lov-btn" asp-action="Details" asp-route-id="@order.OrderId">Xem chi tiết</a>
                         </td>
                     </tr>
                 }
@@ -50,7 +127,7 @@
             else
             {
                 <tr>
-                    <td colspan="6" class="text-center text-muted">Bạn chưa có đơn hàng nào</td>
+                    <td colspan="6" class="lov-empty">Bạn chưa có đơn hàng nào</td>
                 </tr>
             }
         </tbody>

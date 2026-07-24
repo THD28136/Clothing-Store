@@ -6,202 +6,285 @@
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
 
     var vn = CultureInfo.GetCultureInfo("vi-VN");
+    var isLoggedIn = User.Identity?.IsAuthenticated == true
+        || !string.IsNullOrEmpty(Context.Session.GetString("UserId"));
 }
-<link rel="stylesheet" href="~/css/checkout.css" />
-<h2>Thanh toán</h2>
 
-<div class="checkout-container">
+<link rel="stylesheet" href="~/css/checkout.css" />
+
+<style>
+    .co-wrap { max-width: 1200px; margin: 0 auto; padding: 48px 24px 80px; }
+    .co-eyebrow { text-transform: uppercase; letter-spacing: .28em; font-size: 11px; color: #8a7f78; text-align: center; margin-bottom: 10px; }
+    .co-title { font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: clamp(30px, 4vw, 44px); text-align: center; margin: 0 0 40px; letter-spacing: -.01em; color: #1a1a1a; }
+    .co-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 48px; align-items: start; }
+    @@media (max-width: 900px) { .co-grid { grid-template-columns: 1fr; gap: 32px; } }
+
+    .co-card { background: #fff; border: 1px solid #eee7e1; border-radius: 4px; padding: 28px 30px; }
+    .co-card + .co-card { margin-top: 20px; }
+    .co-section-title { font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 500; margin: 0 0 20px; color: #1a1a1a; letter-spacing: -.01em; }
+
+    .co-field { margin-bottom: 18px; }
+    .co-field label { display: block; text-transform: uppercase; letter-spacing: .18em; font-size: 11px; color: #6b625d; margin-bottom: 8px; font-weight: 500; }
+    .co-field .form-control, .co-field .form-select { width: 100%; border: 1px solid #e2dcd6; border-radius: 2px; padding: 12px 14px; font-size: 14px; background: #fbfaf8; transition: border-color .2s, background .2s; }
+    .co-field .form-control:focus, .co-field .form-select:focus { outline: none; border-color: #1a1a1a; background: #fff; box-shadow: none; }
+
+    .co-pay-methods { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    @@media (max-width: 520px) { .co-pay-methods { grid-template-columns: 1fr; } }
+    .co-pay { position: relative; border: 1px solid #e2dcd6; border-radius: 3px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all .2s; background: #fff; }
+    .co-pay:hover { border-color: #b8ada5; }
+    .co-pay input { position: absolute; opacity: 0; pointer-events: none; }
+    .co-pay .dot { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #c9beb6; display: inline-block; position: relative; flex-shrink: 0; }
+    .co-pay input:checked ~ .dot { border-color: #1a1a1a; }
+    .co-pay input:checked ~ .dot:after { content: ''; position: absolute; inset: 3px; background: #1a1a1a; border-radius: 50%; }
+    .co-pay input:checked + .dot + .co-pay-label,
+    .co-pay input:checked ~ .co-pay-label { color: #1a1a1a; }
+    .co-pay:has(input:checked) { border-color: #1a1a1a; background: #fbfaf8; }
+    .co-pay-label { font-size: 14px; color: #4a423e; letter-spacing: .02em; }
+
+    .co-note { margin-top: 14px; font-size: 13px; color: #8a7f78; font-style: italic; }
+
+    .co-btn { display: inline-flex; align-items: center; justify-content: center; padding: 15px 32px; border: none; background: #1a1a1a; color: #fff; text-transform: uppercase; letter-spacing: .22em; font-size: 12px; font-weight: 500; cursor: pointer; transition: background .2s; text-decoration: none; border-radius: 2px; }
+    .co-btn:hover { background: #333; color: #fff; }
+    .co-btn-outline { background: transparent; border: 1px solid #1a1a1a; color: #1a1a1a; }
+    .co-btn-outline:hover { background: #1a1a1a; color: #fff; }
+    .co-actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+
+    /* Summary */
+    .co-summary { position: sticky; top: 100px; background: #fbfaf8; border: 1px solid #eee7e1; border-radius: 4px; padding: 30px; }
+    .co-sum-title { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; font-weight: 500; margin: 0 0 24px; color: #1a1a1a; }
+    .co-sum-items { border-bottom: 1px solid #e8e1db; padding-bottom: 18px; margin-bottom: 18px; max-height: 320px; overflow-y: auto; }
+    .co-sum-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; font-size: 14px; color: #4a423e; }
+    .co-sum-row .name { flex: 1; }
+    .co-sum-row .qty { color: #8a7f78; font-size: 12px; }
+    .co-sum-row .price { font-variant-numeric: tabular-nums; color: #1a1a1a; }
+
+    .co-coupon-form { display: flex; gap: 8px; margin-bottom: 18px; }
+    .co-coupon-form input { flex: 1; border: 1px solid #e2dcd6; padding: 10px 12px; font-size: 13px; background: #fff; border-radius: 2px; text-transform: uppercase; letter-spacing: .1em; }
+    .co-coupon-form input:focus { outline: none; border-color: #1a1a1a; }
+    .co-coupon-btn { padding: 10px 18px; border: 1px solid #1a1a1a; background: transparent; color: #1a1a1a; text-transform: uppercase; letter-spacing: .18em; font-size: 11px; cursor: pointer; border-radius: 2px; transition: all .2s; }
+    .co-coupon-btn:hover { background: #1a1a1a; color: #fff; }
+    .co-coupon-msg { font-size: 13px; margin-bottom: 14px; padding: 10px 12px; border-radius: 2px; }
+    .co-coupon-msg.err { color: #a03030; background: #fbf1f1; border: 1px solid #f0dcdc; }
+    .co-coupon-msg.ok { color: #3a6b3a; background: #f3f7f0; border: 1px solid #dae5cf; }
+
+    .co-tot-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; color: #6b625d; }
+    .co-tot-row.strike { text-decoration: line-through; color: #a89f98; }
+    .co-tot-grand { display: flex; justify-content: space-between; align-items: baseline; padding-top: 16px; margin-top: 10px; border-top: 1px solid #e8e1db; }
+    .co-tot-grand .label { font-family: 'Playfair Display', Georgia, serif; font-size: 18px; color: #1a1a1a; }
+    .co-tot-grand .value { font-family: 'Playfair Display', Georgia, serif; font-size: 24px; color: #1a1a1a; font-variant-numeric: tabular-nums; }
+
+    .co-empty { text-align: center; padding: 80px 20px; background: #fbfaf8; border: 1px solid #eee7e1; border-radius: 4px; }
+    .co-empty p { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; color: #4a423e; margin: 0 0 24px; font-style: italic; }
+
+    .co-validation { color: #a03030; font-size: 13px; margin-top: 6px; }
+
+    .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    @@media (max-width: 520px) { .row-3 { grid-template-columns: 1fr; } }
+</style>
+
+<div class="co-wrap">
+    <div class="co-eyebrow">Secure checkout</div>
+    <h1 class="co-title">Thanh toán</h1>
+
     @if (!Model.Items.Any())
     {
-        <div class="alert alert-info">Giỏ hàng trống.</div>
+        <div class="co-empty">
+            <p>Giỏ hàng của bạn đang trống.</p>
+            <a class="co-btn" asp-controller="Home" asp-action="Index">Tiếp tục mua sắm</a>
+        </div>
     }
     else
     {
-        <div class="table-responsive mb-3">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Sản phẩm</th>
-                        <th>Đơn giá</th>
-                        <th>Số lượng</th>
-                        <th>Thành tiền</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var it in Model.Items)
-                    {
-                        var subtotal = it.Product.Price * it.Quantity;
-                        <tr>
-                            <td>@it.Product.Name</td>
-                            <td>@it.Product.Price.ToString("C0", vn)</td>
-                            <td>@it.Quantity</td>
-                            <td>@($"{subtotal.ToString("C0", vn)}")</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-
-        <div class="card p-3 mb-3" id="couponForm">
-            <form asp-controller="Payments" asp-action="ApplyCoupon" method="post" class="row g-2 align-items-end mb-2">
+        <div class="co-grid">
+            <!-- LEFT: Form -->
+            <form asp-controller="Payments" asp-action="CheckoutPost" method="post" novalidate id="checkoutForm">
                 @Html.AntiForgeryToken()
-                <div class="col-auto">
-                    <label class="form-label">Mã giảm giá</label>
-                    <input asp-for="CouponCode" class="form-control" placeholder="Nhập mã..." />
+                <input type="hidden" asp-for="CouponCode" />
+
+                <div asp-validation-summary="ModelOnly" class="co-validation" style="margin-bottom: 16px;"></div>
+
+                @if (!isLoggedIn)
+                {
+                    <div class="co-card">
+                        <h3 class="co-section-title">Thông tin liên hệ</h3>
+                        <div class="co-field">
+                            <label asp-for="GuestName">Họ và tên</label>
+                            <input asp-for="GuestName" class="form-control" placeholder="Nguyễn Văn A" />
+                            <span asp-validation-for="GuestName" class="co-validation"></span>
+                        </div>
+                        <div class="co-field">
+                            <label asp-for="GuestEmail">Email</label>
+                            <input asp-for="GuestEmail" class="form-control" type="email" placeholder="you@example.com" />
+                            <span asp-validation-for="GuestEmail" class="co-validation"></span>
+                        </div>
+                        <div class="co-field" style="margin-bottom:0;">
+                            <label asp-for="GuestPhone">Số điện thoại (tùy chọn)</label>
+                            <input asp-for="GuestPhone" class="form-control" placeholder="0912 345 678" />
+                            <span asp-validation-for="GuestPhone" class="co-validation"></span>
+                        </div>
+                    </div>
+                }
+
+                <div class="co-card">
+                    <h3 class="co-section-title">Phương thức thanh toán</h3>
+                    <div class="co-pay-methods">
+                        <label class="co-pay">
+                            <input asp-for="SelectedPaymentMethod" type="radio" value="1" id="pmCard" />
+                            <span class="dot"></span>
+                            <span class="co-pay-label">Thẻ tín dụng / Ghi nợ</span>
+                        </label>
+                        <label class="co-pay">
+                            <input asp-for="SelectedPaymentMethod" type="radio" value="2" id="pmCod" />
+                            <span class="dot"></span>
+                            <span class="co-pay-label">Thanh toán khi nhận hàng</span>
+                        </label>
+                        <label class="co-pay">
+                            <input asp-for="SelectedPaymentMethod" type="radio" value="3" id="pmPaypal" />
+                            <span class="dot"></span>
+                            <span class="co-pay-label">PayPal</span>
+                        </label>
+                        <label class="co-pay">
+                            <input asp-for="SelectedPaymentMethod" type="radio" value="4" id="pmMomo" />
+                            <span class="dot"></span>
+                            <span class="co-pay-label">Momo</span>
+                        </label>
+                    </div>
+
+                    <div id="nonCardNote" class="co-note" style="display:none;">
+                        PayPal / Momo sẽ chuyển hướng sang cổng thanh toán bên ngoài (tạm mô phỏng). COD: thanh toán trực tiếp khi nhận hàng.
+                    </div>
                 </div>
-                <div class="col-auto">
-                    <button class="btn btn-outline-primary" type="submit">Áp dụng</button>
+
+                <div class="co-card" id="cardFields">
+                    <h3 class="co-section-title">Thông tin thẻ</h3>
+                    <div class="co-field">
+                        <label asp-for="CardName">Tên trên thẻ</label>
+                        <input asp-for="CardName" class="form-control" placeholder="NGUYEN VAN A" />
+                        <span asp-validation-for="CardName" class="co-validation"></span>
+                    </div>
+                    <div class="co-field">
+                        <label asp-for="CardNumber">Số thẻ</label>
+                        <input asp-for="CardNumber" class="form-control" inputmode="numeric" placeholder="1234 5678 9012 3456" />
+                        <span asp-validation-for="CardNumber" class="co-validation"></span>
+                    </div>
+                    <div class="row-3">
+                        <div class="co-field" style="margin-bottom:0;">
+                            <label asp-for="ExpiryMonth">Tháng</label>
+                            <select asp-for="ExpiryMonth" class="form-select">
+                                <option value="">MM</option>
+                                @for (int m = 1; m <= 12; m++)
+                                {
+                                    <option value="@m" selected="@(Model.ExpiryMonth==m ? "selected" : null)">@m.ToString("D2")</option>
+                                }
+                            </select>
+                            <span asp-validation-for="ExpiryMonth" class="co-validation"></span>
+                        </div>
+                        <div class="co-field" style="margin-bottom:0;">
+                            <label asp-for="ExpiryYear">Năm</label>
+                            <select asp-for="ExpiryYear" class="form-select">
+                                <option value="">YYYY</option>
+                                @{
+                                    var start = System.DateTime.UtcNow.Year;
+                                    for (int y = start; y <= start + 12; y++)
+                                    {
+                                        <option value="@y" selected="@(Model.ExpiryYear==y ? "selected" : null)">@y</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="ExpiryYear" class="co-validation"></span>
+                        </div>
+                        <div class="co-field" style="margin-bottom:0;">
+                            <label asp-for="CVV">CVV</label>
+                            <input asp-for="CVV" class="form-control" inputmode="numeric" placeholder="123" />
+                            <span asp-validation-for="CVV" class="co-validation"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="co-actions">
+                    <button class="co-btn" type="submit">Hoàn tất thanh toán</button>
+                    <a class="co-btn co-btn-outline" asp-controller="Cart" asp-action="Index">Quay lại giỏ hàng</a>
                 </div>
             </form>
 
-            @if (!string.IsNullOrEmpty(Model.CouponMessage))
-            {
-                <div class="text-danger mb-0">@Model.CouponMessage</div>
-            }
-            else if (Model.AppliedDiscountPercent.HasValue)
-            {
-                <div class="text-success mb-0">
-                    Đã áp dụng mã <strong>@Model.CouponCode</strong>: giảm @Model.AppliedDiscountPercent%
-                    (-@($"{Model.DiscountAmount.ToString("C0", vn)}")) — Tổng thanh toán: <strong>@($"{Model.FinalTotal.ToString("C0", vn)}")</strong>
+            <!-- RIGHT: Summary -->
+            <aside class="co-summary">
+                <h3 class="co-sum-title">Đơn hàng của bạn</h3>
+
+                <div class="co-sum-items">
+                    @foreach (var it in Model.Items)
+                    {
+                        var subtotal = it.Product.Price * it.Quantity;
+                        <div class="co-sum-row">
+                            <div class="name">
+                                @it.Product.Name
+                                <div class="qty">SL: @it.Quantity</div>
+                            </div>
+                            <div class="price">@subtotal.ToString("C0", vn)</div>
+                        </div>
+                    }
                 </div>
-            }
-        </div>
 
-        <form asp-controller="Payments" asp-action="CheckoutPost" method="post" novalidate id="checkoutForm">
-            @Html.AntiForgeryToken()
-            <input type="hidden" asp-for="CouponCode" />
+                <form asp-controller="Payments" asp-action="ApplyCoupon" method="post" class="co-coupon-form">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="CouponCode" placeholder="Mã giảm giá" />
+                    <button class="co-coupon-btn" type="submit">Áp dụng</button>
+                </form>
 
-            <div class="mb-3">
+                @if (!string.IsNullOrEmpty(Model.CouponMessage))
+                {
+                    <div class="co-coupon-msg err">@Model.CouponMessage</div>
+                }
+                else if (Model.AppliedDiscountPercent.HasValue)
+                {
+                    <div class="co-coupon-msg ok">
+                        Mã <strong>@Model.CouponCode</strong> — giảm @Model.AppliedDiscountPercent%
+                    </div>
+                }
+
+                <div class="co-tot-row">
+                    <span>Tạm tính</span>
+                    <span>@Model.Total.ToString("C0", vn)</span>
+                </div>
                 @if (Model.AppliedDiscountPercent.HasValue)
                 {
-                    <h5>
-                        Tổng: <span class="text-decoration-line-through text-muted">@($"{Model.Total.ToString("C0", vn)}")</span>
-                        <strong class="text-success">@($"{Model.FinalTotal.ToString("C0", vn)}")</strong>
-                    </h5>
+                    <div class="co-tot-row">
+                        <span>Giảm giá (@Model.AppliedDiscountPercent%)</span>
+                        <span>−@Model.DiscountAmount.ToString("C0", vn)</span>
+                    </div>
                 }
-                else
-                {
-                    <h5>Tổng: @($"{Model.Total.ToString("C0", vn)}")</h5>
-                }
-            </div>
-
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-            @{
-                var isLoggedIn = User.Identity?.IsAuthenticated == true
-                    || !string.IsNullOrEmpty(Context.Session.GetString("UserId"));
-            }
-
-            @if (!isLoggedIn)
-            {
-                <div class="mb-3">
-                    <label asp-for="GuestName" class="form-label">Họ tên</label>
-                    <input asp-for="GuestName" class="form-control" />
-                    <span asp-validation-for="GuestName" class="text-danger"></span>
+                <div class="co-tot-row">
+                    <span>Phí vận chuyển</span>
+                    <span>Miễn phí</span>
                 </div>
 
-                <div class="mb-3">
-                    <label asp-for="GuestEmail" class="form-label">Email (để nhận xác nhận đơn hàng và tra cứu sau này)</label>
-                    <input asp-for="GuestEmail" class="form-control" type="email" />
-                    <span asp-validation-for="GuestEmail" class="text-danger"></span>
+                <div class="co-tot-grand">
+                    <span class="label">Tổng cộng</span>
+                    <span class="value">
+                        @if (Model.AppliedDiscountPercent.HasValue)
+                        {
+                            @Model.FinalTotal.ToString("C0", vn)
+                        }
+                        else
+                        {
+                            @Model.Total.ToString("C0", vn)
+                        }
+                    </span>
                 </div>
-
-                <div class="mb-3">
-                    <label asp-for="GuestPhone" class="form-label">Số điện thoại (tùy chọn)</label>
-                    <input asp-for="GuestPhone" class="form-control" />
-                    <span asp-validation-for="GuestPhone" class="text-danger"></span>
-                </div>
-            }
-
-            <div class="mb-3">
-                <label class="form-label">Phương thức thanh toán</label>
-                <div>
-                    <div class="form-check form-check-inline">
-                        <input asp-for="SelectedPaymentMethod" class="form-check-input" type="radio" value="1" id="pmCard" />
-                        <label class="form-check-label" for="pmCard">Thẻ tính dụng(Credit/Debit)</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input asp-for="SelectedPaymentMethod" class="form-check-input" type="radio" value="2" id="pmCod" />
-                        <label class="form-check-label" for="pmCod">Thanh toán khi nhận hàng</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input asp-for="SelectedPaymentMethod" class="form-check-input" type="radio" value="3" id="pmPaypal" />
-                        <label class="form-check-label" for="pmPaypal">PayPal</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input asp-for="SelectedPaymentMethod" class="form-check-input" type="radio" value="4" id="pmMomo" />
-                        <label class="form-check-label" for="pmMomo">Momo </label>
-                    </div>
-                </div>
-            </div>
-
-            <div id="cardFields">
-                <div class="mb-3">
-                    <label asp-for="CardName" class="form-label">Tên trên thẻ</label>
-                    <input asp-for="CardName" class="form-control" />
-                    <span asp-validation-for="CardName" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="CardNumber" class="form-label">Số thẻ</label>
-                    <input asp-for="CardNumber" class="form-control" inputmode="numeric" />
-                    <span asp-validation-for="CardNumber" class="text-danger"></span>
-                </div>
-
-                <div class="row g-2 mb-3">
-                    <div class="col-auto">
-                        <label asp-for="ExpiryMonth" class="form-label">Tháng</label>
-                        <select asp-for="ExpiryMonth" class="form-select">
-                            <option value="">MM</option>
-                            @for (int m = 1; m <= 12; m++)
-                            {
-                                <option value="@m" selected="@(Model.ExpiryMonth==m ? "selected" : null)">@m.ToString("D2")</option>
-                            }
-                        </select>
-                        <span asp-validation-for="ExpiryMonth" class="text-danger"></span>
-                    </div>
-                    <div class="col-auto">
-                        <label asp-for="ExpiryYear" class="form-label">Năm</label>
-                        <select asp-for="ExpiryYear" class="form-select">
-                            <option value="">YYYY</option>
-                            @{
-                                var start = System.DateTime.UtcNow.Year;
-                                for (int y = start; y <= start + 12; y++)
-                                {
-                                    <option value="@y" selected="@(Model.ExpiryYear==y ? "selected" : null)">@y</option>
-                                }
-                            }
-                        </select>
-                        <span asp-validation-for="ExpiryYear" class="text-danger"></span>
-                    </div>
-                    <div class="col-auto">
-                        <label asp-for="CVV" class="form-label">CVV/CVC</label>
-                        <input asp-for="CVV" class="form-control" inputmode="numeric" />
-                        <span asp-validation-for="CVV" class="text-danger"></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-2 text-muted" id="nonCardNote" style="display:none;">
-                PayPal/Momo sẽ chuyển hướng sang cổng thanh toán bên ngoài (tạm mô phỏng). COD: thanh toán trực tiếp khi nhận hàng.
-            </div>
-
-            <div class="d-flex gap-2">
-                <button class="btn btn-primary" type="submit">Thanh toán</button>
-                <a class="btn btn-outline-secondary" asp-controller="Cart" asp-action="Index">Quay lại giỏ hàng</a>
-            </div>
-        </form>
+            </aside>
+        </div>
     }
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        (function() {
+        (function () {
             function updateVisibility() {
                 var pm = document.querySelector('input[name="SelectedPaymentMethod"]:checked')?.value;
                 var card = document.getElementById('cardFields');
                 var note = document.getElementById('nonCardNote');
+                if (!card || !note) return;
                 if (pm === '1') {
                     card.style.display = '';
                     note.style.display = 'none';
@@ -210,10 +293,9 @@
                     note.style.display = '';
                 }
             }
-            document.querySelectorAll('input[name="SelectedPaymentMethod"]').forEach(function(r) {
+            document.querySelectorAll('input[name="SelectedPaymentMethod"]').forEach(function (r) {
                 r.addEventListener('change', updateVisibility);
             });
-            // initial
             updateVisibility();
         })();
     </script>

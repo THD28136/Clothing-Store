@@ -1,4 +1,4 @@
-﻿@using Microsoft.EntityFrameworkCore
+﻿﻿@using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.DependencyInjection
 @using Microsoft.SqlServer.Server
 @using MTKPM_Clothing_Store_web.Models
@@ -11,26 +11,123 @@
     var returnUrl = ViewData["ReturnUrl"] as string ?? string.Empty;
 }
 
-<h2>Login</h2>
+<style>
+    .lov-auth-wrap { max-width: 460px; margin: 20px auto; }
 
-<form asp-action="Login" method="post" class="w-50">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="returnUrl" value="@returnUrl" />
+    .lov-auth-card {
+        background: var(--lov-surface);
+        border: 1px solid var(--lov-line);
+        border-radius: 16px;
+        padding: 40px 36px;
+        box-shadow: 0 30px 60px -40px rgba(0,0,0,0.15);
+    }
 
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    .lov-auth-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-weight: 600;
+        font-size: 1.8rem;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--lov-ink);
+        margin: 0 0 8px;
+    }
 
-    <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input name="email" id="email" class="form-control" />
+    .lov-auth-sub {
+        text-align: center;
+        color: var(--lov-muted);
+        font-size: 13px;
+        margin-bottom: 28px;
+    }
+
+    .lov-field { margin-bottom: 18px; }
+
+    .lov-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--lov-muted);
+        margin-bottom: 8px;
+    }
+
+    .lov-input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid var(--lov-line);
+        border-radius: 10px;
+        font-family: inherit;
+        font-size: 14px;
+        color: var(--lov-ink);
+        background: #fff;
+        transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .lov-input:focus {
+        outline: none;
+        border-color: var(--lov-accent);
+        box-shadow: 0 0 0 3px rgba(184,137,90,0.15);
+    }
+
+    .lov-submit {
+        width: 100%;
+        background: var(--lov-ink);
+        color: #fff;
+        border: none;
+        padding: 13px 18px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        cursor: pointer;
+        margin-top: 8px;
+        transition: background .2s ease;
+    }
+
+    .lov-submit:hover { background: var(--lov-accent-dark); }
+
+    .lov-auth-alt {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 13px;
+        color: var(--lov-muted);
+    }
+
+    .lov-auth-alt a { color: var(--lov-accent-dark); text-decoration: none; font-weight: 500; }
+    .lov-auth-alt a:hover { color: var(--lov-accent); }
+</style>
+
+<div class="lov-auth-wrap">
+    <div class="lov-auth-card">
+        <h1 class="lov-auth-title">Login</h1>
+        <p class="lov-auth-sub">Welcome back to LOVSTORE</p>
+
+        <form asp-action="Login" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="lov-field">
+                <label for="email" class="lov-label">Email</label>
+                <input name="email" id="email" class="lov-input" />
+            </div>
+
+            <div class="lov-field">
+                <label for="password" class="lov-label">Password</label>
+                <input name="password" id="password" type="password" class="lov-input" />
+            </div>
+
+            <button type="submit" class="lov-submit">Login</button>
+        </form>
+
+        <div class="lov-auth-alt">
+            New to LOVSTORE? <a asp-action="Register">Create an account</a>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label for="password" class="form-label">Password</label>
-        <input name="password" id="password" type="password" class="form-control" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Login</button>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

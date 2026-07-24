@@ -5,34 +5,131 @@
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
 }
 
-<h2>Register</h2>
+<style>
+    .lov-auth-wrap { max-width: 460px; margin: 20px auto; }
 
-<form asp-action="Register" method="post" class="w-50">
-    @Html.AntiForgeryToken()
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    .lov-auth-card {
+        background: var(--lov-surface);
+        border: 1px solid var(--lov-line);
+        border-radius: 16px;
+        padding: 40px 36px;
+        box-shadow: 0 30px 60px -40px rgba(0,0,0,0.15);
+    }
 
-    <div class="mb-3">
-        <label asp-for="Name" class="form-label"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+    .lov-auth-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-weight: 600;
+        font-size: 1.8rem;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--lov-ink);
+        margin: 0 0 8px;
+    }
+
+    .lov-auth-sub {
+        text-align: center;
+        color: var(--lov-muted);
+        font-size: 13px;
+        margin-bottom: 28px;
+    }
+
+    .lov-field { margin-bottom: 18px; }
+
+    .lov-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--lov-muted);
+        margin-bottom: 8px;
+    }
+
+    .lov-input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid var(--lov-line);
+        border-radius: 10px;
+        font-family: inherit;
+        font-size: 14px;
+        color: var(--lov-ink);
+        background: #fff;
+        transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .lov-input:focus {
+        outline: none;
+        border-color: var(--lov-accent);
+        box-shadow: 0 0 0 3px rgba(184,137,90,0.15);
+    }
+
+    .lov-submit {
+        width: 100%;
+        background: var(--lov-ink);
+        color: #fff;
+        border: none;
+        padding: 13px 18px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        cursor: pointer;
+        margin-top: 8px;
+        transition: background .2s ease;
+    }
+
+    .lov-submit:hover { background: var(--lov-accent-dark); }
+
+    .lov-auth-alt {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 13px;
+        color: var(--lov-muted);
+    }
+
+    .lov-auth-alt a { color: var(--lov-accent-dark); text-decoration: none; font-weight: 500; }
+    .lov-auth-alt a:hover { color: var(--lov-accent); }
+</style>
+
+<div class="lov-auth-wrap">
+    <div class="lov-auth-card">
+        <h1 class="lov-auth-title">Register</h1>
+        <p class="lov-auth-sub">Join LOVSTORE — crafted with care</p>
+
+        <form asp-action="Register" method="post">
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div class="lov-field">
+                <label class="lov-label" for="Name">Name</label>
+                <input id="Name" name="Name" class="lov-input" value="@Model?.Name" />
+                <span class="text-danger">@Html.ValidationMessage("Name")</span>
+            </div>
+
+            <div class="lov-field">
+                <label class="lov-label" for="Email">Email</label>
+                <input id="Email" name="Email" class="lov-input" value="@Model?.Email" />
+                <span class="text-danger">@Html.ValidationMessage("Email")</span>
+            </div>
+
+            <div class="lov-field">
+                <label class="lov-label" for="Password">Password</label>
+                <input id="Password" name="Password" type="password" class="lov-input" />
+                <span class="text-danger">@Html.ValidationMessage("Password")</span>
+            </div>
+
+            <input id="Role" name="Role" type="hidden" value="User" />
+
+            <button type="submit" class="lov-submit">Register</button>
+        </form>
+
+        <div class="lov-auth-alt">
+            Already have an account? <a asp-action="Login">Login</a>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="Email" class="form-label"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Password" class="form-label"></label>
-        <input asp-for="Password" type="password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-
-    <input asp-for="Role" type="hidden" value="User" />
-
-    <button type="submit" class="btn btn-primary">Register</button>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

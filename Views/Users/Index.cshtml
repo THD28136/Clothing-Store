@@ -5,46 +5,141 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Danh sách người dùng</h1>
-    <a class="btn btn-outline-primary" asp-action="Create">Tạo user mới</a>
-</div>
+<style>
+    .lov-admin {
+        --lov-bg: #faf8f5;
+        --lov-surface: #ffffff;
+        --lov-ink: #1a1a1a;
+        --lov-muted: #6b6b6b;
+        --lov-line: #ececec;
+        --lov-accent: #b8895a;
+        --lov-accent-dark: #8a6640;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--lov-ink);
+    }
 
-<div class="table-responsive">
-    <table class="table table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th>Mã người dùng</th>
-                <th>Tên</th>
-                <th>Email</th>
-                <th>Vai trò</th>
-                <th>Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model != null && Model.Any())
-            {
-                @foreach (var user in Model)
+    .lov-admin-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .lov-admin-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-weight: 600;
+        font-size: 1.7rem;
+        letter-spacing: 0.02em;
+        margin: 0;
+        color: var(--lov-ink);
+    }
+
+    .lov-btn {
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        padding: 9px 20px;
+        border-radius: 999px;
+        text-decoration: none;
+        display: inline-block;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: background .2s ease, color .2s ease, border-color .2s ease;
+    }
+
+    .lov-btn.solid { background: var(--lov-ink); color: #fff; }
+    .lov-btn.solid:hover { background: var(--lov-accent-dark); color: #fff; }
+
+    .lov-btn.ghost { background: transparent; color: var(--lov-ink); border-color: var(--lov-line); }
+    .lov-btn.ghost:hover { color: var(--lov-accent); border-color: var(--lov-accent); }
+
+    .lov-btn.danger { background: transparent; color: #b3432c; border-color: #f1d8d0; }
+    .lov-btn.danger:hover { background: #b3432c; color: #fff; border-color: #b3432c; }
+
+    .lov-btn.sm { padding: 6px 14px; font-size: 11px; }
+
+    .lov-table-wrap {
+        background: var(--lov-surface);
+        border: 1px solid var(--lov-line);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 30px 60px -48px rgba(0,0,0,0.15);
+    }
+
+    .lov-table { width: 100%; border-collapse: collapse; }
+
+    .lov-table thead { background: var(--lov-ink); }
+
+    .lov-table thead th {
+        color: #f5f1ea;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: 600;
+        padding: 14px 20px;
+        text-align: left;
+    }
+
+    .lov-table tbody td {
+        padding: 14px 20px;
+        border-top: 1px solid var(--lov-line);
+        font-size: 14px;
+        vertical-align: middle;
+    }
+
+    .lov-table tbody tr:hover { background: var(--lov-bg); }
+
+    .lov-empty { text-align: center; color: var(--lov-muted); padding: 32px; }
+
+    .lov-row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+</style>
+
+<div class="lov-admin">
+    <div class="lov-admin-head">
+        <h1 class="lov-admin-title">Danh sách người dùng</h1>
+        <a class="lov-btn solid" asp-action="Create">Tạo user mới</a>
+    </div>
+
+    <div class="lov-table-wrap">
+        <table class="lov-table">
+            <thead>
+                <tr>
+                    <th>Mã người dùng</th>
+                    <th>Tên</th>
+                    <th>Email</th>
+                    <th>Vai trò</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>#@user.UserId</td>
+                            <td>@user.Name</td>
+                            <td>@user.Email</td>
+                            <td>@user.Role</td>
+                            <td>
+                                <div class="lov-row-actions">
+                                    <a class="lov-btn ghost sm" asp-action="Edit" asp-route-id="@user.UserId">Sửa</a>
+                                    <a class="lov-btn ghost sm" asp-action="Details" asp-route-id="@user.UserId">Chi tiết</a>
+                                    <a class="lov-btn danger sm" asp-action="Delete" asp-route-id="@user.UserId">Xóa</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
                 {
                     <tr>
-                        <td>#@user.UserId</td>
-                        <td>@user.Name</td>
-                        <td>@user.Email</td>
-                        <td>@user.Role</td>
-                        <td>
-                            <a class="btn btn-sm btn-warning" asp-action="Edit" asp-route-id="@user.UserId">Sửa</a>
-                            <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@user.UserId">Chi tiết</a>
-                            <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@user.UserId">Xóa</a>
-                        </td>
+                        <td colspan="5" class="lov-empty">Không có người dùng nào</td>
                     </tr>
                 }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="5" class="text-center text-muted">Không có người dùng nào</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </div>

@@ -9,34 +9,72 @@
     var appliedCoupon = ViewData["AppliedCoupon"] as MTKPM_Clothing_Store_web.Models.Coupon;
 }
 
-<h2>Đơn hàng #@ViewData["OrderId"]</h2>
+<style>
+    .sx-wrap { max-width: 720px; margin: 0 auto; padding: 80px 24px 100px; text-align: center; }
+    .sx-check { width: 72px; height: 72px; border-radius: 50%; background: #fbfaf8; border: 1px solid #e8e1db; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 28px; }
+    .sx-check svg { width: 32px; height: 32px; stroke: #1a1a1a; stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .sx-eyebrow { text-transform: uppercase; letter-spacing: .3em; font-size: 11px; color: #8a7f78; margin-bottom: 14px; }
+    .sx-title { font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: clamp(32px, 5vw, 48px); margin: 0 0 18px; color: #1a1a1a; letter-spacing: -.01em; }
+    .sx-sub { font-size: 15px; color: #6b625d; line-height: 1.7; max-width: 480px; margin: 0 auto 40px; }
+    .sx-order-num { font-family: 'Playfair Display', Georgia, serif; color: #1a1a1a; font-style: italic; }
 
-<div class="alert alert-success">
-    <h4 class="alert-heading">Thanh toán thành công!</h4>
-    <p>Đơn hàng của bạn đã được tạo. Mã đơn hàng: <strong>#@orderId</strong></p>
+    .sx-card { background: #fbfaf8; border: 1px solid #eee7e1; border-radius: 4px; padding: 32px; margin-bottom: 36px; text-align: left; }
+    .sx-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; font-size: 14px; color: #4a423e; }
+    .sx-row + .sx-row { border-top: 1px solid #ece5df; }
+    .sx-row .label { text-transform: uppercase; letter-spacing: .18em; font-size: 11px; color: #8a7f78; }
+    .sx-row .value { font-variant-numeric: tabular-nums; color: #1a1a1a; }
+    .sx-total { font-family: 'Playfair Display', Georgia, serif; font-size: 22px !important; }
+    .sx-coupon-pill { display: inline-block; padding: 4px 10px; border: 1px solid #d4cbc3; border-radius: 999px; font-size: 12px; letter-spacing: .1em; color: #4a423e; background: #fff; }
 
-    @if (appliedCoupon != null)
-    {
-        <div class="bg-white bg-opacity-50 rounded p-2 mb-2">
-            Đã áp dụng mã giảm giá <code>@appliedCoupon.Code</code> (-@appliedCoupon.DiscountPercent%)
+    .sx-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .sx-btn { display: inline-flex; align-items: center; justify-content: center; padding: 15px 32px; background: #1a1a1a; color: #fff; text-transform: uppercase; letter-spacing: .22em; font-size: 12px; font-weight: 500; text-decoration: none; border-radius: 2px; transition: background .2s; }
+    .sx-btn:hover { background: #333; color: #fff; }
+    .sx-btn-outline { background: transparent; border: 1px solid #1a1a1a; color: #1a1a1a; }
+    .sx-btn-outline:hover { background: #1a1a1a; color: #fff; }
+</style>
+
+<div class="sx-wrap">
+    <div class="sx-check">
+        <svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+    </div>
+
+    <div class="sx-eyebrow">Đơn hàng đã xác nhận</div>
+    <h1 class="sx-title">Cảm ơn bạn đã đặt hàng</h1>
+    <p class="sx-sub">
+        Đơn hàng của bạn đã được ghi nhận thành công. Chúng tôi sẽ gửi email xác nhận cùng thông tin vận chuyển trong thời gian sớm nhất.
+    </p>
+
+    <div class="sx-card">
+        <div class="sx-row">
+            <span class="label">Mã đơn hàng</span>
+            <span class="value sx-order-num">#@orderId</span>
         </div>
-    }
 
-    @if (orderTotal.HasValue)
-    {
-        <p class="mb-0"><strong>Tổng thanh toán: @orderTotal.Value.ToString("C0", vn)</strong></p>
-    }
+        @if (appliedCoupon != null)
+        {
+            <div class="sx-row">
+                <span class="label">Mã giảm giá</span>
+                <span class="value">
+                    <span class="sx-coupon-pill">@appliedCoupon.Code</span>
+                    <span style="margin-left:8px; color:#6b625d;">−@appliedCoupon.DiscountPercent%</span>
+                </span>
+            </div>
+        }
 
-    <hr />
-    <p class="mb-0">
+        @if (orderTotal.HasValue)
+        {
+            <div class="sx-row">
+                <span class="label">Tổng thanh toán</span>
+                <span class="value sx-total">@orderTotal.Value.ToString("C0", vn)</span>
+            </div>
+        }
+    </div>
+
+    <div class="sx-actions">
         @if (User.Identity?.IsAuthenticated == true)
         {
-            <a class="btn btn-primary"
-               asp-controller="Orders"
-               asp-action="UserOrders">
-                Xem lịch sử đặt hàng
-            </a>
+            <a class="sx-btn" asp-controller="Orders" asp-action="UserOrders">Xem lịch sử đơn hàng</a>
         }
-        <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Tiếp tục mua sắm</a>
-    </p>
+        <a class="sx-btn sx-btn-outline" asp-controller="Home" asp-action="Index">Tiếp tục mua sắm</a>
+    </div>
 </div>
