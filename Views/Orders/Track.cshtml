@@ -3,26 +3,109 @@
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
 }
 
-<h2>Tra cứu đơn hàng</h2>
-<p class="text-muted">Nhập mã đơn hàng và email bạn đã dùng khi đặt hàng.</p>
+<style>
+    .lov-track-wrap { max-width: 520px; margin: 20px auto; }
+    .lov-track-card {
+        background: var(--lov-surface);
+        border: 1px solid var(--lov-line);
+        border-radius: 16px;
+        padding: 40px 36px;
+        box-shadow: 0 30px 60px -40px rgba(0,0,0,0.15);
+    }
+    .lov-track-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-weight: 600;
+        font-size: 2rem;
+        letter-spacing: 0.08em;
+        text-align: center;
+        margin: 0 0 6px;
+        text-transform: uppercase;
+    }
+    .lov-track-sub {
+        text-align: center;
+        color: var(--lov-muted);
+        font-size: 13px;
+        letter-spacing: 0.06em;
+        margin-bottom: 28px;
+    }
+    .lov-field { margin-bottom: 18px; }
+    .lov-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--lov-muted);
+        margin-bottom: 8px;
+    }
+    .lov-input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid var(--lov-line);
+        border-radius: 10px;
+        font-family: inherit;
+        font-size: 14px;
+        color: var(--lov-ink);
+        background: #fff;
+        transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    .lov-input:focus {
+        outline: none;
+        border-color: var(--lov-accent);
+        box-shadow: 0 0 0 3px rgba(184,137,90,0.15);
+    }
+    .lov-submit {
+        width: 100%;
+        background: var(--lov-ink);
+        color: #fff;
+        border: 0;
+        padding: 13px 18px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background .2s ease;
+        margin-top: 6px;
+    }
+    .lov-submit:hover { background: var(--lov-accent-dark); }
+    .lov-error {
+        background: #fdf2f2;
+        border: 1px solid #f5c2c2;
+        color: #a13a3a;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 13px;
+        margin-bottom: 16px;
+    }
+    .lov-error:empty { display: none; }
+</style>
 
-<form asp-controller="Orders" asp-action="Track" method="post" novalidate>
-    @Html.AntiForgeryToken()
+<div class="lov-track-wrap">
+    <div class="lov-track-card">
+        <h1 class="lov-track-title">Tra cứu đơn hàng</h1>
+        <p class="lov-track-sub">Nhập mã đơn hàng và email bạn đã dùng khi đặt hàng</p>
 
-    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <form asp-controller="Orders" asp-action="Track" method="post" novalidate>
+            @Html.AntiForgeryToken()
 
-    <div class="mb-3">
-        <label for="orderId" class="form-label">Mã đơn hàng</label>
-        <input id="orderId" name="orderId" class="form-control" type="number" required />
+            <div asp-validation-summary="ModelOnly" class="lov-error"></div>
+
+            <div class="lov-field">
+                <label for="orderId" class="lov-label">Mã đơn hàng</label>
+                <input id="orderId" name="orderId" class="lov-input" type="number" required />
+            </div>
+
+            <div class="lov-field">
+                <label for="email" class="lov-label">Email</label>
+                <input id="email" name="email" class="lov-input" type="email" required />
+            </div>
+
+            <button class="lov-submit" type="submit">Tra cứu</button>
+        </form>
     </div>
-
-    <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input id="email" name="email" class="form-control" type="email" required />
-    </div>
-
-    <button class="btn btn-primary" type="submit">Tra cứu</button>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

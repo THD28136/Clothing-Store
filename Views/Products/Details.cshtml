@@ -23,194 +23,272 @@
 {
     <div class="alert alert-success">@TempData["ReviewSuccess"]</div>
 }
-@if (TempData["ReviewError"] != null)
-{
-    <div class="alert alert-danger">@TempData["ReviewError"]</div>
-}
 
-<div class="card mb-3">
-    <div class="row g-0">
-        <div class="col-md-4 text-center p-3">
-            <img src="@(string.IsNullOrEmpty(Model.Image) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + Model.Image))" class="img-fluid rounded" style="max-height:320px;object-fit:cover;" alt="@Model.Name" />
-        </div>
-        <div class="col-md-8">
-            <div class="card-body">
-                <h3 class="card-title">@Model.Name</h3>
-                <p class="text-muted mb-1"><strong>Danh mục:</strong> @Model.Category?.Name</p>
-                <p class="text-muted mb-1"><strong>Giá:</strong> @Model.Price.ToString("C0", vn)</p>
-                <p class="mb-1">
-                    <span class="text-warning">@Stars(avgRating)</span>
-                    <span class="text-muted">
-                        @(reviewCount > 0 ? $"{avgRating}/5 ({reviewCount} đánh giá)" : "Chưa có đánh giá")
-                    </span>
-                </p>
+<style>
+    .lov-pd-wrap { max-width: 1080px; margin: 24px auto; padding: 0 16px; }
+    .lov-pd-card {
+        background: var(--lov-surface);
+        border: 1px solid var(--lov-line);
+        border-radius: 18px;
+        padding: 32px;
+        display: grid;
+        grid-template-columns: minmax(280px, 420px) 1fr;
+        gap: 40px;
+        box-shadow: 0 30px 60px -50px rgba(0,0,0,.18);
+    }
+    @@media (max-width: 820px) { .lov-pd-card { grid-template-columns: 1fr; padding: 24px; } }
 
-                <div class="mb-2">
-                    @if (Model.Stock > 10)
-                    {
-                        <p><span class="badge bg-success">Còn hàng - @Model.Stock sản phẩm có sẵn</span></p>
-                    }
-                    else if (Model.Stock > 0)
-                    {
-                        <p><span class="badge bg-warning">Chỉ còn @Model.Stock sản phẩm</span></p>
-                    }
-                    else
-                    {
-                        <p><span class="badge bg-danger">Hết hàng</span></p>
-                    }
-                </div>
+    .lov-pd-image {
+        background: var(--lov-bg);
+        border: 1px solid var(--lov-line);
+        border-radius: 14px;
+        padding: 18px;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .lov-pd-image img { max-height: 380px; width: 100%; object-fit: cover; border-radius: 10px; }
 
-                <hr />
+    .lov-pd-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 600; color: var(--lov-ink); margin: 0 0 12px; }
+    .lov-pd-meta { color: var(--lov-muted); font-size: 14px; margin: 4px 0; }
+    .lov-pd-meta strong { color: var(--lov-ink); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; font-size: 12px; }
+    .lov-pd-price { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--lov-accent-dark); margin: 10px 0 14px; }
+    .lov-pd-rating { display: flex; align-items: center; gap: 10px; margin: 8px 0 16px; }
+    .lov-pd-rating .stars { color: #d4a054; letter-spacing: 2px; font-size: 18px; }
+    .lov-pd-rating .count { color: var(--lov-muted); font-size: 13px; }
 
-                <h6>Mô tả</h6>
-                <p>@(string.IsNullOrWhiteSpace(Model.Description) ? "Chưa có mô tả" : Model.Description)</p>
+    .lov-badge { display: inline-block; padding: 6px 14px; border-radius: 999px; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; border: 1px solid transparent; }
+    .lov-badge.in-stock { background: #eaf4ec; color: #2f6b3a; border-color: #cfe3d2; }
+    .lov-badge.low-stock { background: #fbf1e0; color: #8a6a1f; border-color: #ecd7ac; }
+    .lov-badge.out-stock { background: #f7e3e3; color: #8a2a2a; border-color: #ecc4c4; }
 
-                <div class="mt-4 d-flex gap-2">
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <a class="btn btn-warning" asp-action="Edit" asp-route-id="@Model.ProductId">Sửa</a>
+    .lov-pd-divider { border: 0; border-top: 1px solid var(--lov-line); margin: 22px 0; }
+    .lov-pd-section-title { font-family: 'Playfair Display', serif; font-size: 18px; margin: 0 0 8px; color: var(--lov-ink); }
+    .lov-pd-desc { color: #333; line-height: 1.7; margin: 0; }
 
-                        <form asp-action="Delete" asp-route-id="@Model.ProductId" method="post" onsubmit="return confirm('Xác nhận xóa sản phẩm này?');" class="m-0">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-danger">Xóa</button>
-                        </form>
-                    }
-                    <a class="btn btn-outline-secondary" onclick="history.back(); return false;" href="#">Quay lại</a>
-                    @if (Model.Stock > 0)
-                    {
-                        <form asp-controller="Cart" asp-action="Add" method="post" class="m-0">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="productId" value="@Model.ProductId" />
-                            <input type="hidden" name="quantity" value="1" />
-                            <button type="submit" class="btn btn-primary">Thêm vào giỏ</button>
-                        </form>
-                    }
-                    else
-                    {
-                        <button class="btn btn-primary" disabled>Hết hàng</button>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+    .lov-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; align-items: center; }
 
-<div class="card mb-4">
-    <div class="card-header bg-light">
-        <h5 class="mb-0">Đánh giá sản phẩm (@reviewCount)</h5>
-    </div>
-    <div class="card-body">
+    .lov-btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 22px; border-radius: 999px; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; border: 1px solid var(--lov-line); background: var(--lov-surface); color: var(--lov-ink); cursor: pointer; text-decoration: none; transition: all .2s; }
+    .lov-btn:hover { border-color: var(--lov-ink); }
+    .lov-btn.primary { background: var(--lov-accent); border-color: var(--lov-accent); color: #fff; }
+    .lov-btn.primary:hover { background: var(--lov-accent-dark); border-color: var(--lov-accent-dark); color: #fff; }
+    .lov-btn.warn { background: #f4e9d8; border-color: #e5cfa3; color: #6b4a17; }
+    .lov-btn.warn:hover { background: #ecdcbe; }
+    .lov-btn.danger { background: #fff; border-color: #d48a8a; color: #8a2a2a; }
+    .lov-btn.danger:hover { background: #f7e3e3; }
+    .lov-btn.sm { padding: 6px 14px; font-size: 11px; }
+
+    .lov-input, .lov-qty { background: var(--lov-surface); border: 1px solid var(--lov-line); border-radius: 999px; padding: 10px 16px; font-size: 14px; color: var(--lov-ink); font-family: inherit; outline: none; transition: border-color .2s; }
+    .lov-input:focus, .lov-qty:focus { border-color: var(--lov-accent); }
+    .lov-qty { width: 90px; text-align: center; }
+    textarea.lov-input { border-radius: 14px; width: 100%; min-height: 90px; resize: vertical; }
+
+    .lov-alert { border-radius: 12px; padding: 12px 18px; margin: 0 0 18px; font-size: 14px; border: 1px solid transparent; }
+    .lov-alert.success { background: #eaf4ec; color: #2f6b3a; border-color: #cfe3d2; }
+    .lov-alert.error { background: #f7e3e3; color: #8a2a2a; border-color: #ecc4c4; }
+
+    .lov-reviews-card { background: var(--lov-surface); border: 1px solid var(--lov-line); border-radius: 18px; padding: 32px; margin-top: 24px; box-shadow: 0 30px 60px -50px rgba(0,0,0,.18); }
+    .lov-reviews-title { font-family: 'Playfair Display', serif; font-size: 24px; margin: 0 0 18px; color: var(--lov-ink); }
+
+    .lov-review-form label { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--lov-muted); font-weight: 600; display: block; margin-bottom: 6px; }
+    .lov-review-form .row { display: grid; gap: 14px; margin-bottom: 14px; }
+
+    .lov-star-picker { display: inline-flex; flex-direction: row-reverse; gap: 4px; }
+    .lov-star-picker input { display: none; }
+    .lov-star-picker label { cursor: pointer; font-size: 26px; color: #d9d3c9; letter-spacing: 0; margin: 0; text-transform: none; }
+    .lov-star-picker label:before { content: "\2605"; }
+    .lov-star-picker input:checked ~ label,
+    .lov-star-picker label:hover,
+    .lov-star-picker label:hover ~ label { color: #d4a054; }
+
+    .lov-review-item { border-top: 1px solid var(--lov-line); padding: 16px 0; }
+    .lov-review-item:first-of-type { border-top: 0; }
+    .lov-review-head { display: flex; justify-content: space-between; align-items: baseline; }
+    .lov-review-head strong { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--lov-ink); }
+    .lov-review-head .date { color: var(--lov-muted); font-size: 12px; }
+    .lov-review-stars { color: #d4a054; letter-spacing: 2px; margin: 4px 0; }
+    .lov-review-comment { margin: 4px 0 0; color: #333; line-height: 1.6; }
+    .lov-review-actions { display: flex; gap: 8px; margin-top: 8px; }
+
+    .lov-empty { color: var(--lov-muted); font-style: italic; }
+</style>
+
+<div class="lov-pd-wrap">
+
+    @if (TempData["ReviewSuccess"] != null)
+    {
+        <div class="lov-alert success">@TempData["ReviewSuccess"]</div>
+    }
+    @if (TempData["ReviewError"] != null)
+    {
+        <div class="lov-alert error">@TempData["ReviewError"]</div>
+    }
+
+    <div class="lov-pd-card">
         @{
             bool canReview = ViewBag.CanReview == true;
         }
+        <div class="lov-pd-image">
+            <img src="@(string.IsNullOrEmpty(Model.Image) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + Model.Image))" alt="@Model.Name" />
+        </div>
+
+        <div>
+            <h1 class="lov-pd-title">@Model.Name</h1>
+            <p class="lov-pd-meta"><strong>Danh mục</strong> &nbsp; @Model.Category?.Name</p>
+            <div class="lov-pd-price">@Model.Price.ToString("C0", vn)</div>
+
+            <div class="lov-pd-rating">
+                <span class="stars">@Stars(avgRating)</span>
+                <span class="count">
+                    @(reviewCount > 0 ? $"{avgRating}/5 ({reviewCount} đánh giá)" : "Chưa có đánh giá")
+                </span>
+            </div>
+
+            <div>
+                @if (Model.Stock > 10)
+                {
+                    <span class="lov-badge in-stock">Còn hàng — @Model.Stock sản phẩm</span>
+                }
+                else if (Model.Stock > 0)
+                {
+                    <span class="lov-badge low-stock">Chỉ còn @Model.Stock sản phẩm</span>
+                }
+                else
+                {
+                    <span class="lov-badge out-stock">Hết hàng</span>
+                }
+            </div>
+
+            <hr class="lov-pd-divider" />
+
+            <h2 class="lov-pd-section-title">Mô tả</h2>
+            <p class="lov-pd-desc">
+                @(string.IsNullOrWhiteSpace(Model.Description) ? "Chưa có mô tả" : Model.Description)
+            </p>
+
+            @if (Model.Stock > 0)
+            {
+                <form asp-controller="Cart" asp-action="Add" method="post" class="lov-actions">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@Model.ProductId" />
+                    <input type="number" name="quantity" value="1" min="1" max="@Model.Stock" class="lov-qty" />
+                    <button type="submit" class="lov-btn primary">Thêm vào giỏ</button>
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a class="lov-btn warn" asp-action="Edit" asp-route-id="@Model.ProductId">Sửa</a>
+                        <form asp-action="Delete" asp-route-id="@Model.ProductId" method="post"
+                              onsubmit="return confirm('Xác nhận xóa sản phẩm này?');" class="m-0">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="lov-btn danger">Xóa</button>
+                        </form>
+                    }
+                </form>
+            }
+            else
+            {
+                <div class="lov-actions">
+                    <button type="button" class="lov-btn" disabled>Hết hàng</button>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a class="lov-btn warn" asp-action="Edit" asp-route-id="@Model.ProductId">Sửa</a>
+                        <form asp-action="Delete" asp-route-id="@Model.ProductId" method="post"
+                              onsubmit="return confirm('Xác nhận xóa sản phẩm này?');" class="m-0">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="lov-btn danger">Xóa</button>
+                        </form>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="lov-reviews-card">
+        <h2 class="lov-reviews-title">Đánh giá sản phẩm</h2>
+
         @if (User.Identity != null && User.Identity.IsAuthenticated && canReview)
         {
-            <h6>@(myReview != null ? "Cập nhật đánh giá của bạn" : "Viết đánh giá")</h6>
-            <form asp-controller="Reviews" asp-action="Create" method="post" class="mb-4" id="review-form">
+            <form id="review-form" asp-controller="Reviews" asp-action="Create" method="post" class="lov-review-form">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="productId" value="@Model.ProductId" />
-                <div class="mb-2">
-                    <label class="form-label d-block">Số sao</label>
-                    <div class="star-rating">
-                        @for (int s = 5; s >= 1; s--)
-                        {
-                            <input type="radio" id="star@(s)" name="rating" value="@s"
-                                   checked="@(myReview != null && myReview.Rating == s ? "checked" : null)" required />
-                            <label for="star@(s)" title="@s sao">★</label>
-                        }
+
+                <div class="row">
+                    <div>
+                        <label>Điểm đánh giá</label>
+                        <div class="lov-star-picker">
+                            @for (int i = 5; i >= 1; i--)
+                            {
+                                var id = $"star{i}";
+                                var isChecked = (myReview != null && myReview.Rating == i) || (myReview == null && i == 5);
+                                <input type="radio" name="rating" id="@id" value="@i" @(isChecked ? "checked" : "") />
+                                <label for="@id"></label>
+                            }
+                        </div>
+                    </div>
+                    <div>
+                        <label for="comment">Nhận xét</label>
+                        <textarea id="comment" name="comment" class="lov-input" placeholder="Chia sẻ cảm nhận của bạn về sản phẩm...">@(myReview?.Comment)</textarea>
                     </div>
                 </div>
-                <style>
-                    .star-rating {
-                        display: inline-flex;
-                        flex-direction: row-reverse;
-                        font-size: 2rem;
-                        line-height: 1;
-                    }
 
-                        .star-rating input {
-                            display: none;
-                        }
-
-                        .star-rating label {
-                            color: #ccc;
-                            cursor: pointer;
-                            padding: 0 2px;
-                            transition: color 0.15s;
-                        }
-
-                            .star-rating input:checked ~ label,
-                            .star-rating label:hover,
-                            .star-rating label:hover ~ label {
-                                color: #ffc107;
-                            }
-                </style>
-                <div class="mb-2">
-                    <label class="form-label">Nhận xét</label>
-                    <textarea name="comment" class="form-control" rows="3" maxlength="1000">@(myReview?.Comment)</textarea>
-                </div>
-                <button type="submit" class="btn btn-primary btn-sm">@(myReview != null ? "Cập nhật đánh giá" : "Gửi đánh giá")</button>
-
-                @if (myReview != null)
-                {
-                    <form asp-controller="Reviews" asp-action="Delete" asp-route-id="@myReview.ReviewId" method="post" class="d-inline"
-                          onsubmit="return confirm('Xóa đánh giá của bạn?');">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-outline-danger btn-sm">Xóa đánh giá</button>
-                    </form>
-                }
+                <button type="submit" class="lov-btn primary">
+                    @(myReview == null ? "Gửi đánh giá" : "Cập nhật đánh giá")
+                </button>
             </form>
+
+            <hr class="lov-pd-divider" />
         }
-        else if (User.Identity != null && User.Identity.IsAuthenticated && !canReview)
+        else if (User.Identity != null && User.Identity.IsAuthenticated)
         {
-            <p class="text-muted">Bạn cần <strong>đặt mua sản phẩm này</strong> trước khi có thể đánh giá.</p>
+            <p class="lov-empty">Bạn cần mua và nhận sản phẩm này trước khi có thể đánh giá.</p>
+            <hr class="lov-pd-divider" />
         }
         else
         {
-            <p class="text-muted">
-                <a asp-controller="Users" asp-action="Login" asp-route-returnUrl="@Url.Action("Details", "Products", new { id = Model.ProductId })">Đăng nhập</a>
+            <p class="lov-empty">
+                <a asp-controller="Users" asp-action="Login"
+                   asp-route-returnUrl="@Url.Action("Details", "Products", new { id = Model.ProductId })">Đăng nhập</a>
                 và mua sản phẩm này để có thể viết đánh giá.
             </p>
+            <hr class="lov-pd-divider" />
         }
-
-        <hr />
 
         @if (!reviews.Any())
         {
-            <p class="text-muted mb-0">Chưa có đánh giá nào cho sản phẩm này.</p>
+            <p class="lov-empty">Chưa có đánh giá nào cho sản phẩm này.</p>
         }
         else
         {
             foreach (var r in reviews)
             {
-                <div class="border-bottom py-2">
-                    <div class="d-flex justify-content-between">
+                <div class="lov-review-item">
+                    <div class="lov-review-head">
                         <strong>@(r.User?.Name ?? "Người dùng")</strong>
-                        <span class="text-muted small">@r.ReviewDate?.ToString("dd/MM/yyyy")</span>
+                        <span class="date">@r.ReviewDate?.ToString("dd/MM/yyyy")</span>
                     </div>
-                    <div class="text-warning">@Stars(r.Rating)</div>
+                    <div class="lov-review-stars">@Stars(r.Rating)</div>
                     @if (!string.IsNullOrWhiteSpace(r.Comment))
                     {
-                        <p class="mb-0">@r.Comment</p>
+                        <p class="lov-review-comment">@r.Comment</p>
                     }
                     @if (myReview != null && myReview.ReviewId == r.ReviewId)
                     {
-                        <div class="mt-1 d-flex gap-2">
-                            <a href="#review-form" class="btn btn-outline-primary btn-sm">Sửa</a>
+                        <div class="lov-review-actions">
+                            <a href="#review-form" class="lov-btn sm">Sửa</a>
                             <form asp-controller="Reviews" asp-action="Delete" asp-route-id="@r.ReviewId" method="post" class="m-0"
                                   onsubmit="return confirm('Xóa đánh giá của bạn?');">
                                 @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
+                                <button type="submit" class="lov-btn danger sm">Xóa</button>
                             </form>
                         </div>
                     }
                     else if (User.IsInRole("Admin"))
                     {
-                        <form asp-controller="Reviews" asp-action="Delete" asp-route-id="@r.ReviewId" method="post" class="mt-1"
-                              onsubmit="return confirm('Xóa đánh giá này?');">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-outline-danger btn-sm">Xóa (Admin)</button>
-                        </form>
+                        <div class="lov-review-actions">
+                            <form asp-controller="Reviews" asp-action="Delete" asp-route-id="@r.ReviewId" method="post" class="m-0"
+                                  onsubmit="return confirm('Xóa đánh giá này?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="lov-btn danger sm">Xóa (Admin)</button>
+                            </form>
+                        </div>
                     }
                 </div>
             }

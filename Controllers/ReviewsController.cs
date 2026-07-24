@@ -44,9 +44,11 @@ namespace MTKPM_Clothing_Store_web.Controllers
 
             // Chỉ cho phép đánh giá nếu user đã từng đặt sản phẩm này (đơn không bị hủy)
             bool hasPurchased = await _context.Orders
-                .Where(o => o.UserId == userId.Value && o.Status != "Cancelled")
-                .AnyAsync(o => o.OrderDetails.Any(od => od.ProductId == productId));
-
+    .Where(o =>
+        o.UserId == userId.Value &&
+        (o.Status == "Paid" || o.Status == "Completed"))
+    .AnyAsync(o =>
+        o.OrderDetails.Any(d => d.ProductId == productId));
             if (!hasPurchased)
             {
                 TempData["ReviewError"] = "Bạn cần đặt mua sản phẩm này trước khi có thể đánh giá.";
@@ -72,7 +74,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
             {
                 existing.Rating = rating;
                 existing.Comment = comment;
-                existing.ReviewDate = DateTime.UtcNow;
+                existing.ReviewDate = DateTime.Now;
                 _context.Update(existing);
                 TempData["ReviewSuccess"] = "Đánh giá của bạn đã được cập nhật.";
             }
