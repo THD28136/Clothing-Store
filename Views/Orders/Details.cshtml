@@ -137,11 +137,11 @@
                     <td>
                         @if (!string.IsNullOrEmpty(d.Product?.Image))
                         {
-                            <img src="@Url.Content("~/images/" + d.Product.Image)" alt="@d.Product?.Name" class="lov-thumb" />
+                            <img src="@Url.Content("~/" + d.Product.Image)" alt="@d.Product?.Name" class="lov-thumb" />
                         }
                         else
                         {
-                            <div class="lov-thumb"></div>
+                            <div class="lov-thumb"></div> // Placeholder for missing image
                         }
                     </td>
                     <td>

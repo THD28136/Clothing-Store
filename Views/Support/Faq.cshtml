@@ -3,149 +3,315 @@
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
 }
 
-<h1 class="mb-1">Chăm sóc khách hàng</h1>
-<p class="text-muted mb-4">Các câu hỏi thường gặp.</p>
+<style>
+    .faq-hero {
+        text-align: center;
+        padding: 3rem 1rem 2.5rem;
+        border-bottom: 1px solid #ececec;
+        margin-bottom: 3rem;
+    }
+    .faq-eyebrow {
+        font-family: 'Inter', sans-serif;
+        font-size: .72rem;
+        letter-spacing: .28em;
+        text-transform: uppercase;
+        color: #8a8a8a;
+        margin-bottom: .9rem;
+    }
+    .faq-title {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(2.2rem, 4vw, 3.2rem);
+        font-weight: 500;
+        letter-spacing: -.01em;
+        color: #1a1a1a;
+        margin: 0;
+    }
+    .faq-subtitle {
+        font-family: 'Inter', sans-serif;
+        color: #6b6b6b;
+        margin-top: .75rem;
+        font-size: .95rem;
+    }
 
-<div class="accordion" id="faqAccordion">
+    .faq-layout {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 3.5rem;
+        max-width: 1100px;
+        margin: 0 auto 4rem;
+        padding: 0 1rem;
+    }
+    @@media (max-width: 860px) {
+        .faq-layout { grid-template-columns: 1fr; gap: 2rem; }
+        .faq-nav { position: static !important; }
+    }
 
-    <h5 class="mt-3 mb-2">Đặt hàng & Thanh toán</h5>
+    .faq-nav {
+        position: sticky;
+        top: 100px;
+        align-self: start;
+        font-family: 'Inter', sans-serif;
+    }
+    .faq-nav-label {
+        font-size: .7rem;
+        letter-spacing: .24em;
+        text-transform: uppercase;
+        color: #8a8a8a;
+        margin-bottom: 1rem;
+    }
+    .faq-nav a {
+        display: block;
+        padding: .55rem 0;
+        color: #4a4a4a;
+        text-decoration: none;
+        font-size: .92rem;
+        border-bottom: 1px solid #f0f0f0;
+        transition: color .2s, padding-left .2s;
+    }
+    .faq-nav a:hover {
+        color: #1a1a1a;
+        padding-left: .35rem;
+    }
 
-    <div class="accordion-item">
-        <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
-                Tôi có cần tạo tài khoản mới đặt hàng được không?
-            </button>
-        </h2>
-        <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-            <div class="accordion-body">
-                Không bắt buộc. Bạn có thể đặt hàng với tư cách <strong>khách vãng lai</strong> bằng cách nhập thông tin
-                nhận hàng khi thanh toán. Sau khi đặt xong, hãy lưu lại <strong>mã đơn hàng</strong> cùng email/số điện thoại
-                đã dùng để tra cứu hoặc hủy đơn sau này tại mục
-                <a asp-controller="Orders" asp-action="GuestLookup">Tra cứu đơn hàng</a>.
-            </div>
-        </div>
-    </div>
+    .faq-section-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        font-weight: 500;
+        color: #1a1a1a;
+        margin: 2.5rem 0 1rem;
+        padding-bottom: .6rem;
+        border-bottom: 1px solid #ececec;
+    }
+    .faq-section-title:first-child { margin-top: 0; }
 
-    <div class="accordion-item">
-        <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
-                Cửa hàng chấp nhận hình thức thanh toán nào?
-            </button>
-        </h2>
-        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-            <div class="accordion-body">
-                Hiện tại cửa hàng hỗ trợ thanh toán bằng thẻ, PayPal, Momo và thanh toán tiền mặt khi nhận hàng. 
-            </div>
-        </div>
-    </div>
+    .faq-accordion .accordion-item {
+        border: none;
+        border-bottom: 1px solid #ececec;
+        background: transparent;
+        border-radius: 0;
+    }
+    .faq-accordion .accordion-button {
+        background: transparent;
+        border: none;
+        padding: 1.15rem 0;
+        font-family: 'Inter', sans-serif;
+        font-size: 1rem;
+        font-weight: 500;
+        color: #1a1a1a;
+        box-shadow: none !important;
+    }
+    .faq-accordion .accordion-button:not(.collapsed) {
+        background: transparent;
+        color: #1a1a1a;
+    }
+    .faq-accordion .accordion-button::after {
+        background-image: none;
+        content: '+';
+        font-size: 1.4rem;
+        font-weight: 300;
+        color: #8a8a8a;
+        width: auto;
+        height: auto;
+        transform: none;
+        transition: transform .2s, color .2s;
+    }
+    .faq-accordion .accordion-button:not(.collapsed)::after {
+        content: '−';
+        color: #1a1a1a;
+    }
+    .faq-accordion .accordion-body {
+        padding: 0 0 1.3rem;
+        font-family: 'Inter', sans-serif;
+        font-size: .93rem;
+        line-height: 1.7;
+        color: #555;
+    }
+    .faq-accordion .accordion-body a {
+        color: #1a1a1a;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+    .faq-accordion .accordion-body strong { color: #1a1a1a; }
 
-    <div class="accordion-item">
-        <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
-                Tôi có thể sửa đơn hàng sau khi đã đặt không?
-            </button>
-        </h2>
-        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-            <div class="accordion-body">
-                Đơn hàng không chỉnh sửa trực tiếp được sau khi đặt. Nếu đơn chưa được giao, bạn có thể <strong>hủy đơn</strong> và đặt lại đơn mới với
-                thông tin chính xác.
-            </div>
-        </div>
-    </div>
+    .faq-contact {
+        max-width: 1100px;
+        margin: 0 auto 5rem;
+        padding: 2.5rem;
+        background: #fafafa;
+        text-align: center;
+        border: 1px solid #ececec;
+    }
+    .faq-contact h4 {
+        font-family: 'Playfair Display', serif;
+        font-weight: 500;
+        color: #1a1a1a;
+        margin-bottom: .5rem;
+    }
+    .faq-contact p {
+        font-family: 'Inter', sans-serif;
+        color: #6b6b6b;
+        font-size: .92rem;
+        margin: 0;
+    }
+</style>
 
-    <h5 class="mt-4 mb-2">Hủy đơn & Hoàn tiền</h5>
-
-    <div class="accordion-item">
-        <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
-                Làm sao để hủy đơn hàng?
-            </button>
-        </h2>
-        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-            <div class="accordion-body">
-                Vào <a asp-controller="Orders" asp-action="UserOrders">Lịch sử đặt hàng</a> (hoặc trang
-                <a asp-controller="Orders" asp-action="GuestLookup">Tra cứu đơn hàng</a> nếu bạn đặt hàng không có tài khoản),
-                mở chi tiết đơn hàng cần hủy và bấm nút <strong>Hủy đơn hàng</strong>. Chỉ áp dụng với đơn <strong>chưa được giao</strong>.
-            </div>
-        </div>
-    </div>
-
-    <div class="accordion-item">
-        <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
-                Đơn hàng đã giao (Delivered) có hủy được không?
-            </button>
-        </h2>
-        <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-            <div class="accordion-body">
-                Không. Đơn ở trạng thái <em>Shipped</em> (đang giao) hoặc <em>Delivered</em> (đã giao) không thể hủy trực
-                tuyến. Vui lòng liên hệ để được hỗ trợ đổi/trả theo chính sách của cửa hàng.
-            </div>
-        </div>
-    </div>
-
-    <h5 class="mt-4 mb-2">Đánh giá sản phẩm</h5>
-
-    <div class="accordion-item">
-        <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq6">
-                Vì sao tôi không thấy nút đánh giá sản phẩm?
-            </button>
-        </h2>
-        <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-            <div class="accordion-body">
-                Bạn cần <strong>đăng nhập</strong> và đơn hàng chứa sản phẩm đó phải ở trạng thái
-                <strong>Delivered</strong> (đã nhận hàng) thì nút đánh giá mới xuất hiện, tương tự các sàn thương mại điện tử khác.
-            </div>
-        </div>
-    </div>
-
-    <div class="accordion-item">
-        <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq7">
-                Tôi có sửa/xóa được đánh giá đã gửi không?
-            </button>
-        </h2>
-        <div id="faq7" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-            <div class="accordion-body">
-                Có. Trên trang chi tiết sản phẩm, đánh giá của bạn có nút <strong>Sửa</strong> và <strong>Xóa</strong> ngay
-                cạnh nội dung đánh giá.
-            </div>
-        </div>
-    </div>
-
-    <h5 class="mt-4 mb-2">Tài khoản</h5>
-
-    <div class="accordion-item">
-        <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq8">
-                Tôi quên mật khẩu, làm sao lấy lại?
-            </button>
-        </h2>
-        <div id="faq8" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-            <div class="accordion-body">
-                Vui lòng liên hệ bộ phận hỗ trợ để được cấp lại mật khẩu. Tính năng tự khôi phục mật khẩu qua email
-                hiện chưa khả dụng.
-            </div>
-        </div>
-    </div>
-
-    <div class="accordion-item">
-        <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq9">
-                Làm sao để cập nhật thông tin cá nhân?
-            </button>
-        </h2>
-        <div id="faq9" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-            <div class="accordion-body">
-                Sau khi đăng nhập, vào trang thông tin tài khoản của bạn và chọn <strong>Chỉnh sửa hồ sơ</strong> để cập
-                nhật tên, email, số điện thoại, địa chỉ.
-            </div>
-        </div>
-    </div>
-
+<div class="faq-hero">
+    <div class="faq-eyebrow">Chăm sóc khách hàng</div>
+    <h1 class="faq-title">Câu hỏi thường gặp</h1>
+    <p class="faq-subtitle">Mọi điều bạn cần biết về việc mua sắm cùng chúng tôi.</p>
 </div>
 
-<div class="alert alert-light border mt-4">
-    Không tìm thấy câu trả lời bạn cần? Vui lòng liên hệ trực tiếp với chúng tôi để được hỗ trợ thêm.
+<div class="faq-layout">
+    <nav class="faq-nav">
+        <div class="faq-nav-label">Chủ đề</div>
+        <a href="#section-orders">Đặt hàng &amp; Thanh toán</a>
+        <a href="#section-cancel">Hủy đơn &amp; Hoàn tiền</a>
+        <a href="#section-reviews">Đánh giá sản phẩm</a>
+        <a href="#section-account">Tài khoản</a>
+    </nav>
+
+    <div class="accordion faq-accordion" id="faqAccordion">
+
+        <h5 id="section-orders" class="faq-section-title">Đặt hàng &amp; Thanh toán</h5>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                    Tôi có cần tạo tài khoản mới đặt hàng được không?
+                </button>
+            </h2>
+            <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    Không bắt buộc. Bạn có thể đặt hàng với tư cách <strong>khách vãng lai</strong> bằng cách nhập thông tin
+                    nhận hàng khi thanh toán. Sau khi đặt xong, hãy lưu lại <strong>mã đơn hàng</strong> cùng email/số điện thoại
+                    đã dùng để tra cứu hoặc hủy đơn sau này tại mục
+                    <a asp-controller="Orders" asp-action="GuestLookup">Tra cứu đơn hàng</a>.
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                    Cửa hàng chấp nhận hình thức thanh toán nào?
+                </button>
+            </h2>
+            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    Hiện tại cửa hàng hỗ trợ thanh toán bằng thẻ, PayPal, Momo và thanh toán tiền mặt khi nhận hàng.
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                    Tôi có thể sửa đơn hàng sau khi đã đặt không?
+                </button>
+            </h2>
+            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    Đơn hàng không chỉnh sửa trực tiếp được sau khi đặt. Nếu đơn chưa được giao, bạn có thể <strong>hủy đơn</strong> và đặt lại đơn mới với
+                    thông tin chính xác.
+                </div>
+            </div>
+        </div>
+
+        <h5 id="section-cancel" class="faq-section-title">Hủy đơn &amp; Hoàn tiền</h5>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                    Làm sao để hủy đơn hàng?
+                </button>
+            </h2>
+            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    Vào <a asp-controller="Orders" asp-action="UserOrders">Lịch sử đặt hàng</a> (hoặc trang
+                    <a asp-controller="Orders" asp-action="GuestLookup">Tra cứu đơn hàng</a> nếu bạn đặt hàng không có tài khoản),
+                    mở chi tiết đơn hàng cần hủy và bấm nút <strong>Hủy đơn hàng</strong>. Chỉ áp dụng với đơn <strong>chưa được giao</strong>.
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                    Đơn hàng đã giao (Delivered) có hủy được không?
+                </button>
+            </h2>
+            <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    Không. Đơn ở trạng thái <em>Shipped</em> (đang giao) hoặc <em>Delivered</em> (đã giao) không thể hủy trực
+                    tuyến. Vui lòng liên hệ để được hỗ trợ đổi/trả theo chính sách của cửa hàng.
+                </div>
+            </div>
+        </div>
+
+        <h5 id="section-reviews" class="faq-section-title">Đánh giá sản phẩm</h5>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq6">
+                    Vì sao tôi không thấy nút đánh giá sản phẩm?
+                </button>
+            </h2>
+            <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    Bạn cần <strong>đăng nhập</strong> và đơn hàng chứa sản phẩm đó phải ở trạng thái
+                    <strong>Delivered</strong> (đã nhận hàng) thì nút đánh giá mới xuất hiện, tương tự các sàn thương mại điện tử khác.
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq7">
+                    Tôi có sửa/xóa được đánh giá đã gửi không?
+                </button>
+            </h2>
+            <div id="faq7" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    Có. Trên trang chi tiết sản phẩm, đánh giá của bạn có nút <strong>Sửa</strong> và <strong>Xóa</strong> ngay
+                    cạnh nội dung đánh giá.
+                </div>
+            </div>
+        </div>
+
+        <h5 id="section-account" class="faq-section-title">Tài khoản</h5>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq8">
+                    Tôi quên mật khẩu, làm sao lấy lại?
+                </button>
+            </h2>
+            <div id="faq8" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    Vui lòng liên hệ bộ phận hỗ trợ để được cấp lại mật khẩu. Tính năng tự khôi phục mật khẩu qua email
+                    hiện chưa khả dụng.
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq9">
+                    Làm sao để cập nhật thông tin cá nhân?
+                </button>
+            </h2>
+            <div id="faq9" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    Sau khi đăng nhập, vào trang thông tin tài khoản của bạn và chọn <strong>Chỉnh sửa hồ sơ</strong> để cập
+                    nhật tên, email, số điện thoại, địa chỉ.
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="faq-contact">
+    <h4>Vẫn cần hỗ trợ?</h4>
+    <p>Không tìm thấy câu trả lời bạn cần? Vui lòng liên hệ trực tiếp với chúng tôi để được hỗ trợ thêm.</p>
 </div>
