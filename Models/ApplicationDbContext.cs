@@ -21,7 +21,11 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<Category> Categories { get; set; }
 
+    public virtual DbSet<ShippingAddress> ShippingAddresses { get; set; }
+
     public virtual DbSet<Coupon> Coupons { get; set; }
+
+    public virtual DbSet<LoyaltyPointTransaction> LoyaltyPointTransactions { get; set; }
 
     public virtual DbSet<Order> Orders { get; set; }
 
@@ -58,9 +62,13 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<VwUserOrder> VwUserOrders { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=MSI\\DEV_SERVER;Database=Clothing_Store;Trusted_Connection=True;TrustServerCertificate=True");
-
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseSqlServer(
+                "Server=26.74.200.185,1433;Database=Clothing_Store;User Id=sa;Password=123456;TrustServerCertificate=True");
+        }
+    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Cart>(entity =>
@@ -142,6 +150,35 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.UsedCount).HasColumnName("used_count");
         });
 
+        modelBuilder.Entity<LoyaltyPointTransaction>(entity =>
+        {
+            entity.HasKey(e => e.TransactionId).HasName("PK__LoyaltyPointTransactions");
+
+            entity.ToTable("LoyaltyPointTransactions");
+
+            entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.Points).HasColumnName("points");
+            entity.Property(e => e.Description)
+                .HasMaxLength(255)
+                .HasColumnName("description");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+
+            entity.HasOne(d => d.User).WithMany(p => p.LoyaltyPointTransactions)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_LoyaltyPointTransactions_Users");
+
+            entity.HasOne(d => d.Order).WithMany()
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .HasConstraintName("FK_LoyaltyPointTransactions_Orders");
+        });
+
         modelBuilder.Entity<Order>(entity =>
         {
             entity.HasKey(e => e.OrderId).HasName("PK__orders__46596229D07418E0");
@@ -170,6 +207,24 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("total_amount");
             entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.AddressId).HasColumnName("address_id");
+            entity.Property(e => e.GuestProvince)
+                .HasMaxLength(100)
+                .HasColumnName("guest_province");
+            entity.Property(e => e.GuestWard)
+                .HasMaxLength(100)
+                .HasColumnName("guest_ward");
+            entity.Property(e => e.GuestStreet)
+                .HasMaxLength(255)
+                .HasColumnName("guest_street");
+            entity.Property(e => e.PointsRedeemed).HasColumnName("points_redeemed");
+            entity.Property(e => e.PointsDiscountAmount)
+                .HasColumnType("decimal(18, 2)")
+                .HasColumnName("points_discount_amount");
+
+            entity.HasOne(d => d.Address).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.AddressId)
+                .HasConstraintName("FK_Orders_ShippingAddresses");
 
             entity.HasOne(d => d.Coupon).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.CouponId)
@@ -189,10 +244,10 @@ public partial class ApplicationDbContext : DbContext
             entity.HasKey(e => e.DetailId).HasName("PK__order_de__38E9A2240EE53992");
 
             entity.ToTable("order_details", tb =>
-                {
-                    tb.HasTrigger("trg_UpdateStock");
-                    tb.HasTrigger("trg_UpdateStockAfterOrder");
-                });
+            {
+                tb.HasTrigger("trg_UpdateStock");
+                tb.HasTrigger("trg_UpdateStockAfterOrder");
+            });
 
             entity.Property(e => e.DetailId).HasColumnName("detail_id");
             entity.Property(e => e.OrderId).HasColumnName("order_id");
@@ -230,13 +285,13 @@ public partial class ApplicationDbContext : DbContext
             entity.HasKey(e => e.ProductId).HasName("PK__products__47027DF51524F432");
 
             entity.ToTable("products", tb =>
-                {
-                    tb.HasTrigger("trg_CheckStock");
-                    tb.HasTrigger("trg_LogDelete");
-                    tb.HasTrigger("trg_LogInsert");
-                    tb.HasTrigger("trg_PriceCheck");
-                    tb.HasTrigger("trg_UpdateLog");
-                });
+            {
+                tb.HasTrigger("trg_CheckStock");
+                tb.HasTrigger("trg_LogDelete");
+                tb.HasTrigger("trg_LogInsert");
+                tb.HasTrigger("trg_PriceCheck");
+                tb.HasTrigger("trg_UpdateLog");
+            });
 
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.CategoryId).HasColumnName("category_id");
@@ -286,15 +341,53 @@ public partial class ApplicationDbContext : DbContext
                 .HasConstraintName("FK_Reviews_Users");
         });
 
+        modelBuilder.Entity<ShippingAddress>(entity =>
+        {
+            entity.HasKey(e => e.AddressId).HasName("PK__ShippingAddresses");
+
+            entity.ToTable("ShippingAddresses");
+
+            entity.Property(e => e.AddressId).HasColumnName("address_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.ReceiverName)
+                .HasMaxLength(100)
+                .HasColumnName("receiver_name");
+            entity.Property(e => e.PhoneNumber)
+                .HasMaxLength(20)
+                .HasColumnName("phone_number");
+            entity.Property(e => e.Province)
+                .HasMaxLength(100)
+                .HasColumnName("province");
+            entity.Property(e => e.Ward)
+                .HasMaxLength(100)
+                .HasColumnName("ward");
+            entity.Property(e => e.Street)
+                .HasMaxLength(255)
+                .HasColumnName("street");
+            entity.Property(e => e.AddressLabel)
+                .HasMaxLength(50)
+                .HasColumnName("address_label");
+            entity.Property(e => e.IsDefault).HasColumnName("is_default");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+
+            entity.HasOne(d => d.User).WithMany(p => p.ShippingAddresses)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_ShippingAddresses_Users");
+        });
+
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.UserId).HasName("PK__users__B9BE370FBF36817C");
 
             entity.ToTable("users", tb =>
-                {
-                    tb.HasTrigger("trg_DefaultRole");
-                    tb.HasTrigger("trg_UserDelete");
-                });
+            {
+                tb.HasTrigger("trg_DefaultRole");
+                tb.HasTrigger("trg_UserDelete");
+            });
 
             entity.HasIndex(e => e.Email, "UQ__users__AB6E616445D34C82").IsUnique();
 

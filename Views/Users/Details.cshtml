@@ -114,7 +114,7 @@
 
             @if (User.IsInRole("Admin"))
             {
-                <a class="lov-btn solid" asp-action="Edit" asp-route-id="@Model.UserId">Chỉnh sửa (Admin)</a>
+                <a class="lov-btn solid" asp-action="Edit" asp-route-id="@Model.UserId">Chỉnh sửa</a>
             }
             else if (currentId == Model.UserId.ToString())
             {

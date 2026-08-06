@@ -1,0 +1,92 @@
+﻿@model MTKPM_Clothing_Store_web.Models.ShippingAddress
+@{
+    ViewData["Title"] = "Sửa địa chỉ";
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+}
+
+<div style="max-width:600px;margin:0 auto;padding:32px 16px;">
+    <h2>Sửa địa chỉ</h2>
+
+    <form asp-action="Edit" asp-route-id="@Model.AddressId" method="post" id="addressForm">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="AddressId" />
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label class="form-label">Họ tên người nhận</label>
+            <input asp-for="ReceiverName" class="form-control" required />
+            <span asp-validation-for="ReceiverName" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Số điện thoại</label>
+            <input asp-for="PhoneNumber" class="form-control" required />
+            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Tỉnh/Thành phố</label>
+            <select id="provinceSelect" name="Province" class="form-select" required></select>
+            <span asp-validation-for="Province" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Xã/Phường</label>
+            <select id="wardSelect" name="Ward" class="form-select" required disabled>
+                <option value="">-- Chọn Tỉnh/Thành phố trước --</option>
+            </select>
+            <span asp-validation-for="Ward" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Số nhà, tên đường</label>
+            <input asp-for="Street" class="form-control" required />
+            <span asp-validation-for="Street" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Loại địa chỉ (tùy chọn)</label>
+            <select asp-for="AddressLabel" class="form-select">
+                <option value="">-- Không chọn --</option>
+                <option value="Nhà riêng">Nhà riêng</option>
+                <option value="Công ty">Công ty</option>
+            </select>
+        </div>
+
+        <div class="form-check mb-3">
+            <input asp-for="IsDefault" class="form-check-input" type="checkbox" />
+            <label class="form-check-label" asp-for="IsDefault">Đặt làm địa chỉ mặc định</label>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-dark">Lưu thay đổi</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Hủy</a>
+        </div>
+    </form>
+</div>
+
+<script src="~/js/address-cascade.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        initAddressCascade({
+            provinceSelectId: "provinceSelect",
+            wardSelectId: "wardSelect",
+            selectedProvince: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Province)),
+            selectedWard: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Ward))
+            });
+
+        document.getElementById("addressForm").addEventListener("submit", function (e) {
+            var wardSelect = document.getElementById("wardSelect");
+            var provinceSelect = document.getElementById("provinceSelect");
+            if (!provinceSelect.value) {
+                e.preventDefault();
+                alert("Vui lòng chọn Tỉnh/Thành phố.");
+                return;
+            }
+            if (wardSelect.disabled || !wardSelect.value) {
+                e.preventDefault();
+                alert("Vui lòng chọn Xã/Phường (đợi danh sách tải xong).");
+            }
+        });
+    });
+</script>

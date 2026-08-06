@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MTKPM_Clothing_Store_web.Helpers;
 using MTKPM_Clothing_Store_web.Models;
+using MTKPM_Clothing_Store_web.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Data.SqlClient;
 using System.Data;
@@ -11,6 +12,7 @@ using System.Data.Common;
 using System.Linq;
 using System.Globalization;
 using System.Security.Claims;
+using System.Text;
 
 namespace MTKPM_Clothing_Store_web.Controllers
 {
@@ -21,12 +23,16 @@ namespace MTKPM_Clothing_Store_web.Controllers
         private readonly ApplicationDbContext _dbContext;
         private readonly IHttpContextAccessor _httpAccessor;
         private readonly ILogger<PaymentsController> _loggerInstance;
+        private readonly IEmailService _emailService;
+        private readonly ILoyaltyService _loyaltyService;
 
-        public PaymentsController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ILogger<PaymentsController> logger)
+        public PaymentsController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, ILogger<PaymentsController> logger, IEmailService emailService, ILoyaltyService loyaltyService)
         {
             this._dbContext = context;
             this._httpAccessor = httpContextAccessor;
             this._loggerInstance = logger;
+            this._emailService = emailService;
+            this._loyaltyService = loyaltyService;
         }
 
         // Validates a coupon code against a cart subtotal. Returns the coupon
@@ -74,6 +80,19 @@ namespace MTKPM_Clothing_Store_web.Controllers
             if (int.TryParse(userIdStr, out var uid))
             {
                 vm.UserId = uid;
+
+                // Nạp sổ địa chỉ của user để chọn lúc checkout (giống Shopee).
+                vm.Addresses = await _dbContext.ShippingAddresses
+                    .Where(a => a.UserId == uid)
+                    .OrderByDescending(a => a.IsDefault)
+                    .ThenByDescending(a => a.CreatedAt)
+                    .ToListAsync();
+
+                // Khách hàng thân thiết: hạng thành viên + điểm khả dụng để hiển thị lúc checkout.
+                var tierInfo = await _loyaltyService.GetTierInfoAsync(uid);
+                vm.TierName = tierInfo.TierName;
+                vm.TierDiscountPercent = tierInfo.DiscountPercent;
+                vm.AvailablePoints = await _loyaltyService.GetAvailablePointsAsync(uid);
             }
 
             // default payment method remains Card; you can override with querystring if needed
@@ -225,8 +244,70 @@ namespace MTKPM_Clothing_Store_web.Controllers
                     ModelState.AddModelError(nameof(model.GuestName), "Vui lòng nhập họ tên.");
                     return View("Checkout", model);
                 }
+
+                if (string.IsNullOrWhiteSpace(model.GuestProvince) || string.IsNullOrWhiteSpace(model.GuestWard) || string.IsNullOrWhiteSpace(model.GuestStreet))
+                {
+                    ModelState.AddModelError(string.Empty, "Vui lòng nhập đầy đủ địa chỉ nhận hàng.");
+                    return View("Checkout", model);
+                }
+            }
+            else
+            {
+                // User đã đăng nhập: bắt buộc phải chọn 1 địa chỉ trong sổ địa chỉ của chính mình.
+                if (!model.SelectedAddressId.HasValue)
+                {
+                    ModelState.AddModelError(string.Empty, "Vui lòng chọn địa chỉ giao hàng.");
+                    model.Addresses = await _dbContext.Set<ShippingAddress>().Where(a => a.UserId == userId.Value).ToListAsync();
+                    return View("Checkout", model);
+                }
+
+                var ownsAddress = await _dbContext.ShippingAddresses.AnyAsync(a => a.AddressId == model.SelectedAddressId.Value && a.UserId == userId.Value);
+                if (!ownsAddress)
+                {
+                    ModelState.AddModelError(string.Empty, "Địa chỉ giao hàng không hợp lệ.");
+                    model.Addresses = await _dbContext.Set<ShippingAddress>().Where(a => a.UserId == userId.Value).ToListAsync();
+                    return View("Checkout", model);
+                }
             }
             model.UserId = userId;
+
+            // Khách hàng thân thiết: tính lại hạng + điểm PHÍA SERVER (không tin giá trị từ client).
+            if (userId != null)
+            {
+                var tierInfo = await _loyaltyService.GetTierInfoAsync(userId.Value);
+                model.TierName = tierInfo.TierName;
+                model.TierDiscountPercent = tierInfo.DiscountPercent;
+
+                var availablePoints = await _loyaltyService.GetAvailablePointsAsync(userId.Value);
+                model.AvailablePoints = availablePoints;
+
+                if (model.PointsToRedeem > 0)
+                {
+                    if (model.PointsToRedeem > availablePoints)
+                    {
+                        ModelState.AddModelError(nameof(model.PointsToRedeem), "Bạn không đủ điểm để sử dụng.");
+                        model.Addresses = await _dbContext.Set<ShippingAddress>().Where(a => a.UserId == userId.Value).ToListAsync();
+                        return View("Checkout", model);
+                    }
+
+                    // Giới hạn: điểm dùng tối đa quy đổi không quá 50% giá trị đơn hàng gốc.
+                    var maxPointsDiscount = model.Total * 0.5m;
+                    if (model.PointsToRedeem * 1000m > maxPointsDiscount)
+                    {
+                        ModelState.AddModelError(nameof(model.PointsToRedeem), $"Chỉ được dùng tối đa {(int)(maxPointsDiscount / 1000m)} điểm cho đơn hàng này (không quá 50% giá trị đơn).");
+                        model.Addresses = await _dbContext.Set<ShippingAddress>().Where(a => a.UserId == userId.Value).ToListAsync();
+                        return View("Checkout", model);
+                    }
+                }
+            }
+            else
+            {
+                // Khách vãng lai không có tài khoản -> không có điểm/hạng.
+                model.TierName = "Thân thiết";
+                model.TierDiscountPercent = 0;
+                model.AvailablePoints = 0;
+                model.PointsToRedeem = 0;
+            }
 
             // Re-validate the coupon here, authoritatively — model.AppliedDiscountPercent
             // from the GET preview is never trusted for the actual charge/order.
@@ -321,9 +402,15 @@ namespace MTKPM_Clothing_Store_web.Controllers
                         guest_email,
                         guest_name,
                         guest_phone,
+                        address_id,
+                        guest_province,
+                        guest_ward,
+                        guest_street,
                         coupon_id,
                         payment_method_id,
-                        total_amount
+                        total_amount,
+                        points_redeemed,
+                        points_discount_amount
                     )
                     VALUES
                     (
@@ -333,9 +420,15 @@ namespace MTKPM_Clothing_Store_web.Controllers
                         @gemail,
                         @gname,
                         @gphone,
+                        @addrid,
+                        @gprovince,
+                        @gward,
+                        @gstreet,
                         @cid,
                         @pmid,
-                        @total
+                        @total,
+                        @pointsRedeemed,
+                        @pointsDiscount
                     );
 
                     SELECT CAST(SCOPE_IDENTITY() AS INT);";
@@ -365,6 +458,26 @@ namespace MTKPM_Clothing_Store_web.Controllers
                     pphone.Value = (object?)model.GuestPhone ?? DBNull.Value;
                     pphone.DbType = DbType.String;
                     cmd.Parameters.Add(pphone);
+                    var paddrid = cmd.CreateParameter();
+                    paddrid.ParameterName = "@addrid";
+                    paddrid.Value = (object?)model.SelectedAddressId ?? DBNull.Value;
+                    paddrid.DbType = DbType.Int32;
+                    cmd.Parameters.Add(paddrid);
+                    var pgprov = cmd.CreateParameter();
+                    pgprov.ParameterName = "@gprovince";
+                    pgprov.Value = (object?)model.GuestProvince?.Trim() ?? DBNull.Value;
+                    pgprov.DbType = DbType.String;
+                    cmd.Parameters.Add(pgprov);
+                    var pgward = cmd.CreateParameter();
+                    pgward.ParameterName = "@gward";
+                    pgward.Value = (object?)model.GuestWard?.Trim() ?? DBNull.Value;
+                    pgward.DbType = DbType.String;
+                    cmd.Parameters.Add(pgward);
+                    var pgstreet = cmd.CreateParameter();
+                    pgstreet.ParameterName = "@gstreet";
+                    pgstreet.Value = (object?)model.GuestStreet?.Trim() ?? DBNull.Value;
+                    pgstreet.DbType = DbType.String;
+                    cmd.Parameters.Add(pgstreet);
                     var p4 = cmd.CreateParameter();
                     p4.ParameterName = "@cid";
                     p4.Value = (object?)appliedCoupon?.CouponId ?? DBNull.Value;
@@ -385,6 +498,16 @@ namespace MTKPM_Clothing_Store_web.Controllers
                     p7.Value = isPayPal ? "PendingPayment" : "Pending";
                     p7.DbType = DbType.String;
                     cmd.Parameters.Add(p7);
+                    var pPointsRedeemed = cmd.CreateParameter();
+                    pPointsRedeemed.ParameterName = "@pointsRedeemed";
+                    pPointsRedeemed.Value = model.PointsToRedeem > 0 ? (object)model.PointsToRedeem : DBNull.Value;
+                    pPointsRedeemed.DbType = DbType.Int32;
+                    cmd.Parameters.Add(pPointsRedeemed);
+                    var pPointsDiscount = cmd.CreateParameter();
+                    pPointsDiscount.ParameterName = "@pointsDiscount";
+                    pPointsDiscount.Value = model.PointsToRedeem > 0 ? (object)model.PointsDiscountAmount : DBNull.Value;
+                    pPointsDiscount.DbType = DbType.Decimal;
+                    cmd.Parameters.Add(pPointsDiscount);
 
                     if (conn.State != ConnectionState.Open) await conn.OpenAsync();
                     cmd.Transaction = (_dbContext.Database.CurrentTransaction as RelationalTransaction)?.GetDbTransaction();
@@ -444,10 +567,34 @@ namespace MTKPM_Clothing_Store_web.Controllers
                 _loggerInstance.LogInformation("Checkout completed for order {OrderId}", orderId);
                 await _dbContext.SaveChangesAsync();
 
+                // Khách hàng thân thiết: trừ điểm đã dùng (nếu có) ngay sau khi đơn tạo thành công,
+                // TRƯỚC nhánh PayPal — nếu không, đơn PayPal vẫn được giảm giá theo điểm nhưng
+                // điểm lại không bị trừ (lỗ hổng cho phép giảm giá miễn phí).
+                if (userId != null && model.PointsToRedeem > 0)
+                {
+                    await _loyaltyService.RedeemPointsAsync(userId.Value, model.PointsToRedeem, orderId, $"Dùng điểm giảm giá cho đơn hàng #{orderId}");
+                }
+
                 // If PayPal chosen, redirect into PayPal flow controller which will create PayPal order and redirect customer.
                 if (isPayPal)
                 {
                     return RedirectToAction("Create", "PaymentsPayPal", new { orderId = orderId });
+                }
+
+                // Gửi email xác nhận đơn hàng (không chặn luồng nếu gửi thất bại).
+                var recipientEmail = guestEmail;
+                var recipientName = guestName;
+                if (userId != null)
+                {
+                    var accountUser = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == userId.Value);
+                    recipientEmail = accountUser?.Email;
+                    recipientName = accountUser?.Name;
+                }
+
+                if (!string.IsNullOrWhiteSpace(recipientEmail))
+                {
+                    var emailBody = BuildOrderConfirmationEmail(orderId, recipientName, model.Items, finalTotal, model.SelectedPaymentMethod.ToString());
+                    await _emailService.SendEmailAsync(recipientEmail!, $"Xác nhận đơn hàng #{orderId} - MTKPM Clothing Store", emailBody);
                 }
 
                 // For other methods we treat as immediate success (existing behaviour)
@@ -752,6 +899,39 @@ namespace MTKPM_Clothing_Store_web.Controllers
             }
 
             return list;
+        }
+        // Xây dựng nội dung email HTML xác nhận đơn hàng.
+        private string BuildOrderConfirmationEmail(int orderId, string? customerName, List<CheckoutItem> items, decimal total, string paymentMethod)
+        {
+            var sb = new StringBuilder();
+            sb.Append("<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'>");
+            sb.Append($"<h2>Cảm ơn {(string.IsNullOrWhiteSpace(customerName) ? "bạn" : customerName)} đã đặt hàng!</h2>");
+            sb.Append($"<p>Đơn hàng <strong>#{orderId}</strong> của bạn đã được ghi nhận thành công.</p>");
+            sb.Append("<table style='width:100%;border-collapse:collapse;margin-top:12px;'>");
+            sb.Append("<thead><tr style='background:#f5f5f5;'>" +
+                      "<th style='text-align:left;padding:8px;border:1px solid #ddd;'>Sản phẩm</th>" +
+                      "<th style='text-align:center;padding:8px;border:1px solid #ddd;'>SL</th>" +
+                      "<th style='text-align:right;padding:8px;border:1px solid #ddd;'>Đơn giá</th>" +
+                      "<th style='text-align:right;padding:8px;border:1px solid #ddd;'>Thành tiền</th></tr></thead><tbody>");
+
+            foreach (var item in items)
+            {
+                var subtotal = item.SubTotal;
+                sb.Append("<tr>");
+                sb.Append($"<td style='padding:8px;border:1px solid #ddd;'>{item.Product?.Name}</td>");
+                sb.Append($"<td style='text-align:center;padding:8px;border:1px solid #ddd;'>{item.Quantity}</td>");
+                sb.Append($"<td style='text-align:right;padding:8px;border:1px solid #ddd;'>{item.Product?.Price:N0}₫</td>");
+                sb.Append($"<td style='text-align:right;padding:8px;border:1px solid #ddd;'>{subtotal:N0}₫</td>");
+                sb.Append("</tr>");
+            }
+
+            sb.Append("</tbody></table>");
+            sb.Append($"<p style='margin-top:12px;font-size:16px;'><strong>Tổng cộng: {total:N0}₫</strong></p>");
+            sb.Append($"<p><strong>Phương thức thanh toán:</strong> {paymentMethod}</p>");
+            sb.Append("<p>Chúng tôi sẽ thông báo khi đơn hàng được xử lý và giao đi. Cảm ơn bạn đã mua sắm tại MTKPM Clothing Store!</p>");
+            sb.Append("</div>");
+
+            return sb.ToString();
         }
     }
 }

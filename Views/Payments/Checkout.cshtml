@@ -4,88 +4,350 @@
 @{
     ViewData["Title"] = "Thanh toán";
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
-
     var vn = CultureInfo.GetCultureInfo("vi-VN");
     var isLoggedIn = User.Identity?.IsAuthenticated == true
         || !string.IsNullOrEmpty(Context.Session.GetString("UserId"));
 }
-
 <link rel="stylesheet" href="~/css/checkout.css" />
-
 <style>
-    .co-wrap { max-width: 1200px; margin: 0 auto; padding: 48px 24px 80px; }
-    .co-eyebrow { text-transform: uppercase; letter-spacing: .28em; font-size: 11px; color: #8a7f78; text-align: center; margin-bottom: 10px; }
-    .co-title { font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: clamp(30px, 4vw, 44px); text-align: center; margin: 0 0 40px; letter-spacing: -.01em; color: #1a1a1a; }
-    .co-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 48px; align-items: start; }
-    @@media (max-width: 900px) { .co-grid { grid-template-columns: 1fr; gap: 32px; } }
-
-    .co-card { background: #fff; border: 1px solid #eee7e1; border-radius: 4px; padding: 28px 30px; }
-    .co-card + .co-card { margin-top: 20px; }
-    .co-section-title { font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 500; margin: 0 0 20px; color: #1a1a1a; letter-spacing: -.01em; }
-
-    .co-field { margin-bottom: 18px; }
-    .co-field label { display: block; text-transform: uppercase; letter-spacing: .18em; font-size: 11px; color: #6b625d; margin-bottom: 8px; font-weight: 500; }
-    .co-field .form-control, .co-field .form-select { width: 100%; border: 1px solid #e2dcd6; border-radius: 2px; padding: 12px 14px; font-size: 14px; background: #fbfaf8; transition: border-color .2s, background .2s; }
-    .co-field .form-control:focus, .co-field .form-select:focus { outline: none; border-color: #1a1a1a; background: #fff; box-shadow: none; }
-
-    .co-pay-methods { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    @@media (max-width: 520px) { .co-pay-methods { grid-template-columns: 1fr; } }
-    .co-pay { position: relative; border: 1px solid #e2dcd6; border-radius: 3px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all .2s; background: #fff; }
-    .co-pay:hover { border-color: #b8ada5; }
-    .co-pay input { position: absolute; opacity: 0; pointer-events: none; }
-    .co-pay .dot { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #c9beb6; display: inline-block; position: relative; flex-shrink: 0; }
-    .co-pay input:checked ~ .dot { border-color: #1a1a1a; }
-    .co-pay input:checked ~ .dot:after { content: ''; position: absolute; inset: 3px; background: #1a1a1a; border-radius: 50%; }
-    .co-pay input:checked + .dot + .co-pay-label,
-    .co-pay input:checked ~ .co-pay-label { color: #1a1a1a; }
-    .co-pay:has(input:checked) { border-color: #1a1a1a; background: #fbfaf8; }
-    .co-pay-label { font-size: 14px; color: #4a423e; letter-spacing: .02em; }
-
-    .co-note { margin-top: 14px; font-size: 13px; color: #8a7f78; font-style: italic; }
-
-    .co-btn { display: inline-flex; align-items: center; justify-content: center; padding: 15px 32px; border: none; background: #1a1a1a; color: #fff; text-transform: uppercase; letter-spacing: .22em; font-size: 12px; font-weight: 500; cursor: pointer; transition: background .2s; text-decoration: none; border-radius: 2px; }
-    .co-btn:hover { background: #333; color: #fff; }
-    .co-btn-outline { background: transparent; border: 1px solid #1a1a1a; color: #1a1a1a; }
-    .co-btn-outline:hover { background: #1a1a1a; color: #fff; }
-    .co-actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
-
+    .co-wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 48px 24px 80px;
+    }
+    .co-eyebrow {
+        text-transform: uppercase;
+        letter-spacing: .28em;
+        font-size: 11px;
+        color: #8a7f78;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    .co-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-weight: 500;
+        font-size: clamp(30px, 4vw, 44px);
+        text-align: center;
+        margin: 0 0 40px;
+        letter-spacing: -.01em;
+        color: #1a1a1a;
+    }
+    .co-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 48px;
+        align-items: start;
+    }
+    @@media (max-width: 900px) {
+        .co-grid {
+            grid-template-columns: 1fr;
+            gap: 32px;
+        }
+    }
+    .co-card {
+        background: #fff;
+        border: 1px solid #eee7e1;
+        border-radius: 4px;
+        padding: 28px 30px;
+    }
+        .co-card + .co-card {
+            margin-top: 20px;
+        }
+    .co-section-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 20px;
+        font-weight: 500;
+        margin: 0 0 20px;
+        color: #1a1a1a;
+        letter-spacing: -.01em;
+    }
+    .co-field {
+        margin-bottom: 18px;
+    }
+        .co-field label {
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: .18em;
+            font-size: 11px;
+            color: #6b625d;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .co-field .form-control, .co-field .form-select {
+            width: 100%;
+            border: 1px solid #e2dcd6;
+            border-radius: 2px;
+            padding: 12px 14px;
+            font-size: 14px;
+            background: #fbfaf8;
+            transition: border-color .2s, background .2s;
+        }
+            .co-field .form-control:focus, .co-field .form-select:focus {
+                outline: none;
+                border-color: #1a1a1a;
+                background: #fff;
+                box-shadow: none;
+            }
+    .co-pay-methods {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    @@media (max-width: 520px) {
+        .co-pay-methods {
+            grid-template-columns: 1fr;
+        }
+    }
+    .co-pay {
+        position: relative;
+        border: 1px solid #e2dcd6;
+        border-radius: 3px;
+        padding: 14px 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: all .2s;
+        background: #fff;
+    }
+        .co-pay:hover {
+            border-color: #b8ada5;
+        }
+        .co-pay input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .co-pay .dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1.5px solid #c9beb6;
+            display: inline-block;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .co-pay input:checked ~ .dot {
+            border-color: #1a1a1a;
+        }
+            .co-pay input:checked ~ .dot:after {
+                content: '';
+                position: absolute;
+                inset: 3px;
+                background: #1a1a1a;
+                border-radius: 50%;
+            }
+        .co-pay input:checked + .dot + .co-pay-label,
+        .co-pay input:checked ~ .co-pay-label {
+            color: #1a1a1a;
+        }
+        .co-pay:has(input:checked) {
+            border-color: #1a1a1a;
+            background: #fbfaf8;
+        }
+    .co-pay-label {
+        font-size: 14px;
+        color: #4a423e;
+        letter-spacing: .02em;
+    }
+    .co-note {
+        margin-top: 14px;
+        font-size: 13px;
+        color: #8a7f78;
+        font-style: italic;
+    }
+    .co-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 15px 32px;
+        border: none;
+        background: #1a1a1a;
+        color: #fff;
+        text-transform: uppercase;
+        letter-spacing: .22em;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background .2s;
+        text-decoration: none;
+        border-radius: 2px;
+    }
+        .co-btn:hover {
+            background: #333;
+            color: #fff;
+        }
+    .co-btn-outline {
+        background: transparent;
+        border: 1px solid #1a1a1a;
+        color: #1a1a1a;
+    }
+        .co-btn-outline:hover {
+            background: #1a1a1a;
+            color: #fff;
+        }
+    .co-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+        flex-wrap: wrap;
+    }
     /* Summary */
-    .co-summary { position: sticky; top: 100px; background: #fbfaf8; border: 1px solid #eee7e1; border-radius: 4px; padding: 30px; }
-    .co-sum-title { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; font-weight: 500; margin: 0 0 24px; color: #1a1a1a; }
-    .co-sum-items { border-bottom: 1px solid #e8e1db; padding-bottom: 18px; margin-bottom: 18px; max-height: 320px; overflow-y: auto; }
-    .co-sum-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; font-size: 14px; color: #4a423e; }
-    .co-sum-row .name { flex: 1; }
-    .co-sum-row .qty { color: #8a7f78; font-size: 12px; }
-    .co-sum-row .price { font-variant-numeric: tabular-nums; color: #1a1a1a; }
-
-    .co-coupon-form { display: flex; gap: 8px; margin-bottom: 18px; }
-    .co-coupon-form input { flex: 1; border: 1px solid #e2dcd6; padding: 10px 12px; font-size: 13px; background: #fff; border-radius: 2px; text-transform: uppercase; letter-spacing: .1em; }
-    .co-coupon-form input:focus { outline: none; border-color: #1a1a1a; }
-    .co-coupon-btn { padding: 10px 18px; border: 1px solid #1a1a1a; background: transparent; color: #1a1a1a; text-transform: uppercase; letter-spacing: .18em; font-size: 11px; cursor: pointer; border-radius: 2px; transition: all .2s; }
-    .co-coupon-btn:hover { background: #1a1a1a; color: #fff; }
-    .co-coupon-msg { font-size: 13px; margin-bottom: 14px; padding: 10px 12px; border-radius: 2px; }
-    .co-coupon-msg.err { color: #a03030; background: #fbf1f1; border: 1px solid #f0dcdc; }
-    .co-coupon-msg.ok { color: #3a6b3a; background: #f3f7f0; border: 1px solid #dae5cf; }
-
-    .co-tot-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; color: #6b625d; }
-    .co-tot-row.strike { text-decoration: line-through; color: #a89f98; }
-    .co-tot-grand { display: flex; justify-content: space-between; align-items: baseline; padding-top: 16px; margin-top: 10px; border-top: 1px solid #e8e1db; }
-    .co-tot-grand .label { font-family: 'Playfair Display', Georgia, serif; font-size: 18px; color: #1a1a1a; }
-    .co-tot-grand .value { font-family: 'Playfair Display', Georgia, serif; font-size: 24px; color: #1a1a1a; font-variant-numeric: tabular-nums; }
-
-    .co-empty { text-align: center; padding: 80px 20px; background: #fbfaf8; border: 1px solid #eee7e1; border-radius: 4px; }
-    .co-empty p { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; color: #4a423e; margin: 0 0 24px; font-style: italic; }
-
-    .co-validation { color: #a03030; font-size: 13px; margin-top: 6px; }
-
-    .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-    @@media (max-width: 520px) { .row-3 { grid-template-columns: 1fr; } }
+    .co-summary {
+        position: sticky;
+        top: 100px;
+        background: #fbfaf8;
+        border: 1px solid #eee7e1;
+        border-radius: 4px;
+        padding: 30px;
+    }
+    .co-sum-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 22px;
+        font-weight: 500;
+        margin: 0 0 24px;
+        color: #1a1a1a;
+    }
+    .co-sum-items {
+        border-bottom: 1px solid #e8e1db;
+        padding-bottom: 18px;
+        margin-bottom: 18px;
+        max-height: 320px;
+        overflow-y: auto;
+    }
+    .co-sum-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 0;
+        font-size: 14px;
+        color: #4a423e;
+    }
+        .co-sum-row .name {
+            flex: 1;
+        }
+        .co-sum-row .qty {
+            color: #8a7f78;
+            font-size: 12px;
+        }
+        .co-sum-row .price {
+            font-variant-numeric: tabular-nums;
+            color: #1a1a1a;
+        }
+    .co-coupon-form {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 18px;
+    }
+        .co-coupon-form input {
+            flex: 1;
+            border: 1px solid #e2dcd6;
+            padding: 10px 12px;
+            font-size: 13px;
+            background: #fff;
+            border-radius: 2px;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+        }
+            .co-coupon-form input:focus {
+                outline: none;
+                border-color: #1a1a1a;
+            }
+    .co-coupon-btn {
+        padding: 10px 18px;
+        border: 1px solid #1a1a1a;
+        background: transparent;
+        color: #1a1a1a;
+        text-transform: uppercase;
+        letter-spacing: .18em;
+        font-size: 11px;
+        cursor: pointer;
+        border-radius: 2px;
+        transition: all .2s;
+    }
+        .co-coupon-btn:hover {
+            background: #1a1a1a;
+            color: #fff;
+        }
+    .co-coupon-msg {
+        font-size: 13px;
+        margin-bottom: 14px;
+        padding: 10px 12px;
+        border-radius: 2px;
+    }
+        .co-coupon-msg.err {
+            color: #a03030;
+            background: #fbf1f1;
+            border: 1px solid #f0dcdc;
+        }
+        .co-coupon-msg.ok {
+            color: #3a6b3a;
+            background: #f3f7f0;
+            border: 1px solid #dae5cf;
+        }
+    .co-tot-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 14px;
+        color: #6b625d;
+    }
+        .co-tot-row.strike {
+            text-decoration: line-through;
+            color: #a89f98;
+        }
+    .co-tot-grand {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding-top: 16px;
+        margin-top: 10px;
+        border-top: 1px solid #e8e1db;
+    }
+        .co-tot-grand .label {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 18px;
+            color: #1a1a1a;
+        }
+        .co-tot-grand .value {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 24px;
+            color: #1a1a1a;
+            font-variant-numeric: tabular-nums;
+        }
+    .co-empty {
+        text-align: center;
+        padding: 80px 20px;
+        background: #fbfaf8;
+        border: 1px solid #eee7e1;
+        border-radius: 4px;
+    }
+        .co-empty p {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 22px;
+            color: #4a423e;
+            margin: 0 0 24px;
+            font-style: italic;
+        }
+    .co-validation {
+        color: #a03030;
+        font-size: 13px;
+        margin-top: 6px;
+    }
+    .row-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+    }
+    @@media (max-width: 520px) {
+        .row-3 {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
-
 <div class="co-wrap">
     <div class="co-eyebrow">Secure checkout</div>
     <h1 class="co-title">Thanh toán</h1>
-
     @if (!Model.Items.Any())
     {
         <div class="co-empty">
@@ -122,6 +384,113 @@
                             <input asp-for="GuestPhone" class="form-control" placeholder="0912 345 678" />
                             <span asp-validation-for="GuestPhone" class="co-validation"></span>
                         </div>
+                    </div>
+                }
+                @if (!isLoggedIn)
+                {
+                    <div class="co-card">
+                        <h3 class="co-section-title">📍 Địa chỉ nhận hàng</h3>
+                        <div class="co-field">
+                            <label>Tỉnh/Thành phố</label>
+                            <select id="guestProvinceSelect" asp-for="GuestProvince" class="form-select"></select>
+                            <span asp-validation-for="GuestProvince" class="co-validation"></span>
+                        </div>
+                        <div class="co-field">
+                            <label>Xã/Phường</label>
+                            <select id="guestWardSelect" asp-for="GuestWard" class="form-select" disabled>
+                                <option value="">-- Chọn Tỉnh/Thành phố trước --</option>
+                            </select>
+                            <span asp-validation-for="GuestWard" class="co-validation"></span>
+                        </div>
+                        <div class="co-field" style="margin-bottom:0;">
+                            <label asp-for="GuestStreet">Số nhà, tên đường</label>
+                            <input asp-for="GuestStreet" class="form-control" placeholder="Ví dụ: 123 Nguyễn Trãi" />
+                            <span asp-validation-for="GuestStreet" class="co-validation"></span>
+                        </div>
+                    </div>
+                }
+                <!-- ADDRESS BOOK -->
+                @if (isLoggedIn)
+                {
+                    <div class="co-card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+                            <div>
+                                <h3 class="co-section-title" style="margin:0">
+                                    📍 Địa chỉ nhận hàng
+                                </h3>
+                                <div style="font-size:13px;color:#8a7f78">
+                                    Chọn địa chỉ có sẵn hoặc thêm mới
+                                </div>
+                            </div>
+
+                            <a asp-controller="ShippingAddresses"
+                               asp-action="Index"
+                               class="co-btn co-btn-outline"
+                               style="padding:10px 16px;font-size:11px">
+                                Thay đổi
+                            </a>
+                        </div>
+
+                        @if (Model.DefaultAddress != null)
+                        {
+                            <input type="hidden"
+                                   asp-for="SelectedAddressId"
+                                   value="@Model.DefaultAddress.AddressId" />
+
+                            <div style="border:1px solid #e2dcd6;border-radius:3px;padding:18px;background:#fbfaf8">
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                                    <div>
+                                        <strong>@Model.DefaultAddress.ReceiverName</strong>
+                                        <span style="margin-left:8px;color:#8a7f78">
+                                            @Model.DefaultAddress.PhoneNumber
+                                        </span>
+                                    </div>
+
+                                    <span style="font-size:11px;
+                                        padding:4px 10px;
+                                        border:1px solid #1a1a1a;
+                                        border-radius:999px;
+                                        text-transform:uppercase;
+                                        letter-spacing:.12em">
+                                        Mặc định
+                                    </span>
+                                </div>
+
+                                <div style="color:#4a423e;line-height:1.7">
+                                    @Model.DefaultAddress.Street,<br />
+                                    @Model.DefaultAddress.Ward,<br />
+                                    @Model.DefaultAddress.Province
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(Model.DefaultAddress.AddressLabel))
+                                {
+                                    <div style="margin-top:10px">
+                                        <span style="background:#fff;
+                                            border:1px solid #d8cec6;
+                                            padding:4px 10px;
+                                            border-radius:999px;
+                                            font-size:12px;
+                                            color:#6b625d">
+                                            @Model.DefaultAddress.AddressLabel
+                                        </span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div style="border:1px dashed #d8cec6;border-radius:3px;padding:22px;text-align:center;color:#8a7f78">
+                                Bạn chưa có địa chỉ giao hàng.
+                                <div style="margin-top:12px">
+                                    <a asp-controller="ShippingAddresses"
+                                       asp-action="Create"
+                                       class="co-btn"
+                                       style="padding:12px 22px;font-size:11px">
+                                        + Thêm địa chỉ mới
+                                    </a>
+                                </div>
+                            </div>
+                        }
                     </div>
                 }
 
@@ -174,7 +543,7 @@
                                 <option value="">MM</option>
                                 @for (int m = 1; m <= 12; m++)
                                 {
-                                    <option value="@m" selected="@(Model.ExpiryMonth==m ? "selected" : null)">@m.ToString("D2")</option>
+                                    <option value="@m" selected="@(Model.ExpiryMonth == m ? "selected" : null)">@m.ToString("D2")</option>
                                 }
                             </select>
                             <span asp-validation-for="ExpiryMonth" class="co-validation"></span>
@@ -187,7 +556,7 @@
                                     var start = System.DateTime.UtcNow.Year;
                                     for (int y = start; y <= start + 12; y++)
                                     {
-                                        <option value="@y" selected="@(Model.ExpiryYear==y ? "selected" : null)">@y</option>
+                                        <option value="@y" selected="@(Model.ExpiryYear == y ? "selected" : null)">@y</option>
                                     }
                                 }
                             </select>
@@ -241,6 +610,31 @@
                         Mã <strong>@Model.CouponCode</strong> — giảm @Model.AppliedDiscountPercent%
                     </div>
                 }
+                @if (isLoggedIn)
+                {
+                    <div style="background:#fbfaf8;border:1px solid #eee7e1;border-radius:2px;padding:14px;margin-bottom:18px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:@(Model.AvailablePoints > 0 ? "10px" : "0")">
+                            <span>Hạng <strong>@Model.TierName</strong></span>
+                            @if (Model.TierDiscountPercent > 0)
+                            {
+                                <span style="color:#3a6b3a;">Tự động giảm @Model.TierDiscountPercent%</span>
+                            }
+                        </div>
+                        @if (Model.AvailablePoints > 0)
+                        {
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <input type="number" id="pointsInput" name="PointsToRedeem" form="checkoutForm"
+                                       min="0" max="@Model.AvailablePoints" value="0"
+                                       style="width:100px;border:1px solid #e2dcd6;padding:8px 10px;font-size:13px;border-radius:2px;" />
+                                <span style="font-size:12px;color:#8a7f78;">
+                                    / @Model.AvailablePoints.ToString("N0") điểm khả dụng
+                                    (<a asp-controller="Loyalty" asp-action="Index" target="_blank" style="color:#8a7f78;">xem</a>)
+                                </span>
+                            </div>
+                            <div id="pointsPreview" style="font-size:12px;color:#3a6b3a;margin-top:6px;"></div>
+                        }
+                    </div>
+                }
 
                 <div class="co-tot-row">
                     <span>Tạm tính</span>
@@ -254,22 +648,38 @@
                     </div>
                 }
                 <div class="co-tot-row">
+                    <span>Tạm tính</span>
+                    <span>@Model.Total.ToString("C0", vn)</span>
+                </div>
+                @if (Model.AppliedDiscountPercent.HasValue)
+                {
+                    <div class="co-tot-row">
+                        <span>Giảm giá (@Model.AppliedDiscountPercent%)</span>
+                        <span>−@Model.DiscountAmount.ToString("C0", vn)</span>
+                    </div>
+                }
+                @if (Model.TierDiscountPercent > 0)
+                {
+                    <div class="co-tot-row">
+                        <span>Ưu đãi hạng @Model.TierName (@Model.TierDiscountPercent%)</span>
+                        <span>−@Model.TierDiscountAmount.ToString("C0", vn)</span>
+                    </div>
+                }
+                @if (Model.PointsToRedeem > 0)
+                {
+                    <div class="co-tot-row" id="pointsDiscountRow">
+                        <span>Dùng @Model.PointsToRedeem điểm</span>
+                        <span>−@Model.PointsDiscountAmount.ToString("C0", vn)</span>
+                    </div>
+                }
+                <div class="co-tot-row">
                     <span>Phí vận chuyển</span>
                     <span>Miễn phí</span>
                 </div>
 
                 <div class="co-tot-grand">
                     <span class="label">Tổng cộng</span>
-                    <span class="value">
-                        @if (Model.AppliedDiscountPercent.HasValue)
-                        {
-                            @Model.FinalTotal.ToString("C0", vn)
-                        }
-                        else
-                        {
-                            @Model.Total.ToString("C0", vn)
-                        }
-                    </span>
+                    <span class="value" id="grandTotalValue">@Model.FinalTotal.ToString("C0", vn)</span>
                 </div>
             </aside>
         </div>
@@ -278,7 +688,43 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/address-cascade.js"></script>
     <script>
+        <script>
+            (function () {
+                var pointsInput = document.getElementById('pointsInput');
+            if (!pointsInput) return;
+
+            var total = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Total));
+            var couponDiscount = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DiscountAmount));
+            var tierDiscount = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TierDiscountAmount));
+            var maxPoints = @Model.AvailablePoints;
+
+            pointsInput.addEventListener('input', function () {
+                    var points = parseInt(pointsInput.value) || 0;
+            if (points < 0) points = 0;
+                    if (points > maxPoints) points = maxPoints;
+
+            var maxByHalf = Math.floor((total * 0.5) / 1000);
+                    if (points > maxByHalf) points = maxByHalf;
+            pointsInput.value = points;
+
+            var pointsDiscount = points * 1000;
+            var grandTotal = total - couponDiscount - tierDiscount - pointsDiscount;
+            if (grandTotal < 0) grandTotal = 0;
+
+            var preview = document.getElementById('pointsPreview');
+            if (preview) {
+                preview.textContent = points > 0 ? ('Giảm ' + pointsDiscount.toLocaleString('vi-VN') + '₫') : '';
+                    }
+
+            var grandTotalEl = document.getElementById('grandTotalValue');
+            if (grandTotalEl) {
+                grandTotalEl.textContent = grandTotal.toLocaleString('vi-VN') + '₫';
+                    }
+                });
+            })();
+    </script>
         (function () {
             function updateVisibility() {
                 var pm = document.querySelector('input[name="SelectedPaymentMethod"]:checked')?.value;
@@ -298,5 +744,19 @@
             });
             updateVisibility();
         })();
+
+        @if (!isLoggedIn)
+            {
+                <text>
+                        document.addEventListener("DOMContentLoaded", function () {
+                            initAddressCascade({
+                                provinceSelectId: "guestProvinceSelect",
+                                wardSelectId: "guestWardSelect",
+                                selectedProvince: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.GuestProvince)),
+                                selectedWard: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.GuestWard))
+                                                });
+                                            });
+                </text>
+        }
     </script>
 }

@@ -28,6 +28,11 @@
                             <span>@userName</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminUserDropdown">
+                            <li>
+                                <a class="dropdown-item" asp-controller="Users" asp-action="ChangePassword" asp-route-id="@userId">
+                                    <i class="bi bi-shield-lock"></i> Đổi mật khẩu
+                                </a>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form asp-controller="Users" asp-action="Logout" method="post" class="d-inline">
@@ -111,6 +116,11 @@
                                         <li>
                                             <a class="dropdown-item" asp-controller="Users" asp-action="Details" asp-route-id="@userId">
                                                 <i class="bi bi-person"></i> Thông tin người dùng
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Users" asp-action="ChangePassword" asp-route-id="@userId">
+                                                <i class="bi bi-shield-lock"></i> Đổi mật khẩu
                                             </a>
                                         </li>
                                         <li>

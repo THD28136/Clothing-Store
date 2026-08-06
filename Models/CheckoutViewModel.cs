@@ -80,10 +80,29 @@ namespace MTKPM_Clothing_Store_web.Models
         [Display(Name = "Số điện thoại")]
         public string? GuestPhone { get; set; }
 
+        // Địa chỉ giao hàng cho khách vãng lai (không có sổ địa chỉ).
+        // Cấu trúc 2 cấp: Tỉnh/Thành phố -> Xã/Phường/Đặc khu (đúng theo cải cách hành chính từ 01/07/2025).
+        [Display(Name = "Tỉnh/Thành phố")]
+        public string? GuestProvince { get; set; }
+
+        [Display(Name = "Xã/Phường")]
+        public string? GuestWard { get; set; }
+
+        [Display(Name = "Số nhà, tên đường")]
+        [StringLength(255)]
+        public string? GuestStreet { get; set; }
+
         // Coupon: user-entered code, plus what the server determined about it.
         // AppliedDiscountPercent/CouponMessage are set by the controller after
         // validation — never trust a discount value coming from the client.
         [Display(Name = "Mã giảm giá")]
+        // Shipping address
+        public int? SelectedAddressId { get; set; }
+
+        public List<ShippingAddress> Addresses { get; set; } = new();
+
+        public ShippingAddress? DefaultAddress =>
+            Addresses.FirstOrDefault(a => a.IsDefault);
         public string? CouponCode { get; set; }
 
         public decimal? AppliedDiscountPercent { get; set; }
@@ -92,6 +111,34 @@ namespace MTKPM_Clothing_Store_web.Models
 
         public decimal DiscountAmount => Total * (AppliedDiscountPercent ?? 0m) / 100m;
 
-        public decimal FinalTotal => Total - DiscountAmount;
+        // Khách hàng thân thiết: hạng thành viên (giảm % tự động) + điểm tích lũy.
+        // Các giá trị hiển thị (TierName/TierDiscountPercent/AvailablePoints) luôn do server
+        // tính lại và gán vào — không tin tưởng giá trị này nếu nó đến từ client.
+        public string TierName { get; set; } = "Thân thiết";
+
+        public decimal TierDiscountPercent { get; set; }
+
+        public int AvailablePoints { get; set; }
+
+        [Display(Name = "Số điểm muốn dùng")]
+        [Range(0, int.MaxValue, ErrorMessage = "Số điểm không hợp lệ.")]
+        public int PointsToRedeem { get; set; }
+
+        public decimal TierDiscountAmount => Total * TierDiscountPercent / 100m;
+
+        // 1 điểm = 1.000đ, không vượt quá điểm khả dụng và không vượt quá 50% giá trị đơn
+        // (giới hạn cụ thể còn lại được enforce ở server trong CheckoutPost).
+        public decimal PointsDiscountAmount => PointsToRedeem * 1000m;
+
+        public decimal FinalTotal
+        {
+            get
+            {
+                var afterCoupon = Total - DiscountAmount;
+                var afterTier = afterCoupon - TierDiscountAmount;
+                var afterPoints = afterTier - PointsDiscountAmount;
+                return afterPoints < 0 ? 0 : afterPoints;
+            }
+        }
     }
 }

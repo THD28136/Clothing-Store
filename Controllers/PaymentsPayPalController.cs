@@ -85,11 +85,9 @@ public class PaymentsPayPalController : Controller
 
         order.Status = "Paid";
 
-        foreach (var item in order.OrderDetails)
-        {
-            if (item.Product != null)
-                item.Product.Stock -= item.Quantity;
-        }
+        // NOTE: Do NOT decrement product.Stock here — stock was already updated by the database trigger
+        // when order_details rows were created earlier in CheckoutPost. Modifying product.Stock here with
+        // the trigger present will double-decrement and may cause negative stock / rollback.
 
         await _db.SaveChangesAsync();
 

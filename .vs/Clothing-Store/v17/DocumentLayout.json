@@ -44,7 +44,7 @@
               "RelativeDocumentMoniker": "Views\\Shared\\_CustomerLayout.cshtml",
               "ToolTip": "D:\\Github Repos\\Clothing-Store\\Views\\Shared\\_CustomerLayout.cshtml",
               "RelativeToolTip": "Views\\Shared\\_CustomerLayout.cshtml",
-              "ViewState": "AgIAADsBAAAAAAAAAAAswFsBAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACwBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-07-23T16:10:07.499Z",
               "EditorCaption": ""
@@ -59,8 +59,7 @@
               "RelativeToolTip": "Views\\Shared\\_Layout.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-07-23T16:10:06.169Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-23T16:10:06.169Z"
             },
             {
               "$type": "Document",
@@ -72,8 +71,7 @@
               "RelativeToolTip": "wwwroot\\css\\_Layout.cshtml.css",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2026-07-23T16:09:07.951Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-23T16:09:07.951Z"
             },
             {
               "$type": "Document",
@@ -85,8 +83,7 @@
               "RelativeToolTip": "Views\\Payments\\Checkout.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-07-23T16:08:35.442Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-23T16:08:35.442Z"
             }
           ]
         }

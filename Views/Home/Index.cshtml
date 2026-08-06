@@ -230,7 +230,7 @@
 }
 .product-card .stock-tag.oos { color: #b23a3a; }
 
-/* thêm dòng này để các item trong hàng cùng cao bằng nhau */
+<!-- thêm dòng này để các item trong hàng cùng cao bằng nhau -->
 .product-row {
     align-items: stretch;
 }
@@ -357,12 +357,20 @@
                             <div class="img-wrap">
                                 <span class="badge-featured">Nổi bật</span>
                                 <img src="@(string.IsNullOrEmpty(p.Image) ? Url.Content("~/images/PlaceHolder.png") : Url.Content("~/" + p.Image))" alt="@p.Name" />
-                                <form asp-controller="Cart" asp-action="Add" method="post" class="m-0">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="productId" value="@p.ProductId" />
-                                    <input type="hidden" name="quantity" value="1" />
-                                    <button type="submit" class="quick-add">Thêm vào giỏ</button>
-                                </form>
+                                @* Only allow quick-add when product has stock *@
+                                @if (p.Stock > 0)
+                                {
+                                    <form asp-controller="Cart" asp-action="Add" method="post" class="m-0">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="productId" value="@p.ProductId" />
+                                        <input type="hidden" name="quantity" value="1" />
+                                        <button type="submit" class="quick-add">Thêm vào giỏ</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="stock-tag oos" style="position:absolute; left:12px; bottom:12px; background: rgba(255,255,255,0.9); padding:6px 10px; border-radius:6px;">Hết hàng</span>
+                                }
                             </div>
                             <h6 class="card-title">
                                 <a asp-controller="Products" asp-action="Details" asp-route-id="@p.ProductId">@p.Name</a>

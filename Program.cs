@@ -58,6 +58,13 @@ builder.Services.Configure<PayPalSettings>(
 
 builder.Services.AddScoped<PayPalService>();
 
+// Email (order confirmation) service configuration
+builder.Services.Configure<SmtpSettings>(
+    builder.Configuration.GetSection("Smtp"));
+
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ILoyaltyService, LoyaltyService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -87,4 +94,3 @@ app.MapControllerRoute(
 app.MapRazorPages();
 
 app.Run();
-
