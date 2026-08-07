@@ -32,6 +32,10 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = UmF6b3IgVmlld3NcUGF5bWVudHNcUGF5UGFsQ2hlY2tvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/Github Repos/Clothing-Store/Razor Views/Support/Chat.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UmF6b3IgVmlld3NcU3VwcG9ydFxDaGF0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/Github Repos/Clothing-Store/Views/Cart/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FydFxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -142,6 +146,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/Github Repos/Clothing-Store/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Github Repos/Clothing-Store/Views/Shared/_ChatWidget.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9DaGF0V2lkZ2V0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/Github Repos/Clothing-Store/Views/Shared/_CustomerLayout.cshtml]

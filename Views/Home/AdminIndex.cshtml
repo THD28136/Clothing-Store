@@ -1,68 +1,431 @@
-﻿@{
+﻿@using MTKPM_Clothing_Store_web.Models
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext _context
+
+@{
     ViewData["Title"] = "Dashboard";
-    // Layout được chọn tự động bởi _Layout dựa trên vai trò
+
+    // Prepare last 6 months (ascending)
+    var now = DateTime.UtcNow;
+    var months = Enumerable.Range(0, 6).Select(i => now.AddMonths(-(5 - i))).ToArray();
+    var monthLabels = months.Select(m => m.ToString("MMM yyyy")).ToArray();
+
+    // Sales totals and order counts per month
+    var salesData = months.Select(m =>
+        _context.Orders
+            .Where(o => o.OrderDate.HasValue && o.OrderDate.Value.Year == m.Year && o.OrderDate.Value.Month == m.Month && (o.Status != "Cancelled"))
+            .Select(o => o.TotalAmount ?? 0M)
+            .Sum()
+    ).ToArray();
+
+    var orderCounts = months.Select(m =>
+        _context.Orders.Count(o => o.OrderDate.HasValue && o.OrderDate.Value.Year == m.Year && o.OrderDate.Value.Month == m.Month)
+    ).ToArray();
+
+    var totalRevenue = salesData.Sum();
+    var totalOrders = orderCounts.Sum();
+
+    // Additional KPIs
+    var userCount = _context.Users.Count();
+    var productCount = _context.Products.Count();
+    var lowStockCount = _context.VwLowStocks.Count();
+
+    // Recent orders (latest 6)
+    var recentOrders = _context.Orders
+        .Include(o => o.User)
+        .OrderByDescending(o => o.OrderDate)
+        .Take(6)
+        .ToList();
+
+    // Low stock products (view)
+    var lowStockProducts = _context.VwLowStocks
+        .OrderBy(p => p.Name)
+        .Take(6)
+        .ToList();
+
+    // Top selling products (view)
+    var topSelling = _context.VwTopSellingProducts
+        .OrderByDescending(t => t.TotalSold)
+        .Take(6)
+        .ToList();
+
+    // Order status counts for doughnut
+    var statusCounts = _context.Orders
+        .GroupBy(o => o.Status ?? "Unknown")
+        .Select(g => new { Status = g.Key, Count = g.Count() })
+        .ToList();
+
+    // Safety: serialize data for client charts
+    var labelsJson = System.Text.Json.JsonSerializer.Serialize(monthLabels);
+    var salesJson = System.Text.Json.JsonSerializer.Serialize(salesData);
+    var ordersJson = System.Text.Json.JsonSerializer.Serialize(orderCounts);
+    var statusLabelsJson = System.Text.Json.JsonSerializer.Serialize(statusCounts.Select(s => s.Status).ToArray());
+    var statusDataJson = System.Text.Json.JsonSerializer.Serialize(statusCounts.Select(s => s.Count).ToArray());
 }
 
-<h1>Dashboard</h1>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-<div class="row">
-    <div class="col-md-3">
-        <div class="card text-white mb-3" style="background-color: #FDEE84;">
-            <div class="card-body">
-                <h5 class="card-title" style="color: #020B45">Người dùng</h5>
-                <p class="card-text" style="color: #2C3879">Quản lý tài khoản người dùng</p>
-                <a class="btn btn-light" asp-controller="Users" asp-action="Index">Quản lý người dùng</a>
+<style>
+    :root {
+        --ink: #1a1a1a;
+        --muted: #8a8a8a;
+        --line: #ececec;
+        --bg-soft: #faf8f5;
+        --accent: #c2956b;
+    }
+
+    .admin-wrap {
+        font-family: "Inter", -apple-system, "Segoe UI", sans-serif;
+        color: var(--ink);
+    }
+
+    .admin-eyebrow {
+        font-size: .68rem;
+        letter-spacing: .32em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 10px;
+    }
+
+    .admin-title {
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 500;
+        font-size: 2.4rem;
+        letter-spacing: -.01em;
+        margin: 0 0 6px;
+    }
+
+    .admin-sub {
+        color: var(--muted);
+        font-size: .92rem;
+        margin-bottom: 40px;
+    }
+
+    .kpi-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+
+    .kpi-card {
+        background: #fff;
+        border: 1px solid var(--line);
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .kpi-label {
+        font-size: .68rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .18em;
+    }
+
+    .kpi-value {
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 1.6rem;
+        color: var(--ink);
+    }
+
+    .kpi-sub {
+        font-size: .78rem;
+        color: var(--muted);
+    }
+
+    .main-grid {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 24px;
+        align-items: start;
+    }
+
+    .panel {
+        background: #fff;
+        border: 1px solid var(--line);
+        padding: 18px;
+    }
+
+    .panel h5 { margin: 0 0 12px 0; font-family: "Playfair Display", Georgia, serif; }
+
+    table.table-compact {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: .92rem;
+    }
+
+    table.table-compact th, table.table-compact td {
+        padding: 8px 10px;
+        border-bottom: 1px solid #f3f3f3;
+        text-align: left;
+    }
+
+    .muted { color: var(--muted); font-size: .86rem; }
+
+    .product-list { display: grid; gap: 10px; }
+    .product-item { display:flex; gap:12px; align-items:center; }
+    .product-thumb { width:46px; height:46px; object-fit:cover; border-radius:4px; background:#f3f3f3; }
+
+    .quick-actions {
+        display:flex;
+        gap:12px;
+        flex-wrap:wrap;
+        margin-top:12px;
+    }
+
+    .btn-ghost { padding:10px 14px; border:1px solid var(--ink); background:transparent; color:var(--ink); text-decoration:none; font-weight:600; font-size:.85rem; }
+
+</style>
+
+<div class="admin-wrap">
+    <div class="admin-eyebrow">Bảng điều khiển</div>
+    <h1 class="admin-title">Dashboard</h1>
+    <p class="admin-sub">Tổng quan hoạt động cửa hàng trong 6 tháng gần đây.</p>
+
+    <!-- KPI cards -->
+    <div class="kpi-row">
+        <div class="kpi-card">
+            <div class="kpi-label">Doanh thu (6 tháng)</div>
+            <div class="kpi-value">@totalRevenue.ToString("N0") ₫</div>
+            <div class="kpi-sub">Tổng giá trị đơn hàng</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-label">Đơn hàng</div>
+            <div class="kpi-value">@totalOrders.ToString("N0")</div>
+            <div class="kpi-sub">Số đơn đã ghi nhận</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-label">Khách hàng</div>
+            <div class="kpi-value">@userCount</div>
+            <div class="kpi-sub">Tài khoản người dùng</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-label">Sản phẩm</div>
+            <div class="kpi-value">@productCount</div>
+            <div class="kpi-sub">Đang có trong kho</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-label">Sản phẩm hết/ít hàng</div>
+            <div class="kpi-value">@lowStockCount</div>
+            <div class="kpi-sub">Mục cần kiểm kho</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-label">Kỳ báo cáo</div>
+            <div class="kpi-value">@monthLabels.First() — @monthLabels.Last()</div>
+            <div class="kpi-sub">6 tháng gần nhất</div>
+        </div>
+    </div>
+
+    <div class="main-grid">
+        <!-- Left column: Revenue chart + Recent orders -->
+        <div>
+            <div class="panel" style="margin-bottom:20px;">
+                <h5>Doanh thu (6 tháng)</h5>
+                <canvas id="revenueChart" height="150"></canvas>
+            </div>
+
+            <div class="panel">
+                <h5>Đơn hàng gần đây</h5>
+                <table class="table-compact">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Khách</th>
+                            <th>Ngày</th>
+                            <th class="muted">Tổng</th>
+                            <th class="muted">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (recentOrders.Any())
+                        {
+                            foreach (var o in recentOrders)
+                            {
+                                <tr>
+                                    <td>@o.OrderId</td>
+                                    <td>@(o.User?.Name ?? o.GuestName ?? "Guest")</td>
+                                    <td>@(o.OrderDate?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
+                                    <td>@( (o.TotalAmount ?? 0M).ToString("N0") ) ₫</td>
+                                    <td class="muted">@(!string.IsNullOrEmpty(o.Status) ? o.Status : "Unknown")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="5" class="muted">Không có đơn hàng gần đây</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Right column: Doughnut + Low stock + Top selling -->
+        <div>
+            <div class="panel" style="margin-bottom:16px;">
+                <h5>Trạng thái đơn hàng</h5>
+                <canvas id="statusDoughnut" height="180"></canvas>
+            </div>
+
+            <div class="panel" style="margin-bottom:16px;">
+                <h5>Low Stock</h5>
+                <div class="product-list">
+                    @if (lowStockProducts.Any())
+                    {
+                        foreach (var p in lowStockProducts)
+                        {
+                            <div class="product-item">
+                                <img src="@(p.Pic ?? "/images/placeholder.png")" alt="@p.Name" class="product-thumb" />
+                                <div>
+                                    <div style="font-weight:600;">@p.Name</div>
+                                    <div class="muted">Stock: @p.Stock</div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="muted">Không có sản phẩm low stock</div>
+                    }
+                </div>
+            </div>
+
+            <div class="panel">
+                <h5>Top Selling</h5>
+                <div class="product-list">
+                    @if (topSelling.Any())
+                    {
+                        foreach (var t in topSelling)
+                        {
+                            <div class="product-item">
+                                <div style="width:46px;height:46px;background:#f3f3f3;border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:600;">
+                                    @t.TotalSold
+                                </div>
+                                <div>
+                                    <div style="font-weight:600;">@t.Name</div>
+                                    <div class="muted">Đã bán: @t.TotalSold</div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="muted">Không có dữ liệu bán hàng</div>
+                    }
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="card text-white mb-3" style="background-color: #FEDA51;">
-            <div class="card-body">
-                <h5 class="card-title" style="color: #020B45">Sản phẩm</h5>
-                <p class="card-text" style="color: #2C3879">Thêm / sửa / xóa sản phẩm</p>
-                <a class="btn btn-light" asp-controller="Products" asp-action="AdminIndex">Quản lý sản phẩm</a>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="card text-white mb-3" style="background-color: #FDEE84;">
-            <div class="card-body">
-                <h5 class="card-title" style="color: #020B45">Danh mục</h5>
-                <p class="card-text" style="color: #2C3879">Quản lý danh mục</p>
-                <a class="btn btn-light" asp-controller="Categories" asp-action="Index">Quản lý danh mục</a>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="card text-white mb-3" style="background-color: #FEDA51;">
-            <div class="card-body">
-                <h5 class="card-title" style="color: #020B45">Đơn hàng</h5>
-                <p class="card-text" style="color: #2C3879">Xem và xử lý đơn hàng</p>
-                <a class="btn btn-light" asp-controller="Orders" asp-action="Index">Quản lý đơn hàng</a>
+    <!-- Quick actions -->
+    <div style="margin-top:20px;">
+        <div class="panel">
+            <h5>Thao tác nhanh</h5>
+            <div class="quick-actions">
+                <a class="btn-ghost" asp-controller="Products" asp-action="Create">Tạo sản phẩm</a>
+                <a class="btn-ghost" asp-controller="Categories" asp-action="Create">Tạo danh mục</a>
+                <a class="btn-ghost" asp-controller="Users" asp-action="Create">Tạo user</a>
+                <a class="btn-ghost" asp-controller="Orders" asp-action="Index">Xem đơn hàng</a>
+                <a class="btn-ghost" asp-controller="Coupons" asp-action="Index">Mã giảm giá</a>
             </div>
         </div>
     </div>
 </div>
 
-<section class="mt-4">
-    <!-- Make store summary full-width (same visual width as product list) -->
-    <div class="row mb-3">
-        <div class="col-12">
-            @await Component.InvokeAsync("DbFunctions")
-        </div>
-    </div>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <div class="row">
-        <div class="col-12">
-            <h4>Thao tác nhanh</h4>
-            <div class="d-flex gap-2">
-                <a class="btn btn-outline-primary" asp-controller="Products" asp-action="Create">Tạo sản phẩm</a>
-                <a class="btn btn-outline-secondary" asp-controller="Categories" asp-action="Create">Tạo danh mục</a>
-                <a class="btn btn-outline-success" asp-controller="Users" asp-action="Create">Tạo user</a>
-            </div>
-        </div>
-    </div>
-</section>
+<script>
+    (function () {
+        // Revenue line chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        const revLabels = @Html.Raw(labelsJson);
+        const revSales = @Html.Raw(salesJson);
+        const revOrders = @Html.Raw(ordersJson);
+
+        const gradient = revenueCtx.createLinearGradient(0, 0, 0, 240);
+        gradient.addColorStop(0, 'rgba(26,26,26,0.12)');
+        gradient.addColorStop(1, 'rgba(26,26,26,0)');
+
+        new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: revLabels,
+                datasets: [
+                    {
+                        label: 'Doanh thu (VND)',
+                        data: revSales,
+                        borderColor: '#1a1a1a',
+                        backgroundColor: gradient,
+                        tension: 0.35,
+                        fill: true,
+                        yAxisID: 'y',
+                        pointRadius: 3
+                    },
+                    {
+                        label: 'Đơn hàng',
+                        data: revOrders,
+                        borderColor: '#c2956b',
+                        backgroundColor: 'rgba(194,149,107,0.12)',
+                        tension: 0.35,
+                        fill: false,
+                        yAxisID: 'y1',
+                        pointRadius: 3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: {
+                        type: 'linear',
+                        position: 'left',
+                        ticks: {
+                            callback: function (v) { return v >= 1000 ? v.toLocaleString() : v; }
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        position: 'right',
+                        grid: { drawOnChartArea: false }
+                    }
+                },
+                plugins: {
+                    legend: { position: 'top' }
+                }
+            }
+        });
+
+        // Order status doughnut
+        const statusCtx = document.getElementById('statusDoughnut').getContext('2d');
+        const statusLabels = @Html.Raw(statusLabelsJson);
+        const statusData = @Html.Raw(statusDataJson);
+        const palette = ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0', '#607d8b'];
+
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    data: statusData,
+                    backgroundColor: palette.slice(0, statusLabels.length),
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    })();
+</script>

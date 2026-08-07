@@ -423,25 +423,24 @@
                                 </div>
                             </div>
 
-                            <a asp-controller="ShippingAddresses"
-                               asp-action="Index"
-                               class="co-btn co-btn-outline"
+                            <a href="#" role="button" class="co-btn co-btn-outline"
+                               onclick="openAddressBook(); return false;"
                                style="padding:10px 16px;font-size:11px">
-                                Thay đổi
-                            </a>
+                                Thay đổi địa chỉ
+                             </a>
                         </div>
 
                         @if (Model.DefaultAddress != null)
                         {
-                            <input type="hidden"
+                            <input type="hidden" id="selectedAddressId" name="SelectedAddressId"
                                    asp-for="SelectedAddressId"
-                                   value="@Model.DefaultAddress.AddressId" />
+                                   value="@(Model.SelectedAddressId ?? Model.DefaultAddress?.AddressId)" />
 
-                            <div style="border:1px solid #e2dcd6;border-radius:3px;padding:18px;background:#fbfaf8">
+                            <div id="selectedAddressBlock" style="border:1px solid #e2dcd6;border-radius:3px;padding:18px;background:#fbfaf8">
                                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
                                     <div>
-                                        <strong>@Model.DefaultAddress.ReceiverName</strong>
-                                        <span style="margin-left:8px;color:#8a7f78">
+                                        <strong id="sa-name">@Model.DefaultAddress.ReceiverName</strong>
+                                        <span style="margin-left:8px;color:#8a7f78" id="sa-phone">
                                             @Model.DefaultAddress.PhoneNumber
                                         </span>
                                     </div>
@@ -456,7 +455,7 @@
                                     </span>
                                 </div>
 
-                                <div style="color:#4a423e;line-height:1.7">
+                                <div style="color:#4a423e;line-height:1.7" id="sa-line1">
                                     @Model.DefaultAddress.Street,<br />
                                     @Model.DefaultAddress.Ward,<br />
                                     @Model.DefaultAddress.Province
@@ -484,6 +483,7 @@
                                 <div style="margin-top:12px">
                                     <a asp-controller="ShippingAddresses"
                                        asp-action="Create"
+                                       asp-route-returnTo="checkout"
                                        class="co-btn"
                                        style="padding:12px 22px;font-size:11px">
                                         + Thêm địa chỉ mới
@@ -690,73 +690,105 @@
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/address-cascade.js"></script>
     <script>
-        <script>
-            (function () {
-                var pointsInput = document.getElementById('pointsInput');
-            if (!pointsInput) return;
+        function openAddressBook() {
+            var url = '@Url.Action("Index", "ShippingAddresses", new { returnTo = "checkout" })';
+            var w = 760, h = 640;
+            var left = (screen.width / 2) - (w / 2);
+            var top = (screen.height / 2) - (h / 2);
+            window.open(url, 'addressBook', 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top + ',resizable=yes,scrollbars=yes');
+        }
 
-            var total = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Total));
-            var couponDiscount = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DiscountAmount));
-            var tierDiscount = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TierDiscountAmount));
-            var maxPoints = @Model.AvailablePoints;
+        // Listen for address selection from popup
+        window.addEventListener('message', function (e) {
+            try {
+                if (e.origin !== window.location.origin) return;
+            } catch (ex) {
+                // ignore cross-origin check issues in older browsers
+            }
+            var data = e.data || {};
+            if (data.type !== 'addressSelected' || !data.address) return;
+            var a = data.address;
+            // update hidden field
+            var hid = document.getElementById('selectedAddressId');
+            if (hid) hid.value = a.addressId;
+            // update visible block
+            var nameEl = document.getElementById('sa-name');
+            var phoneEl = document.getElementById('sa-phone');
+            var lineEl = document.getElementById('sa-line1');
+            if (nameEl) nameEl.textContent = a.receiverName || '';
+            if (phoneEl) phoneEl.textContent = a.phoneNumber || '';
+            if (lineEl) lineEl.innerHTML = (a.street ? (a.street + ',<br/>') : '') + (a.ward ? (a.ward + ',<br/>') : '') + (a.province || '');
+        }, false);
+    </script>
+    <script>
+         (function () {
+             // Points preview logic (only initialize when input exists)
+             var pointsInput = document.getElementById('pointsInput');
+             if (pointsInput) {
+                 var total = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Total));
+                 var couponDiscount = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DiscountAmount));
+                 var tierDiscount = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TierDiscountAmount));
+                 var maxPoints = @Model.AvailablePoints;
 
-            pointsInput.addEventListener('input', function () {
+                pointsInput.addEventListener('input', function () {
                     var points = parseInt(pointsInput.value) || 0;
-            if (points < 0) points = 0;
+                    if (points < 0) points = 0;
                     if (points > maxPoints) points = maxPoints;
 
-            var maxByHalf = Math.floor((total * 0.5) / 1000);
+                    var maxByHalf = Math.floor((total * 0.5) / 1000);
                     if (points > maxByHalf) points = maxByHalf;
-            pointsInput.value = points;
+                    pointsInput.value = points;
 
-            var pointsDiscount = points * 1000;
-            var grandTotal = total - couponDiscount - tierDiscount - pointsDiscount;
-            if (grandTotal < 0) grandTotal = 0;
+                    var pointsDiscount = points * 1000;
+                    var grandTotal = total - couponDiscount - tierDiscount - pointsDiscount;
+                    if (grandTotal < 0) grandTotal = 0;
 
-            var preview = document.getElementById('pointsPreview');
-            if (preview) {
-                preview.textContent = points > 0 ? ('Giảm ' + pointsDiscount.toLocaleString('vi-VN') + '₫') : '';
+                    var preview = document.getElementById('pointsPreview');
+                    if (preview) {
+                        preview.textContent = points > 0 ? ('Giảm ' + pointsDiscount.toLocaleString('vi-VN') + '₫') : '';
                     }
 
-            var grandTotalEl = document.getElementById('grandTotalValue');
-            if (grandTotalEl) {
-                grandTotalEl.textContent = grandTotal.toLocaleString('vi-VN') + '₫';
+                    var grandTotalEl = document.getElementById('grandTotalValue');
+                    if (grandTotalEl) {
+                        grandTotalEl.textContent = grandTotal.toLocaleString('vi-VN') + '₫';
                     }
                 });
-            })();
-    </script>
-        (function () {
-            function updateVisibility() {
-                var pm = document.querySelector('input[name="SelectedPaymentMethod"]:checked')?.value;
-                var card = document.getElementById('cardFields');
-                var note = document.getElementById('nonCardNote');
-                if (!card || !note) return;
-                if (pm === '1') {
-                    card.style.display = '';
-                    note.style.display = 'none';
-                } else {
-                    card.style.display = 'none';
-                    note.style.display = '';
-                }
-            }
-            document.querySelectorAll('input[name="SelectedPaymentMethod"]').forEach(function (r) {
-                r.addEventListener('change', updateVisibility);
-            });
-            updateVisibility();
-        })();
+             }
 
-        @if (!isLoggedIn)
-            {
-                <text>
-                        document.addEventListener("DOMContentLoaded", function () {
-                            initAddressCascade({
-                                provinceSelectId: "guestProvinceSelect",
-                                wardSelectId: "guestWardSelect",
-                                selectedProvince: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.GuestProvince)),
-                                selectedWard: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.GuestWard))
-                                                });
-                                            });
-                </text>
-        }
-    </script>
-}
+             // Payment-method visibility logic
+             function updateVisibility() {
+                 var pm = document.querySelector('input[name="SelectedPaymentMethod"]:checked')?.value;
+                 var card = document.getElementById('cardFields');
+                 var note = document.getElementById('nonCardNote');
+                 if (!card || !note) return;
+                 if (pm === '1') {
+                     card.style.display = '';
+                     note.style.display = 'none';
+                 } else {
+                     card.style.display = 'none';
+                     note.style.display = '';
+                 }
+             }
+
+             // Wire up handlers on DOM ready
+             document.addEventListener('DOMContentLoaded', function () {
+                 document.querySelectorAll('input[name="SelectedPaymentMethod"]').forEach(function (r) {
+                     r.addEventListener('change', updateVisibility);
+                 });
+                 updateVisibility();
+
+                @if (!isLoggedIn)
+                 {
+                     <text>
+                         initAddressCascade({
+                             provinceSelectId: "guestProvinceSelect",
+                             wardSelectId: "guestWardSelect",
+                             selectedProvince: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.GuestProvince)),
+                             selectedWard: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.GuestWard))
+                         });
+                     </text>
+                 }
+             });
+         })();
+     </script>
+ }

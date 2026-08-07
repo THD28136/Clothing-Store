@@ -61,7 +61,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
 
         // GET: show checkout page
         [HttpGet]
-        public async Task<IActionResult> Checkout(string? couponCode = null)
+        public async Task<IActionResult> Checkout(string? couponCode = null, int? selectedAddressId = null)
         {
             var cart = this._httpAccessor.HttpContext?.Session.GetObject<List<SessionCartItem>>("Cart") ?? new List<SessionCartItem>();
             if (!cart.Any()) return RedirectToAction("Index", "Cart");
@@ -87,6 +87,12 @@ namespace MTKPM_Clothing_Store_web.Controllers
                     .OrderByDescending(a => a.IsDefault)
                     .ThenByDescending(a => a.CreatedAt)
                     .ToListAsync();
+
+                // If caller provided a selectedAddressId, preselect it; otherwise leave DefaultAddress as before
+                if (selectedAddressId.HasValue && vm.Addresses.Any(a => a.AddressId == selectedAddressId.Value))
+                {
+                    vm.SelectedAddressId = selectedAddressId.Value;
+                }
 
                 // Khách hàng thân thiết: hạng thành viên + điểm khả dụng để hiển thị lúc checkout.
                 var tierInfo = await _loyaltyService.GetTierInfoAsync(uid);
@@ -115,57 +121,13 @@ namespace MTKPM_Clothing_Store_web.Controllers
             return View(vm);
         }
 
+        // POST: Apply coupon from the summary form. Redirect to Checkout GET which does the validation and shows feedback.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ApplyCoupon(CheckoutViewModel model)
+        public IActionResult ApplyCoupon(string? couponCode)
         {
-            // Load cart từ Session
-            var cart = _httpAccessor.HttpContext?.Session
-                .GetObject<List<SessionCartItem>>("Cart") ?? new();
-
-            if (!cart.Any())
-                return RedirectToAction("Index", "Cart");
-
-            model.Items.Clear();
-
-            foreach (var ci in cart)
-            {
-                var product = await _dbContext.Products.FindAsync(ci.ProductId);
-                if (product == null) continue;
-
-                model.Items.Add(new CheckoutItem
-                {
-                    Product = product,
-                    Quantity = ci.Quantity
-                });
-            }
-
-            // Remove payment-related fields from ModelState so that we can validate the coupon without requiring card info
-            ModelState.Remove(nameof(model.CardName));
-            ModelState.Remove(nameof(model.CardNumber));
-            ModelState.Remove(nameof(model.ExpiryMonth));
-            ModelState.Remove(nameof(model.ExpiryYear));
-            ModelState.Remove(nameof(model.CVV));
-            ModelState.Remove(nameof(model.GuestEmail));
-
-            if (string.IsNullOrWhiteSpace(model.CouponCode))
-            {
-                model.CouponMessage = "Vui lòng nhập mã giảm giá.";
-                return View("Checkout", model);
-            }
-
-            var (coupon, error) = await ValidateCouponAsync(model.CouponCode, model.Total);
-
-            if (coupon == null)
-            {
-                model.CouponMessage = error;
-                return View("Checkout", model);
-            }
-
-            model.AppliedDiscountPercent = coupon.DiscountPercent;
-            model.CouponMessage = "Áp dụng mã giảm giá thành công.";
-
-            return View("Checkout", model);
+            // Redirect to the Checkout GET so it will compute totals and validate the coupon.
+            return RedirectToAction("Checkout", new { couponCode = couponCode });
         }
 
         // POST: mock payment (school project) with raw-insert Order creation workaround
@@ -309,7 +271,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
                 model.PointsToRedeem = 0;
             }
 
-            // Re-validate the coupon here, authoritatively — model.AppliedDiscountPercent
+            // Re-validate the coupon here, authoritively — model.AppliedDiscountPercent
             // from the GET preview is never trusted for the actual charge/order.
             Coupon? appliedCoupon = null;
 
@@ -594,7 +556,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
                 if (!string.IsNullOrWhiteSpace(recipientEmail))
                 {
                     var emailBody = BuildOrderConfirmationEmail(orderId, recipientName, model.Items, finalTotal, model.SelectedPaymentMethod.ToString());
-                    await _emailService.SendEmailAsync(recipientEmail!, $"Xác nhận đơn hàng #{orderId} - MTKPM Clothing Store", emailBody);
+                    await _emailService.SendEmailAsync(recipientEmail!, $"Xác nhận đơn hàng #{orderId} - LOVStore", emailBody);
                 }
 
                 // For other methods we treat as immediate success (existing behaviour)

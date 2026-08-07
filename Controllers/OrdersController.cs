@@ -10,8 +10,29 @@ namespace MTKPM_Clothing_Store_web.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        // Allowed statuses
-        private static readonly string[] AllowedStatuses = new[] { "Pending", "Processing", "Shipped", "Delivered", "Cancelled" };
+        // Allowed statuses (including payment-related statuses used by PayPal)
+        private static readonly string[] AllowedStatuses = new[] { "Pending", "PendingPayment", "Paid", "Processing", "Shipped", "Delivered", "Cancelled" };
+
+        // Valid state transitions (from -> allowed next states).
+        // Keep this small and explicit so UpdateStatus can reject illogical changes.
+        private static readonly Dictionary<string, string[]> ValidTransitions = new()
+        {
+            [""] = new[] { "Pending", "PendingPayment" }, // unknown/empty -> initial states
+            ["Pending"] = new[] { "PendingPayment", "Paid", "Processing", "Cancelled" },
+            ["PendingPayment"] = new[] { "Paid", "Cancelled" },
+            ["Paid"] = new[] { "Processing", "Cancelled" },
+            ["Processing"] = new[] { "Shipped", "Cancelled" },
+            ["Shipped"] = new[] { "Delivered" }, // typically once shipped only Delivered is next
+            ["Delivered"] = Array.Empty<string>(), // terminal
+            ["Cancelled"] = Array.Empty<string>()  // terminal in current model (you handle restore elsewhere)
+        };
+
+        private static bool IsValidTransition(string? from, string to)
+        {
+            var key = string.IsNullOrWhiteSpace(from) ? "" : from!;
+            if (!ValidTransitions.TryGetValue(key, out var allowed)) return false;
+            return allowed.Contains(to);
+        }
 
         public OrdersController(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
         {
@@ -67,16 +88,43 @@ namespace MTKPM_Clothing_Store_web.Controllers
             return RedirectToAction(nameof(Details), new { id = orderId });
         }
 
-        // Admin: View all orders
+        // Admin: View all orders (with search and status filter)
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? search, string? status)
         {
-            var orders = await _context.Orders
+            var q = _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Product)
-                .OrderByDescending(o => o.OrderDate)
-                .ToListAsync();
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var trimmed = search.Trim();
+                // if numeric, allow searching by order id
+                if (int.TryParse(trimmed, out var oid))
+                {
+                    q = q.Where(o => o.OrderId == oid
+                                     || (o.User != null && EF.Functions.Like(o.User.Name, $"%{trimmed}%"))
+                                     || (o.GuestEmail != null && EF.Functions.Like(o.GuestEmail, $"%{trimmed}%")));
+                }
+                else
+                {
+                    q = q.Where(o => (o.User != null && EF.Functions.Like(o.User.Name, $"%{trimmed}%"))
+                                     || (o.GuestEmail != null && EF.Functions.Like(o.GuestEmail, $"%{trimmed}%")));
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(status) && AllowedStatuses.Contains(status))
+            {
+                q = q.Where(o => o.Status == status);
+            }
+
+            var orders = await q.OrderByDescending(o => o.OrderDate).ToListAsync();
+
+            ViewBag.AllowedStatuses = AllowedStatuses;
+            ViewBag.Search = search;
+            ViewBag.StatusFilter = status;
 
             return View(orders);
         }
@@ -187,15 +235,18 @@ namespace MTKPM_Clothing_Store_web.Controllers
                 .FirstOrDefaultAsync(o => o.OrderId == id);
             if (order == null) return NotFound();
 
+            if (!IsValidTransition(order.Status, status))
+            {
+                ModelState.AddModelError(string.Empty, $"Invalid status transition from '{order.Status ?? "None"}' to '{status}'.");
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
             var wasCancelled = order.Status == "Cancelled";
             var isNowCancelled = status == "Cancelled";
 
             if (isNowCancelled && !wasCancelled)
             {
                 // Order is being cancelled for the first time: give the stock back.
-                // The wasCancelled/isNowCancelled guard stops this running again
-                // if someone clicks "Cancelled" a second time on an already-
-                // cancelled order (which would otherwise credit stock twice).
                 foreach (var detail in order.OrderDetails)
                 {
                     var product = await _context.Products.FindAsync(detail.ProductId);
@@ -209,8 +260,7 @@ namespace MTKPM_Clothing_Store_web.Controllers
             {
                 // Symmetric case: admin reverses a cancellation back to an
                 // active status. Re-deduct the stock we gave back above, but
-                // refuse if there isn't enough left (someone else may have
-                // bought it in the meantime).
+                // refuse if there isn't enough left.
                 foreach (var detail in order.OrderDetails)
                 {
                     var product = await _context.Products.FindAsync(detail.ProductId);
@@ -235,6 +285,92 @@ namespace MTKPM_Clothing_Store_web.Controllers
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Details), new { id });
+        }
+
+        // Admin-only: bulk update status for selected orders
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BulkUpdateStatus([FromForm] int[]? selectedIds, [FromForm] string? status)
+        {
+            if (selectedIds == null || selectedIds.Length == 0)
+            {
+                TempData["Error"] = "Vui lòng chọn ít nhất một đơn hàng.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (string.IsNullOrWhiteSpace(status) || !AllowedStatuses.Contains(status))
+            {
+                TempData["Error"] = "Trạng thái không hợp lệ cho thao tác hàng loạt.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Start transaction to keep updates consistent
+            await using var tx = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var orders = await _context.Orders
+                    .Where(o => selectedIds.Contains(o.OrderId))
+                    .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
+                    .ToListAsync();
+
+                foreach (var order in orders)
+                {
+                    var wasCancelled = order.Status == "Cancelled";
+                    var isNowCancelled = status == "Cancelled";
+
+                    if (isNowCancelled && !wasCancelled)
+                    {
+                        // give stock back
+                        foreach (var detail in order.OrderDetails)
+                        {
+                            var product = await _context.Products.FindAsync(detail.ProductId);
+                            if (product != null)
+                            {
+                                product.Stock += detail.Quantity;
+                            }
+                        }
+                    }
+                    else if (!isNowCancelled && wasCancelled)
+                    {
+                        // Check availability first
+                        foreach (var detail in order.OrderDetails)
+                        {
+                            var product = await _context.Products.FindAsync(detail.ProductId);
+                            if (product != null && product.Stock < detail.Quantity)
+                            {
+                                TempData["Error"] = $"Không đủ hàng tồn kho cho sản phẩm '{product.Name}' khi khôi phục đơn #{order.OrderId}. Hủy thao tác.";
+                                await tx.RollbackAsync();
+                                return RedirectToAction(nameof(Index));
+                            }
+                        }
+
+                        foreach (var detail in order.OrderDetails)
+                        {
+                            var product = await _context.Products.FindAsync(detail.ProductId);
+                            if (product != null)
+                            {
+                                product.Stock -= detail.Quantity;
+                            }
+                        }
+                    }
+
+                    order.Status = status;
+                }
+
+                await _context.SaveChangesAsync();
+                await tx.CommitAsync();
+
+                TempData["Success"] = $"Cập nhật trạng thái thành công cho {orders.Count} đơn hàng.";
+            }
+            catch (Exception)
+            {
+                try { await tx.RollbackAsync(); } catch { }
+                TempData["Error"] = "Đã xảy ra lỗi khi cập nhật trạng thái hàng loạt. Vui lòng thử lại.";
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         // Allow authenticated customers (owners) to cancel their own order.

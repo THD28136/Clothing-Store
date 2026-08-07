@@ -3,59 +3,126 @@
 @{
     ViewData["Title"] = "Quản lý đơn hàng";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var allowedStatuses = ViewBag.AllowedStatuses as string[] ?? new string[0];
+    var currentSearch = ViewBag.Search as string ?? "";
+    var currentStatus = ViewBag.StatusFilter as string ?? "";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Danh sách đơn hàng</h1>
 </div>
 
-<div class="table-responsive">
-    <table class="table table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th>Mã đơn</th>
-                <th>Khách hàng</th>
-                <th>Ngày đặt hàng</th>
-                <th>Số sản phẩm</th>
-                <th>Tổng tiền</th>
-                <th>Trạng thái</th>
-                <th>Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.Any())
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="search" value="@currentSearch" class="form-control" placeholder="Tìm theo mã đơn, tên khách, email khách..." />
+    </div>
+    <div class="col-auto">
+        <select name="status" class="form-select">
+            <option value="">-- Tất cả trạng thái --</option>
+            @foreach (var s in allowedStatuses)
             {
-                @foreach (var order in Model)
+                <option value="@s" selected="@(s == currentStatus ? "selected" : null)">@s</option>
+            }
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Tìm</button>
+        <a class="btn btn-secondary ms-2" href="@Url.Action("Index", "Orders")">Bỏ lọc</a>
+    </div>
+</form>
+
+<form asp-action="BulkUpdateStatus" method="post">
+    @Html.AntiForgeryToken()
+    <div class="mb-2 d-flex align-items-center">
+        <div class="me-2">
+            <select name="status" class="form-select" style="min-width:200px;">
+                @foreach (var s in allowedStatuses)
                 {
-                    var totalAmount = order.OrderDetails?.Sum(od => od.Quantity * od.Product?.Price ?? 0) ?? 0;
-                    var status = string.IsNullOrWhiteSpace(order.Status) ? "Pending" : order.Status;
-                    string badgeClass = status switch
+                    <option value="@s">@s</option>
+                }
+            </select>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary">Áp dụng cho các đơn đã chọn</button>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width:36px;"><input id="select-all" type="checkbox" title="Select all" /></th>
+                    <th>Mã đơn</th>
+                    <th>Khách hàng</th>
+                    <th>Ngày đặt hàng</th>
+                    <th>Số sản phẩm</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    foreach (var order in Model)
                     {
-                        "Processing" => "bg-warning text-dark",
-                        "Shipped" => "bg-info text-dark",
-                        "Delivered" => "bg-success",
-                        "Cancelled" => "bg-danger",
-                        _ => "bg-secondary"
-                    };
+                        var totalAmount = order.OrderDetails?.Sum(od => od.Quantity * od.Product?.Price ?? 0) ?? 0;
+                        var status = string.IsNullOrWhiteSpace(order.Status) ? "Pending" : order.Status;
+                        string badgeClass = status switch
+                        {
+                            "Processing" => "bg-warning text-dark",
+                            "Shipped" => "bg-info text-dark",
+                            "Delivered" => "bg-success",
+                            "Cancelled" => "bg-danger",
+                            _ => "bg-secondary"
+                        };
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="selectedIds" value="@order.OrderId" class="select-item" />
+                            </td>
+                            <td>#@order.OrderId</td>
+                            <td>@order.User?.Name</td>
+                            <td>@order.OrderDate?.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@order.OrderDetails?.Count()</td>
+                            <td>@totalAmount.ToString("C0")</td>
+                            <td><span class="badge @badgeClass">@status</span></td>
+                            <td>
+                                <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@order.OrderId">Xem chi tiết</a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
                     <tr>
-                        <td>#@order.OrderId</td>
-                        <td>@order.User?.Name</td>
-                        <td>@order.OrderDate?.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td>@order.OrderDetails?.Count()</td>
-                        <td>@totalAmount.ToString("C0")</td>
-                        <td><span class="badge @badgeClass">@status</span></td>
-                        <td>
-                            <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@order.OrderId">Xem chi tiết</a>
-                        </td>
+                        <td colspan="8" class="text-center text-muted">Không có đơn hàng nào</td>
                     </tr>
                 }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="7" class="text-center text-muted">Không có đơn hàng nào</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
+            </tbody>
+        </table>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        (function () {
+            var selectAll = document.getElementById('select-all');
+            if (!selectAll) return;
+            selectAll.addEventListener('change', function () {
+                var checked = selectAll.checked;
+                var items = document.querySelectorAll('.select-item');
+                items.forEach(function (el) { el.checked = checked; });
+            });
+        })();
+    </script>
+}

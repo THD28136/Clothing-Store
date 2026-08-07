@@ -4,6 +4,6 @@ namespace MTKPM_Clothing_Store_web.Services
 {
     public interface IEmailService
     {
-        Task SendEmailAsync(string toEmail, string subject, string htmlBody);
+        Task SendEmailAsync(string to, string subject, string htmlBody);
     }
 }

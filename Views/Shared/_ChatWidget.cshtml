@@ -1,0 +1,186 @@
+﻿@using System.Security.Claims
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@{
+    var user = HttpContextAccessor.HttpContext?.User;
+    var name = HttpContextAccessor.HttpContext?.Session.GetString("Name")
+               ?? user?.Identity?.Name;
+    var email = HttpContextAccessor.HttpContext?.Session.GetString("Email")
+                ?? user?.FindFirst(ClaimTypes.Email)?.Value;
+}
+
+<style>
+    /* Chat widget (fixed bottom-right); panel appears to the left of the button */
+    .chat-widget {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 2200;
+        font-family: Inter, system-ui, -apple-system, sans-serif;
+        display: flex;
+        align-items: flex-end; /* align panel and button on baseline */
+        gap: 12px; /* spacing between panel and button */
+    }
+
+    .chat-button {
+        width: 64px;
+        height: 64px;
+        border-radius: 999px;
+        background: #b8895a;
+        color: #fff;
+        border: none;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        flex: 0 0 auto;
+    }
+
+    .chat-panel {
+        width: 340px;
+        max-width: calc(100vw - 48px);
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        overflow: hidden;
+        display: none; /* toggled via JS/class */
+        flex-direction: column;
+        flex: 0 0 auto;
+    }
+
+    .chat-header { padding: 12px 14px; background: #f7f5f2; font-weight: 600; border-bottom: 1px solid #eee; }
+    .chat-body { padding: 12px; height: 220px; overflow: auto; background: #fafafa; }
+    .chat-footer { padding: 10px; border-top: 1px solid #eee; background: #fff; }
+    .chat-message { background: #fff; padding: 10px 12px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .chat-message.me { background: #e9f4ff; align-self: flex-end; }
+    .form-control-sm { font-size: .9rem; }
+
+    .media (max-width: 480px) {
+        .chat-widget { right: 12px; left: 12px; justify-content: center; }
+        .chat-panel { width: auto; max-width: calc(100vw - 24px); }
+    }
+
+    /* optional helper when you want to show via class instead of inline style:
+       .chat-panel.open { display: flex; } */
+</style>
+
+<div class="chat-widget" aria-live="polite">
+    <div class="chat-panel d-flex flex-column" id="chatPanel" aria-hidden="true">
+        <div class="chat-header">Hỗ trợ khách hàng</div>
+        <div class="chat-body d-flex flex-column" id="chatBody"></div>
+        <div class="chat-footer">
+            <form id="chatForm" method="post" novalidate>
+                @Html.AntiForgeryToken()
+                <div class="mb-2">
+                    <input name="Name" value="@name" class="form-control form-control-sm" placeholder="Họ tên (tuỳ chọn)" />
+                </div>
+                <div class="mb-2">
+                    <input name="Email" value="@email" class="form-control form-control-sm" placeholder="Email (để chúng tôi trả lời)" />
+                </div>
+                <div class="mb-2">
+                    <input name="OrderNumber" class="form-control form-control-sm" placeholder="Mã đơn (tuỳ chọn)" />
+                </div>
+                <div class="mb-2">
+                    <textarea name="Message" required class="form-control form-control-sm" rows="3" placeholder="Gửi câu hỏi hoặc phản hồi của bạn..."></textarea>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-sm btn-dark flex-grow-1" id="chatSend">Gửi</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="chatClose">Đóng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <button class="chat-button" id="chatToggle" title="Liên hệ" aria-expanded="false" aria-controls="chatPanel">
+        <i class="bi bi-chat-dots"></i>
+    </button>
+</div>
+
+<script>
+    (function () {
+        // Scope behavior to each .chat-widget instance to avoid cross-widget conflicts
+        document.querySelectorAll('.chat-widget').forEach(widget => {
+            const toggle = widget.querySelector('#chatToggle');
+            const panel = widget.querySelector('#chatPanel');
+            const closeBtn = widget.querySelector('#chatClose');
+            const form = widget.querySelector('#chatForm');
+            const body = widget.querySelector('#chatBody');
+
+            if (!toggle || !panel || !form || !body) return;
+
+            function openPanel() {
+                panel.style.display = 'flex';
+                panel.setAttribute('aria-hidden', 'false');
+                toggle.setAttribute('aria-expanded', 'true');
+            }
+            function closePanel() {
+                panel.style.display = 'none';
+                panel.setAttribute('aria-hidden', 'true');
+                toggle.setAttribute('aria-expanded', 'false');
+            }
+
+            toggle.addEventListener('click', () => {
+                // use computed style so we detect visible state regardless of whether display was set via inline style or CSS class
+                const isOpen = window.getComputedStyle(panel).display !== 'none';
+                if (isOpen) closePanel(); else openPanel();
+            });
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', (e) => {
+                    // ensure click inside form doesn't submit or propagate unexpectedly
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closePanel();
+                });
+            }
+
+            // Basic submit handler (scoped)
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const sendBtn = widget.querySelector('#chatSend');
+                if (sendBtn) sendBtn.disabled = true;
+                const fd = new FormData(form);
+
+                fetch('@Url.Action("Chat", "Support")', {
+                    method: 'POST',
+                    body: fd,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(async (r) => {
+                    if (!r.ok) {
+                        const err = await r.json().catch(() => null);
+                        throw err || new Error('Server error');
+                    }
+                    return r.json();
+                })
+                .then((json) => {
+                    const msg = document.createElement('div');
+                    msg.className = 'chat-message me';
+                    msg.innerHTML = '<strong>Bạn:</strong><br/>' + (fd.get('Message') || '');
+                    body.appendChild(msg);
+                    body.scrollTop = body.scrollHeight;
+
+                    const reply = document.createElement('div');
+                    reply.className = 'chat-message';
+                    reply.innerHTML = '<strong>Hệ thống:</strong><br/>' + (json.message || 'Tin nhắn đã gửi. Nhân viên hỗ trợ sẽ liên hệ qua email.');
+                    body.appendChild(reply);
+                    body.scrollTop = body.scrollHeight;
+
+                    form.reset();
+                    if (sendBtn) sendBtn.disabled = false;
+                })
+                .catch((err) => {
+                    console.error(err);
+                    const reply = document.createElement('div');
+                    reply.className = 'chat-message';
+                    reply.innerHTML = '<strong>Hệ thống:</strong><br/>Không thể gửi tin nhắn. Vui lòng thử lại sau.';
+                    body.appendChild(reply);
+                    body.scrollTop = body.scrollHeight;
+                    if (sendBtn) sendBtn.disabled = false;
+                });
+            });
+        });
+    })();
+</script>

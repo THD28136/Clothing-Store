@@ -2,12 +2,20 @@
 @{
     ViewData["Title"] = "Sổ địa chỉ";
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    var returnTo = (ViewData["ReturnTo"] as string) ?? "";
+    var selectedId = ViewData["SelectedId"] as int?;
 }
 
 <div style="max-width:800px;margin:0 auto;padding:32px 16px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
         <h2 style="margin:0;">Sổ địa chỉ</h2>
-        <a class="btn btn-dark" asp-action="Create">+ Thêm địa chỉ mới</a>
+        <div style="display:flex;gap:8px;align-items:center;">
+            @if (returnTo == "checkout")
+            {
+                <a class="btn btn-outline-secondary" href="javascript:window.close()">Đóng</a>
+            }
+            <a class="btn btn-dark" asp-action="Create" asp-route-returnTo="@(returnTo == "checkout" ? "checkout" : null)">+ Thêm địa chỉ mới</a>
+        </div>
     </div>
 
     @if (TempData["Success"] != null)
@@ -20,7 +28,7 @@
         <div style="border:1px dashed #d8cec6;border-radius:4px;padding:40px;text-align:center;color:#8a7f78;">
             Bạn chưa có địa chỉ nào được lưu.
             <div style="margin-top:14px;">
-                <a class="btn btn-dark" asp-action="Create">+ Thêm địa chỉ đầu tiên</a>
+                <a class="btn btn-dark" asp-action="Create" asp-route-returnTo="@(returnTo == "checkout" ? "checkout" : null)">+ Thêm địa chỉ đầu tiên</a>
             </div>
         </div>
     }
@@ -28,7 +36,7 @@
     {
         foreach (var addr in Model)
         {
-            <div style="border:1px solid #e2dcd6;border-radius:4px;padding:20px;margin-bottom:14px;background:@(addr.IsDefault ? "#fbfaf8" : "#fff");">
+            <div id="addr-@addr.AddressId" style="border:1px solid #e2dcd6;border-radius:4px;padding:20px;margin-bottom:14px;background:@(addr.IsDefault ? "#fbfaf8" : "#fff");">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
                     <div>
                         <strong>@addr.ReceiverName</strong>
@@ -44,6 +52,19 @@
                         <p style="margin:8px 0 0;color:#4a423e;">@addr.Street, @addr.Ward, @addr.Province</p>
                     </div>
                     <div style="display:flex;gap:8px;flex-shrink:0;">
+                        @if (returnTo == "checkout")
+                        {
+                            <button type="button" class="btn btn-sm btn-primary choose-btn"
+                                    data-id="@addr.AddressId"
+                                    data-name="@addr.ReceiverName"
+                                    data-phone="@addr.PhoneNumber"
+                                    data-street="@addr.Street"
+                                    data-ward="@addr.Ward"
+                                    data-province="@addr.Province"
+                                    data-label="@addr.AddressLabel">
+                                Chọn
+                            </button>
+                        }
                         <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@addr.AddressId">Sửa</a>
                         @if (!addr.IsDefault)
                         {
@@ -63,3 +84,52 @@
         }
     }
 </div>
+
+@if (returnTo == "checkout")
+{
+    <script>
+        (function () {
+            function buildAddressFromEl(el) {
+                return {
+                    addressId: parseInt(el.getAttribute('data-id')),
+                    receiverName: el.getAttribute('data-name'),
+                    phoneNumber: el.getAttribute('data-phone'),
+                    street: el.getAttribute('data-street'),
+                    ward: el.getAttribute('data-ward'),
+                    province: el.getAttribute('data-province'),
+                    label: el.getAttribute('data-label')
+                };
+            }
+
+            // attach handlers for manual choose clicks
+            document.querySelectorAll('.choose-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var addr = buildAddressFromEl(btn);
+                    try {
+                        if (window.opener && !window.opener.closed) {
+                            window.opener.postMessage({ type: 'addressSelected', address: addr }, window.location.origin);
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                    window.close();
+                });
+            });
+
+            // If server indicated a newly created selected id, auto-send it
+            var preselected = @Html.Raw(selectedId.HasValue ? selectedId.Value.ToString() : "null");
+            if (preselected !== null) {
+                var el = document.getElementById('addr-' + preselected);
+                if (el) {
+                    var btn = el.querySelector('.choose-btn');
+                    if (btn) {
+                        // small timeout to ensure opener is ready
+                        setTimeout(function () {
+                            btn.click();
+                        }, 100);
+                    }
+                }
+            }
+        })();
+    </script>
+}

@@ -1,6 +1,230 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "Chính sách bảo mật";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --ink: #1a1a1a;
+        --muted: #8a8a8a;
+        --line: #ececec;
+        --bg-soft: #faf8f5;
+    }
+
+    .policy-wrap {
+        font-family: "Inter", -apple-system, "Segoe UI", sans-serif;
+        color: var(--ink);
+        max-width: 780px;
+        margin: 0 auto;
+        padding: 56px 20px 96px;
+    }
+
+    .policy-eyebrow {
+        font-size: .68rem;
+        letter-spacing: .32em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 14px;
+        text-align: center;
+    }
+
+    .policy-title {
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 500;
+        font-size: 2.8rem;
+        line-height: 1.1;
+        letter-spacing: -.01em;
+        text-align: center;
+        margin: 0 0 16px;
+    }
+
+    .policy-lead {
+        text-align: center;
+        color: var(--muted);
+        font-size: 1rem;
+        line-height: 1.7;
+        margin: 0 auto 18px;
+        max-width: 560px;
+    }
+
+    .policy-updated {
+        text-align: center;
+        font-size: .74rem;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: var(--muted);
+        padding-bottom: 44px;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 52px;
+    }
+
+    .policy-section {
+        margin-bottom: 44px;
+    }
+
+        .policy-section h2 {
+            font-family: "Playfair Display", Georgia, serif;
+            font-size: 1.4rem;
+            font-weight: 500;
+            margin: 0 0 14px;
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+        }
+
+    .policy-num {
+        font-family: "Inter", sans-serif;
+        font-size: .68rem;
+        letter-spacing: .22em;
+        color: var(--muted);
+    }
+
+    .policy-section p,
+    .policy-section li {
+        color: #4a4a4a;
+        font-size: .95rem;
+        line-height: 1.8;
+    }
+
+    .policy-section ul {
+        list-style: none;
+        padding: 0;
+        margin: 14px 0 0;
+    }
+
+    .policy-section li {
+        position: relative;
+        padding-left: 20px;
+        margin-bottom: 8px;
+    }
+
+        .policy-section li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: .78em;
+            width: 6px;
+            height: 1px;
+            background: var(--ink);
+        }
+
+    .policy-contact {
+        background: var(--bg-soft);
+        border: 1px solid var(--line);
+        padding: 36px 32px;
+        text-align: center;
+        margin-top: 64px;
+    }
+
+        .policy-contact h3 {
+            font-family: "Playfair Display", Georgia, serif;
+            font-size: 1.4rem;
+            font-weight: 500;
+            margin: 0 0 10px;
+        }
+
+        .policy-contact p {
+            color: var(--muted);
+            font-size: .92rem;
+            margin-bottom: 24px;
+        }
+
+    .btn-boutique {
+        display: inline-block;
+        background: var(--ink);
+        color: #fff;
+        border: 1px solid var(--ink);
+        padding: 13px 34px;
+        font-size: .72rem;
+        letter-spacing: .2em;
+        text-transform: uppercase;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all .25s ease;
+    }
+
+        .btn-boutique:hover {
+            background: #fff;
+            color: var(--ink);
+        }
+
+    @@media (max-width: 767px) {
+        .policy-title {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<div class="policy-wrap">
+    <div class="policy-eyebrow">Pháp lý</div>
+    <h1 class="policy-title">@ViewData["Title"]</h1>
+    <p class="policy-lead">
+        Chúng tôi tôn trọng quyền riêng tư của bạn. Trang này giải thích cách chúng tôi thu thập,
+        sử dụng và bảo vệ thông tin cá nhân khi bạn mua sắm tại cửa hàng.
+    </p>
+    <div class="policy-updated">Cập nhật lần cuối: @DateTime.Now.ToString("dd/MM/yyyy")</div>
+
+    <div class="policy-section">
+        <h2><span class="policy-num">01</span> Thông tin chúng tôi thu thập</h2>
+        <p>Khi bạn tạo tài khoản hoặc đặt hàng, chúng tôi có thể thu thập các thông tin sau:</p>
+        <ul>
+            <li>Họ tên, địa chỉ email và số điện thoại liên hệ</li>
+            <li>Địa chỉ giao hàng và địa chỉ thanh toán</li>
+            <li>Lịch sử đơn hàng và nội dung giỏ hàng</li>
+            <li>Dữ liệu kỹ thuật cơ bản như trình duyệt và thiết bị truy cập</li>
+        </ul>
+    </div>
+
+    <div class="policy-section">
+        <h2><span class="policy-num">02</span> Mục đích sử dụng</h2>
+        <p>Thông tin của bạn chỉ được dùng để vận hành và cải thiện dịch vụ, cụ thể là:</p>
+        <ul>
+            <li>Xử lý, đóng gói và giao đơn hàng</li>
+            <li>Hỗ trợ khách hàng và giải quyết khiếu nại</li>
+            <li>Gửi thông báo về trạng thái đơn hàng</li>
+            <li>Cải thiện trải nghiệm mua sắm trên website</li>
+        </ul>
+    </div>
+
+    <div class="policy-section">
+        <h2><span class="policy-num">03</span> Chia sẻ thông tin</h2>
+        <p>
+            Chúng tôi không bán hay trao đổi thông tin cá nhân của bạn. Dữ liệu chỉ được chia sẻ
+            với các đơn vị vận chuyển và cổng thanh toán ở mức tối thiểu cần thiết để hoàn tất đơn hàng,
+            hoặc khi có yêu cầu hợp pháp từ cơ quan nhà nước có thẩm quyền.
+        </p>
+    </div>
+
+    <div class="policy-section">
+        <h2><span class="policy-num">04</span> Bảo mật dữ liệu</h2>
+        <p>
+            Mật khẩu được mã hoá và mọi kết nối tới website đều được bảo vệ. Chúng tôi áp dụng các
+            biện pháp kỹ thuật và quản lý hợp lý nhằm ngăn chặn truy cập trái phép, tuy nhiên không
+            hệ thống nào là an toàn tuyệt đối.
+        </p>
+    </div>
+
+    <div class="policy-section">
+        <h2><span class="policy-num">05</span> Cookie</h2>
+        <p>
+            Website sử dụng cookie để ghi nhớ phiên đăng nhập, giỏ hàng và tuỳ chọn của bạn.
+            Bạn có thể tắt cookie trong trình duyệt, nhưng một số chức năng có thể hoạt động không đầy đủ.
+        </p>
+    </div>
+
+    <div class="policy-section">
+        <h2><span class="policy-num">06</span> Quyền của bạn</h2>
+        <ul>
+            <li>Yêu cầu xem, chỉnh sửa hoặc xoá thông tin cá nhân</li>
+            <li>Rút lại sự đồng ý nhận thông tin tiếp thị bất kỳ lúc nào</li>
+            <li>Yêu cầu ngừng xử lý dữ liệu trong phạm vi pháp luật cho phép</li>
+        </ul>
+    </div>
+
+    <div class="policy-contact">
+        <h3>Cần hỗ trợ thêm?</h3>
+        <p>Liên hệ với chúng tôi nếu bạn có câu hỏi về chính sách bảo mật này.</p>
+        <a class="btn-boutique" asp-controller="Home" asp-action="Faq">Trung tâm hỗ trợ</a>
+    </div>
+</div>

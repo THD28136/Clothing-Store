@@ -1,0 +1,171 @@
+﻿@model MTKPM_Clothing_Store_web.Models.SupportMessageViewModel
+@{
+    ViewData["Title"] = "Liên hệ hỗ trợ";
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+}
+<style>
+    .chat-widget {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 1200;
+        font-family: Inter, system-ui, -apple-system, sans-serif;
+    }
+    .chat-button {
+        width: 64px;
+        height: 64px;
+        border-radius: 999px;
+        background: #b8895a;
+        color: #fff;
+        border: none;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+    }
+    .chat-panel {
+        width: 340px;
+        max-width: calc(100vw - 48px);
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        overflow: hidden;
+        margin-bottom: 12px;
+        display: none;
+        flex-direction: column;
+    }
+    .chat-header {
+        padding: 12px 14px;
+        background: #f7f5f2;
+        font-weight: 600;
+        border-bottom: 1px solid #eee;
+    }
+    .chat-body {
+        padding: 12px;
+        height: 220px;
+        overflow: auto;
+        background: #fafafa;
+    }
+    .chat-footer {
+        padding: 10px;
+        border-top: 1px solid #eee;
+        background: #fff;
+    }
+    .chat-message {
+        background: #fff;
+        padding: 10px 12px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .chat-message.me { background: #e9f4ff; align-self: flex-end; }
+    .form-control-sm { font-size: .9rem; }
+</style>
+
+<div class="chat-widget">
+    <div class="chat-panel d-flex flex-column" id="chatPanel" aria-hidden="true">
+        <div class="chat-header">Hỗ trợ khách hàng</div>
+        <div class="chat-body d-flex flex-column" id="chatBody" aria-live="polite"></div>
+        <div class="chat-footer">
+            <form id="chatForm" method="post" novalidate>
+                @Html.AntiForgeryToken()
+                <div class="mb-2">
+                    <input name="Name" value="@Model?.Name" class="form-control form-control-sm" placeholder="Họ tên (tuỳ chọn)" />
+                </div>
+                <div class="mb-2">
+                    <input name="Email" value="@Model?.Email" class="form-control form-control-sm" placeholder="Email (để chúng tôi trả lời)" />
+                </div>
+                <div class="mb-2">
+                    <input name="OrderNumber" value="@Model?.OrderNumber" class="form-control form-control-sm" placeholder="Mã đơn (tuỳ chọn)" />
+                </div>
+                <div class="mb-2">
+                    <textarea name="Message" required class="form-control form-control-sm" rows="3" placeholder="Gửi câu hỏi hoặc phản hồi của bạn..."></textarea>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-sm btn-dark flex-grow-1" id="chatSend">Gửi</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="chatClose">Đóng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <button class="chat-button" id="chatToggle" title="Liên hệ">
+        <i class="bi bi-chat-dots"></i>
+    </button>
+</div>
+
+@section Scripts {
+<script>
+    (function () {
+        const toggle = document.getElementById('chatToggle');
+        const panel = document.getElementById('chatPanel');
+        const closeBtn = document.getElementById('chatClose');
+        const form = document.getElementById('chatForm');
+        const body = document.getElementById('chatBody');
+
+        function openPanel() {
+            panel.style.display = 'flex';
+            panel.setAttribute('aria-hidden', 'false');
+        }
+        function closePanel() {
+            panel.style.display = 'none';
+            panel.setAttribute('aria-hidden', 'true');
+        }
+
+        toggle.addEventListener('click', () => {
+            if (panel.style.display === 'flex') closePanel(); else openPanel();
+        });
+        closeBtn.addEventListener('click', closePanel);
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const sendBtn = document.getElementById('chatSend');
+            sendBtn.disabled = true;
+            const fd = new FormData(form);
+
+            fetch('@Url.Action("Chat", "Support")', {
+                method: 'POST',
+                body: fd,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(async (r) => {
+                if (!r.ok) {
+                    const err = await r.json().catch(() => null);
+                    throw err || new Error('Server error');
+                }
+                return r.json();
+            })
+            .then((json) => {
+                const msg = document.createElement('div');
+                msg.className = 'chat-message me';
+                msg.innerHTML = '<strong>Bạn:</strong><br/>' + (fd.get('Message') || '');
+                body.appendChild(msg);
+                body.scrollTop = body.scrollHeight;
+
+                // show confirmation from support
+                const reply = document.createElement('div');
+                reply.className = 'chat-message';
+                reply.innerHTML = '<strong>Hệ thống:</strong><br/>' + (json.message || 'Tin nhắn đã gửi. Nhân viên hỗ trợ sẽ liên hệ qua email.');
+                body.appendChild(reply);
+                body.scrollTop = body.scrollHeight;
+
+                form.reset();
+                sendBtn.disabled = false;
+            })
+            .catch((err) => {
+                console.error(err);
+                const reply = document.createElement('div');
+                reply.className = 'chat-message';
+                reply.innerHTML = '<strong>Hệ thống:</strong><br/>Không thể gửi tin nhắn. Vui lòng thử lại sau.';
+                body.appendChild(reply);
+                body.scrollTop = body.scrollHeight;
+                sendBtn.disabled = false;
+            });
+        });
+    })();
+</script>
+}

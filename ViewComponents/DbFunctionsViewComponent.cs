@@ -30,8 +30,12 @@ public class DbFunctionsViewComponent : ViewComponent
             vm.TotalProducts = await ExecuteScalarIntAsync("EXEC pkg_order.sp7", null);
             vm.ServerNow = await ExecuteScalarDateTimeAsync("EXEC pkg_order.sp8", null);
 
-            // revenue (read-only)
-            vm.TotalRevenue = await ExecuteScalarDecimalAsync("EXEC sp_TotalRevenue", null);
+            // revenue (read-only) - exclude cancelled orders
+            vm.TotalRevenue = await _context.Orders
+                .AsNoTracking()
+                .Where(o => o.TotalAmount.HasValue && (o.Status != "Cancelled"))
+                .Select(o => o.TotalAmount!.Value)
+                .SumAsync();
 
             // views via EF
             vm.ProductCount = await _context.VwProductLists.AsNoTracking().CountAsync();

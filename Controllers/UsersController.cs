@@ -10,16 +10,19 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
 using System;
+using MTKPM_Clothing_Store_web.Services;
 
 namespace MTKPM_Clothing_Store_web.Controllers
 {
     public class UsersController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEmailService _emailService;
 
-        public UsersController(ApplicationDbContext context)
+        public UsersController(ApplicationDbContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         // GET: Users
@@ -415,13 +418,26 @@ namespace MTKPM_Clothing_Store_web.Controllers
                 var expires = DateTime.UtcNow.AddMinutes(15);
                 HttpContext.Session.SetString($"PwdReset:{email}", $"{code}|{expires:o}");
 
-                // For client-side/dev environments we display the code on-screen so user can reset without email.
-                ViewBag.DebugResetCode = code;
+                // send code by email
+                try
+                {
+                    var subject = "LOVSTORE - Mã đặt lại mật khẩu";
+                    var body = $@"
+                        <p>Xin chào {System.Net.WebUtility.HtmlEncode(user.Name)},</p>
+                        <p>Bạn (hoặc ai đó) đã yêu cầu đặt lại mật khẩu cho tài khoản của bạn. Mã đặt lại có hiệu lực trong 15 phút:</p>
+                        <h2 style='letter-spacing:4px'>{System.Net.WebUtility.HtmlEncode(code)}</h2>
+                        <p>Thân mến,<br/>LOVSTORE</p>";
+                    await _emailService.SendEmailAsync(user.Email, subject, body);
+                }
+                catch
+                {
+                    // Don't reveal email send status to user; keep same outward behavior.
+                    // In production consider logging the exception.
+                }
             }
 
             ViewBag.Email = email;
-            // show same view but with a confirmation message and (for dev) the code
-            ViewBag.Message = "If that email exists in our system, a reset code has been generated. Use it on the reset page.";
+            ViewBag.Message = "If that email exists in our system, a reset code has been sent. Check your inbox (and spam).";
             return View();
         }
 

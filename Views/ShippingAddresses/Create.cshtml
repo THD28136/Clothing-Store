@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Thêm địa chỉ mới";
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    var returnTo = (ViewData["ReturnTo"] as string) ?? "";
 }
 
 <div style="max-width:600px;margin:0 auto;padding:32px 16px;">
@@ -9,6 +10,7 @@
 
     <form asp-action="Create" method="post" id="addressForm">
         @Html.AntiForgeryToken()
+        <input type="hidden" name="returnTo" value="@returnTo" />
         <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
         <div class="mb-3">
@@ -59,7 +61,14 @@
 
         <div class="d-flex gap-2">
             <button type="submit" class="btn btn-dark">Lưu địa chỉ</button>
-            <a class="btn btn-outline-secondary" asp-action="Index">Hủy</a>
+            @if (returnTo == "checkout")
+            {
+                <a class="btn btn-outline-secondary" asp-controller="Payments" asp-action="Checkout">Hủy</a>
+            }
+            else
+            {
+                <a class="btn btn-outline-secondary" asp-action="Index">Hủy</a>
+            }
         </div>
     </form>
 </div>

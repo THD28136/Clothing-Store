@@ -28,7 +28,8 @@ namespace MTKPM_Clothing_Store_web.Controllers
         }
 
         // GET: ShippingAddresses
-        public async Task<IActionResult> Index()
+        // optional returnTo="checkout" will enable "choose" buttons and a Back-to-Checkout link
+        public async Task<IActionResult> Index(string? returnTo = null, int? selected = null)
         {
             var userId = GetCurrentUserId();
             var addresses = await _context.ShippingAddresses
@@ -37,25 +38,29 @@ namespace MTKPM_Clothing_Store_web.Controllers
                 .ThenByDescending(a => a.CreatedAt)
                 .ToListAsync();
 
+            ViewData["ReturnTo"] = returnTo;
+            ViewData["SelectedId"] = selected;
             return View(addresses);
         }
 
         // GET: ShippingAddresses/Create
-        public IActionResult Create()
+        public IActionResult Create(string? returnTo = null)
         {
+            ViewData["ReturnTo"] = returnTo;
             return View(new ShippingAddress());
         }
 
         // POST: ShippingAddresses/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ReceiverName,PhoneNumber,Province,Ward,Street,AddressLabel,IsDefault")] ShippingAddress model)
+        public async Task<IActionResult> Create([Bind("ReceiverName,PhoneNumber,Province,Ward,Street,AddressLabel,IsDefault")] ShippingAddress model, string? returnTo = null)
         {
             var userId = GetCurrentUserId();
             if (userId == 0) return Forbid();
 
             if (!ModelState.IsValid)
             {
+                ViewData["ReturnTo"] = returnTo;
                 return View(model);
             }
 
@@ -77,6 +82,13 @@ namespace MTKPM_Clothing_Store_web.Controllers
             await _context.SaveChangesAsync();
 
             TempData["Success"] = "Đã thêm địa chỉ mới.";
+
+            // If called from Checkout flow, redirect to Index with selected id so the popup can postMessage the new address.
+            if (!string.IsNullOrEmpty(returnTo) && returnTo == "checkout")
+            {
+                return RedirectToAction(nameof(Index), new { returnTo = "checkout", selected = model.AddressId });
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
