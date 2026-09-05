@@ -3,12 +3,28 @@
   "WorkspaceRootPath": "D:\\Github Repos\\Clothing-Store\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|d:\\github repos\\clothing-store\\views\\shared\\_chatwidget.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:views\\shared\\_chatwidget.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|d:\\github repos\\clothing-store\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|d:\\github repos\\clothing-store\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|d:\\github repos\\clothing-store\\views\\shared\\_customerlayout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:views\\shared\\_customerlayout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|d:\\github repos\\clothing-store\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|d:\\github repos\\clothing-store\\views\\products\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:views\\products\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|d:\\github repos\\clothing-store\\views\\shared\\_chatwidget.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:views\\shared\\_chatwidget.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|d:\\github repos\\clothing-store\\razor views\\support\\chat.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
@@ -91,20 +107,12 @@
       "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:services\\smtpsettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|d:\\github repos\\clothing-store\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|d:\\github repos\\clothing-store\\models\\resetpasswordviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:models\\resetpasswordviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|d:\\github repos\\clothing-store\\models\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:models\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|d:\\github repos\\clothing-store\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|d:\\github repos\\clothing-store\\models\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -121,10 +129,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|d:\\github repos\\clothing-store\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|d:\\github repos\\clothing-store\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|solutionrelative:views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A95BF532-CADA-4D00-B827-D48B9F09141E}|MTKPM_Clothing_Store_web.csproj|d:\\github repos\\clothing-store\\views\\users\\changepassword.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
@@ -241,25 +245,24 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "_CustomerLayout.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Shared\\_CustomerLayout.cshtml",
               "RelativeDocumentMoniker": "Views\\Shared\\_CustomerLayout.cshtml",
               "ToolTip": "D:\\Github Repos\\Clothing-Store\\Views\\Shared\\_CustomerLayout.cshtml",
               "RelativeToolTip": "Views\\Shared\\_CustomerLayout.cshtml",
-              "ViewState": "AgIAABoBAAAAAAAAAAAAACYBAABaAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-07-16T03:28:18.184Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 8,
               "Title": "SupportController.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Controllers\\SupportController.cs",
               "RelativeDocumentMoniker": "Controllers\\SupportController.cs",
@@ -268,12 +271,11 @@
               "ViewState": "AgIAAAMAAAAAAAAAAAAcwBkAAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-07-23T07:14:03.192Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
-              "DocumentIndex": 36,
+              "DocumentIndex": 37,
               "Title": "Faq.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Support\\Faq.cshtml",
               "RelativeDocumentMoniker": "Views\\Support\\Faq.cshtml",
@@ -286,7 +288,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 31,
               "Title": "HomeController.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Controllers\\HomeController.cs",
               "RelativeDocumentMoniker": "Controllers\\HomeController.cs",
@@ -298,6 +300,19 @@
               "IsPinned": true
             },
             {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "D:\\Github Repos\\Clothing-Store\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-09-05T19:54:07.831Z",
+              "EditorCaption": ""
+            },
+            {
               "$type": "Bookmark",
               "Name": "ST:0:0:{0174dea2-fdbe-4ef1-8f99-c0beae78880f}"
             },
@@ -307,7 +322,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 4,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Products\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Products\\Index.cshtml",
+              "ToolTip": "D:\\Github Repos\\Clothing-Store\\Views\\Products\\Index.cshtml",
+              "RelativeToolTip": "Views\\Products\\Index.cshtml",
+              "ViewState": "AgIAACQAAAAAAAAAAAAAAFEAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-08-18T05:17:22.295Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "_ChatWidget.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Shared\\_ChatWidget.cshtml",
               "RelativeDocumentMoniker": "Views\\Shared\\_ChatWidget.cshtml",
@@ -315,25 +342,36 @@
               "RelativeToolTip": "Views\\Shared\\_ChatWidget.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAD0AAABDAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-08-07T02:46:47.527Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-07T02:46:47.527Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Chat.cshtml",
-              "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Razor Views\\Support\\Chat.cshtml",
-              "RelativeDocumentMoniker": "Razor Views\\Support\\Chat.cshtml",
-              "ToolTip": "D:\\Github Repos\\Clothing-Store\\Razor Views\\Support\\Chat.cshtml",
-              "RelativeToolTip": "Razor Views\\Support\\Chat.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAFAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Home\\Index.cshtml",
+              "ToolTip": "D:\\Github Repos\\Clothing-Store\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAAE0BAAAAAAAAAAAAAFABAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-08-07T02:37:37.014Z",
+              "WhenOpened": "2026-08-05T15:09:51.439Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
+              "Title": "User.cs",
+              "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Models\\User.cs",
+              "RelativeDocumentMoniker": "Models\\User.cs",
+              "ToolTip": "D:\\Github Repos\\Clothing-Store\\Models\\User.cs",
+              "RelativeToolTip": "Models\\User.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAA7wBoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-06T05:32:39.275Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
               "Title": "SupportMessageViewModel.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Models\\SupportMessageViewModel.cs",
               "RelativeDocumentMoniker": "Models\\SupportMessageViewModel.cs",
@@ -341,12 +379,23 @@
               "RelativeToolTip": "Models\\SupportMessageViewModel.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-07T02:37:32.676Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-07T02:37:32.676Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
+              "Title": "Chat.cshtml",
+              "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Razor Views\\Support\\Chat.cshtml",
+              "RelativeDocumentMoniker": "Razor Views\\Support\\Chat.cshtml",
+              "ToolTip": "D:\\Github Repos\\Clothing-Store\\Razor Views\\Support\\Chat.cshtml",
+              "RelativeToolTip": "Razor Views\\Support\\Chat.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-08-07T02:37:37.014Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
               "Title": "DbFunctionsViewComponent.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\ViewComponents\\DbFunctionsViewComponent.cs",
               "RelativeDocumentMoniker": "ViewComponents\\DbFunctionsViewComponent.cs",
@@ -354,12 +403,11 @@
               "RelativeToolTip": "ViewComponents\\DbFunctionsViewComponent.cs",
               "ViewState": "AgIAAEEAAAAAAAAAAAAlwDsAAABiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-07T02:25:55.15Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-07T02:25:55.15Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 12,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Orders\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Orders\\Index.cshtml",
@@ -367,12 +415,11 @@
               "RelativeToolTip": "Views\\Orders\\Index.cshtml",
               "ViewState": "AgIAAEwAAAAAAAAAAAAhwFwAAAA0AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-07-23T07:24:11.46Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-23T07:24:11.46Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 11,
               "Title": "OrdersController.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Controllers\\OrdersController.cs",
               "RelativeDocumentMoniker": "Controllers\\OrdersController.cs",
@@ -380,12 +427,11 @@
               "RelativeToolTip": "Controllers\\OrdersController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAPcAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T07:26:18.993Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-25T07:26:18.993Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 10,
               "Title": "AdminIndex.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Home\\AdminIndex.cshtml",
               "RelativeDocumentMoniker": "Views\\Home\\AdminIndex.cshtml",
@@ -393,12 +439,11 @@
               "RelativeToolTip": "Views\\Home\\AdminIndex.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAJgAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-08-07T01:37:37.839Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-07T01:37:37.839Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 13,
               "Title": "_Layout.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Shared\\_Layout.cshtml",
               "RelativeDocumentMoniker": "Views\\Shared\\_Layout.cshtml",
@@ -406,12 +451,11 @@
               "RelativeToolTip": "Views\\Shared\\_Layout.cshtml",
               "ViewState": "AgIAAEUBAAAAAAAAAAAAAGYBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-07-16T15:54:19.935Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-16T15:54:19.935Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 14,
               "Title": "Privacy.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Home\\Privacy.cshtml",
               "RelativeDocumentMoniker": "Views\\Home\\Privacy.cshtml",
@@ -419,12 +463,11 @@
               "RelativeToolTip": "Views\\Home\\Privacy.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAMkAAABiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-08-07T01:45:41.839Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-07T01:45:41.839Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 16,
               "Title": "Checkout.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Payments\\Checkout.cshtml",
               "RelativeDocumentMoniker": "Views\\Payments\\Checkout.cshtml",
@@ -432,12 +475,11 @@
               "RelativeToolTip": "Views\\Payments\\Checkout.cshtml",
               "ViewState": "AgIAAJkBAAAAAAAAAAAhwBUAAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-07-01T18:35:34.674Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-01T18:35:34.674Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 17,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\ShippingAddresses\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\ShippingAddresses\\Index.cshtml",
@@ -445,12 +487,11 @@
               "RelativeToolTip": "Views\\ShippingAddresses\\Index.cshtml",
               "ViewState": "AgIAAFEAAAAAAAAAAAD4vwAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-08-07T01:17:19.259Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-07T01:17:19.259Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 15,
               "Title": "PaymentsController.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Controllers\\PaymentsController.cs",
               "RelativeDocumentMoniker": "Controllers\\PaymentsController.cs",
@@ -458,12 +499,11 @@
               "RelativeToolTip": "Controllers\\PaymentsController.cs",
               "ViewState": "AgIAAGoAAAAAAAAAAAAhwC4CAAB/AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-01T17:33:07.626Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-01T17:33:07.626Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 18,
               "Title": "ShippingAddressesController.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Controllers\\ShippingAddressesController.cs",
               "RelativeDocumentMoniker": "Controllers\\ShippingAddressesController.cs",
@@ -471,12 +511,11 @@
               "RelativeToolTip": "Controllers\\ShippingAddressesController.cs",
               "ViewState": "AgIAAEcAAAAAAAAAAAD4vwAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-07T01:17:00.946Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-07T01:17:00.946Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 19,
               "Title": "Create.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\ShippingAddresses\\Create.cshtml",
               "RelativeDocumentMoniker": "Views\\ShippingAddresses\\Create.cshtml",
@@ -484,12 +523,11 @@
               "RelativeToolTip": "Views\\ShippingAddresses\\Create.cshtml",
               "ViewState": "AgIAADQAAAAAAAAAAAASwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-08-07T01:17:33.154Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-07T01:17:33.154Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 20,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
@@ -497,12 +535,11 @@
               "RelativeToolTip": "Program.cs",
               "ViewState": "AgIAACwAAAAAAAAAAAAAAD0AAAAbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-23T13:32:57.024Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-23T13:32:57.024Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 21,
               "Title": "UsersController.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Controllers\\UsersController.cs",
               "RelativeDocumentMoniker": "Controllers\\UsersController.cs",
@@ -510,12 +547,11 @@
               "RelativeToolTip": "Controllers\\UsersController.cs",
               "ViewState": "AgIAADAAAAAAAAAAAAAmwFgAAAB4AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T07:22:03.775Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-25T07:22:03.775Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 22,
               "Title": "ForgotPassword.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Users\\ForgotPassword.cshtml",
               "RelativeDocumentMoniker": "Views\\Users\\ForgotPassword.cshtml",
@@ -523,12 +559,11 @@
               "RelativeToolTip": "Views\\Users\\ForgotPassword.cshtml",
               "ViewState": "AgIAAA4AAAAAAAAAAAAlwAIAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-08-05T14:32:50.215Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-05T14:32:50.215Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 23,
               "Title": "IEmailService.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Services\\IEmailService.cs",
               "RelativeDocumentMoniker": "Services\\IEmailService.cs",
@@ -536,12 +571,11 @@
               "RelativeToolTip": "Services\\IEmailService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-07T00:55:23.211Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-07T00:55:23.211Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 24,
               "Title": "EmailService.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Services\\EmailService.cs",
               "RelativeDocumentMoniker": "Services\\EmailService.cs",
@@ -549,12 +583,11 @@
               "RelativeToolTip": "Services\\EmailService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-07T00:55:31.216Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-07T00:55:31.216Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 25,
               "Title": "SmtpSettings.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Services\\SmtpSettings.cs",
               "RelativeDocumentMoniker": "Services\\SmtpSettings.cs",
@@ -562,25 +595,11 @@
               "RelativeToolTip": "Services\\SmtpSettings.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-07T00:54:52.042Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-07T00:54:52.042Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\appsettings.json",
-              "RelativeDocumentMoniker": "appsettings.json",
-              "ToolTip": "D:\\Github Repos\\Clothing-Store\\appsettings.json",
-              "RelativeToolTip": "appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAaAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-07-23T13:32:12.292Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 26,
               "Title": "ResetPasswordViewModel.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Models\\ResetPasswordViewModel.cs",
               "RelativeDocumentMoniker": "Models\\ResetPasswordViewModel.cs",
@@ -592,19 +611,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
-              "Title": "User.cs",
-              "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Models\\User.cs",
-              "RelativeDocumentMoniker": "Models\\User.cs",
-              "ToolTip": "D:\\Github Repos\\Clothing-Store\\Models\\User.cs",
-              "RelativeToolTip": "Models\\User.cs",
-              "ViewState": "AgIAABMAAAAAAAAAAAA0wBoAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-06T05:32:39.275Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 27,
               "Title": "ApplicationDbContext.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Models\\ApplicationDbContext.cs",
               "RelativeDocumentMoniker": "Models\\ApplicationDbContext.cs",
@@ -616,7 +623,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 28,
               "Title": "Order.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Models\\Order.cs",
               "RelativeDocumentMoniker": "Models\\Order.cs",
@@ -628,7 +635,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 29,
               "Title": "PaymentsPayPalController.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Controllers\\PaymentsPayPalController.cs",
               "RelativeDocumentMoniker": "Controllers\\PaymentsPayPalController.cs",
@@ -640,7 +647,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 30,
               "Title": "CheckoutViewModel.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Models\\CheckoutViewModel.cs",
               "RelativeDocumentMoniker": "Models\\CheckoutViewModel.cs",
@@ -652,19 +659,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Home\\Index.cshtml",
-              "RelativeDocumentMoniker": "Views\\Home\\Index.cshtml",
-              "ToolTip": "D:\\Github Repos\\Clothing-Store\\Views\\Home\\Index.cshtml",
-              "RelativeToolTip": "Views\\Home\\Index.cshtml",
-              "ViewState": "AgIAAF0BAAAAAAAAAAAkwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-08-05T15:09:51.439Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 31,
+              "DocumentIndex": 32,
               "Title": "ChangePassword.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Users\\ChangePassword.cshtml",
               "RelativeDocumentMoniker": "Views\\Users\\ChangePassword.cshtml",
@@ -676,7 +671,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 33,
               "Title": "ResetPassword.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Users\\ResetPassword.cshtml",
               "RelativeDocumentMoniker": "Views\\Users\\ResetPassword.cshtml",
@@ -688,7 +683,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 34,
               "Title": "Login.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Users\\Login.cshtml",
               "RelativeDocumentMoniker": "Views\\Users\\Login.cshtml",
@@ -700,7 +695,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 35,
               "Title": "ChangePasswordViewModel.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Models\\ChangePasswordViewModel.cs",
               "RelativeDocumentMoniker": "Models\\ChangePasswordViewModel.cs",
@@ -712,7 +707,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 40,
+              "DocumentIndex": 41,
               "Title": "PayPalSettings.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Models\\PayPalSettings.cs",
               "RelativeDocumentMoniker": "Models\\PayPalSettings.cs",
@@ -724,7 +719,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 41,
+              "DocumentIndex": 42,
               "Title": "PayPalService.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Services\\PayPalService.cs",
               "RelativeDocumentMoniker": "Services\\PayPalService.cs",
@@ -736,7 +731,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 37,
+              "DocumentIndex": 38,
               "Title": "Faq.cshtml",
               "DocumentMoniker": "C:\\Users\\MSI TRUE  GAMING\\AppData\\Local\\Temp\\MicrosoftEdgeDownloads\\6d101439-b340-404b-a726-20c107138348\\Faq.cshtml",
               "ToolTip": "C:\\Users\\MSI TRUE  GAMING\\AppData\\Local\\Temp\\MicrosoftEdgeDownloads\\6d101439-b340-404b-a726-20c107138348\\Faq.cshtml",
@@ -746,7 +741,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 35,
+              "DocumentIndex": 36,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Categories\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Categories\\Index.cshtml",
@@ -758,7 +753,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 55,
+              "DocumentIndex": 56,
               "Title": "CouponsController.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Controllers\\CouponsController.cs",
               "RelativeDocumentMoniker": "Controllers\\CouponsController.cs",
@@ -770,7 +765,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 39,
+              "DocumentIndex": 40,
               "Title": "PayPalCheckout.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Razor Views\\Payments\\PayPalCheckout.cshtml",
               "RelativeDocumentMoniker": "Razor Views\\Payments\\PayPalCheckout.cshtml",
@@ -782,7 +777,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 43,
+              "DocumentIndex": 44,
               "Title": "Details.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Users\\Details.cshtml",
               "RelativeDocumentMoniker": "Views\\Users\\Details.cshtml",
@@ -794,7 +789,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 47,
+              "DocumentIndex": 48,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Cart\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Cart\\Index.cshtml",
@@ -806,7 +801,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 44,
+              "DocumentIndex": 45,
               "Title": "Success.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Payments\\Success.cshtml",
               "RelativeDocumentMoniker": "Views\\Payments\\Success.cshtml",
@@ -818,7 +813,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 45,
+              "DocumentIndex": 46,
               "Title": "Details.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Products\\Details.cshtml",
               "RelativeDocumentMoniker": "Views\\Products\\Details.cshtml",
@@ -830,7 +825,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 48,
+              "DocumentIndex": 49,
               "Title": "ReviewsController.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Controllers\\ReviewsController.cs",
               "RelativeDocumentMoniker": "Controllers\\ReviewsController.cs",
@@ -842,7 +837,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 54,
+              "DocumentIndex": 55,
               "Title": "Delete.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Coupons\\Delete.cshtml",
               "RelativeDocumentMoniker": "Views\\Coupons\\Delete.cshtml",
@@ -854,7 +849,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 56,
+              "DocumentIndex": 57,
               "Title": "Edit.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Coupons\\Edit.cshtml",
               "RelativeDocumentMoniker": "Views\\Coupons\\Edit.cshtml",
@@ -866,7 +861,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 57,
+              "DocumentIndex": 58,
               "Title": "Create.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Coupons\\Create.cshtml",
               "RelativeDocumentMoniker": "Views\\Coupons\\Create.cshtml",
@@ -878,7 +873,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 51,
+              "DocumentIndex": 52,
               "Title": "Index.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Coupons\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Coupons\\Index.cshtml",
@@ -890,7 +885,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 52,
+              "DocumentIndex": 53,
               "Title": "ProductsController.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Controllers\\ProductsController.cs",
               "RelativeDocumentMoniker": "Controllers\\ProductsController.cs",
@@ -902,7 +897,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 50,
+              "DocumentIndex": 51,
               "Title": "AdminIndex.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Products\\AdminIndex.cshtml",
               "RelativeDocumentMoniker": "Views\\Products\\AdminIndex.cshtml",
@@ -914,7 +909,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 49,
+              "DocumentIndex": 50,
               "Title": "Coupon.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Models\\Coupon.cs",
               "RelativeDocumentMoniker": "Models\\Coupon.cs",
@@ -926,7 +921,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 38,
+              "DocumentIndex": 39,
               "Title": "Details.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Orders\\Details.cshtml",
               "RelativeDocumentMoniker": "Views\\Orders\\Details.cshtml",
@@ -938,7 +933,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 46,
+              "DocumentIndex": 47,
               "Title": "UserOrders.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Orders\\UserOrders.cshtml",
               "RelativeDocumentMoniker": "Views\\Orders\\UserOrders.cshtml",
@@ -950,7 +945,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 53,
+              "DocumentIndex": 54,
               "Title": "Product.cs",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Models\\Product.cs",
               "RelativeDocumentMoniker": "Models\\Product.cs",
@@ -962,7 +957,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 42,
+              "DocumentIndex": 43,
               "Title": "Track.cshtml",
               "DocumentMoniker": "D:\\Github Repos\\Clothing-Store\\Views\\Orders\\Track.cshtml",
               "RelativeDocumentMoniker": "Views\\Orders\\Track.cshtml",
