@@ -45,10 +45,13 @@
         border-radius: 12px;
         box-shadow: 0 20px 40px rgba(0,0,0,0.15);
         overflow: hidden;
-        display: none; /* toggled via JS/class */
+        display: none; /* default hidden; shown by .open */
         flex-direction: column;
         flex: 0 0 auto;
     }
+
+    /* show by class so CSS frameworks that touch .d-flex won't conflict */
+    .chat-panel.open { display: flex; }
 
     .chat-header { padding: 12px 14px; background: #f7f5f2; font-weight: 600; border-bottom: 1px solid #eee; }
     .chat-body { padding: 12px; height: 220px; overflow: auto; background: #fafafa; }
@@ -57,17 +60,15 @@
     .chat-message.me { background: #e9f4ff; align-self: flex-end; }
     .form-control-sm { font-size: .9rem; }
 
-    .media (max-width: 480px) {
+    @@media (max-width: 480px) {
         .chat-widget { right: 12px; left: 12px; justify-content: center; }
         .chat-panel { width: auto; max-width: calc(100vw - 24px); }
     }
-
-    /* optional helper when you want to show via class instead of inline style:
-       .chat-panel.open { display: flex; } */
 </style>
 
 <div class="chat-widget" aria-live="polite">
-    <div class="chat-panel d-flex flex-column" id="chatPanel" aria-hidden="true">
+    <!-- removed d-flex from panel to avoid Bootstrap display conflict -->
+    <div class="chat-panel" id="chatPanel" aria-hidden="true">
         <div class="chat-header">Hỗ trợ khách hàng</div>
         <div class="chat-body d-flex flex-column" id="chatBody"></div>
         <div class="chat-footer">
@@ -87,7 +88,6 @@
                 </div>
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-sm btn-dark flex-grow-1" id="chatSend">Gửi</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" id="chatClose">Đóng</button>
                 </div>
             </form>
         </div>
@@ -100,7 +100,10 @@
 
 <script>
     (function () {
-        // Scope behavior to each .chat-widget instance to avoid cross-widget conflicts
+        // Avoid double-initialization if partial is included multiple times
+        if (window.__chatWidgetInitialized) return;
+        window.__chatWidgetInitialized = true;
+
         document.querySelectorAll('.chat-widget').forEach(widget => {
             const toggle = widget.querySelector('#chatToggle');
             const panel = widget.querySelector('#chatPanel');
@@ -111,32 +114,48 @@
             if (!toggle || !panel || !form || !body) return;
 
             function openPanel() {
-                panel.style.display = 'flex';
+                panel.classList.add('open');
                 panel.setAttribute('aria-hidden', 'false');
                 toggle.setAttribute('aria-expanded', 'true');
+                const firstField = panel.querySelector('input, textarea, button');
+                if (firstField) firstField.focus();
             }
             function closePanel() {
-                panel.style.display = 'none';
+                panel.classList.remove('open');
                 panel.setAttribute('aria-hidden', 'true');
                 toggle.setAttribute('aria-expanded', 'false');
             }
 
-            toggle.addEventListener('click', () => {
-                // use computed style so we detect visible state regardless of whether display was set via inline style or CSS class
-                const isOpen = window.getComputedStyle(panel).display !== 'none';
+            // Keep clicks inside widget from bubbling out
+            widget.addEventListener('click', (e) => e.stopPropagation());
+
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = panel.classList.contains('open');
                 if (isOpen) closePanel(); else openPanel();
             });
 
             if (closeBtn) {
                 closeBtn.addEventListener('click', (e) => {
-                    // ensure click inside form doesn't submit or propagate unexpectedly
                     e.preventDefault();
                     e.stopPropagation();
                     closePanel();
                 });
             }
 
-            // Basic submit handler (scoped)
+            // close when clicking outside the widget
+            document.addEventListener('click', () => {
+                if (panel.classList.contains('open')) closePanel();
+            });
+
+            // close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' || e.key === 'Esc') {
+                    if (panel.classList.contains('open')) closePanel();
+                }
+            });
+
+            // Basic submit handler (kept unchanged)
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
                 const sendBtn = widget.querySelector('#chatSend');
@@ -146,7 +165,8 @@
                 fetch('@Url.Action("Chat", "Support")', {
                     method: 'POST',
                     body: fd,
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    credentials: 'same-origin'
                 })
                 .then(async (r) => {
                     if (!r.ok) {
